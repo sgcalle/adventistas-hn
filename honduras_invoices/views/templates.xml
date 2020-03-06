@@ -45,7 +45,9 @@
                                 <div class="row">
                                     <div class="col-3">RTN:<span t-field="o.company_id.vat" class="col" /></div>
                                     <div class="col-3">Correo:<span t-field="o.company_id.email" /></div>
-                                    <div class="col-6">RANGO AUTORIZADO DEL <t t-esc="'{}{}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)"/> AL <t t-esc="'{}{}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)"/></div>
+                                    <div class="col-6">RANGO AUTORIZADO DEL
+                                           <t t-esc="'{}{:>08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)"/> 
+                                        AL <t t-esc="'{}{:>08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)"/></div>
                                 </div>
                                     
                                 <div class="row">
