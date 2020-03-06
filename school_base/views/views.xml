@@ -1,0 +1,24 @@
+<odoo>
+
+    <record model="ir.ui.view" id="view_school_year_tree">
+        <field name="name">School year</field>
+        <field name="model">school_base.school_year</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="sequence" widget='handle'/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record model="ir.ui.view" id="view_grade_level_tree">
+        <field name="name">School level</field>
+        <field name="model">school_base.grade_level</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="sequence" widget='handle'/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+</odoo>
