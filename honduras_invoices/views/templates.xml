@@ -230,8 +230,7 @@
                     <t t-set="modo" t-value="'COPIA'"/>
                 </t>
             </div>
-
-</xpath>
+        </xpath>
     </template>
 
 </odoo>
