@@ -3,7 +3,6 @@
         inherit_id="account.report_invoice_document">
         <xpath expr="//t[@t-call='web.external_layout']" position="replace">
 <!--             <t t-call="web.external_layout"> -->
-                <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
                     <div class="container-fluid">
                         
                         <style>
@@ -214,7 +213,6 @@
                             </table>
                         </section>
                     </div>
-                </div>
 <!--             </t> -->
         </xpath>
     </template>
@@ -222,13 +220,16 @@
     <template id="honduras_invoices.invoice_report_with_payments"
               inherit_id="account.report_invoice_with_payments">
         <xpath expr="//t[@t-call='account.report_invoice_document_with_payments']" position="replace">
-            
-            <t t-call="honduras_invoices.invoice_report" t-lang="lang">
-                <t t-set="modo" t-value="'ORIGINAL'"/>
-            </t>
-            <t t-call="honduras_invoices.invoice_report" t-lang="lang">
-                <t t-set="modo" t-value="'COPIA'"/>
-            </t>
+            <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+                <t t-call="honduras_invoices.invoice_report" t-lang="lang">
+                    <t t-set="modo" t-value="'ORIGINAL'"/>
+                </t>
+                <br/>
+                <br/>
+                <t t-call="honduras_invoices.invoice_report" t-lang="lang">
+                    <t t-set="modo" t-value="'COPIA'"/>
+                </t>
+            </div>
 
 </xpath>
     </template>
