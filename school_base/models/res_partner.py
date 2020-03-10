@@ -26,12 +26,54 @@ class Contact(models.Model):
     family_ids = fields.Many2many("res.partner", string="Families", relation="partner_families", column1="partner_id", column2="partner_family_id")
     member_ids = fields.Many2many("res.partner", string="Members", relation="partner_members", column1="partner_id", column2="partner_member_id")
 
-    family_invoice_ids = fields.Many2many("account.move")
+    family_invoice_ids = fields.Many2many("account.move", compute="_compute_family_invoice_ids", domain=[('type', '=', 'out_invoice')], context={'default_type': 'out_invoice', 'type': 'out_invoice','tree_view_ref': 'account.view_invoice_tree'})
     facts_id_int = fields.Integer("Fact id (Integer)")
     facts_id = fields.Char("Fact id")
+    
+    def _compute_family_invoice_ids(self):
+        for record in self:
+            invoices = False
+            if record.is_company:
+                invoices = self.member_ids.invoice_ids + self.invoice_ids
+            record.family_invoice_ids = invoices
 
-    # def write(self, values):
-    #     PartnerEnv = self.env["res.partner"]
+                
 
 
-    #     return super().write(values)
+    def write(self, values):
+        PartnerEnv = self.env["res.partner"]
+
+        # Some constant for making more readeable the code
+        ACTION_TYPE = 0
+        TYPE_REPLACE = 6
+        TYPE_ADD_EXISTING = 4
+        TYPE_REMOVE_NO_DELETE = 3
+
+        for record in self:
+            if "family_ids" in values:
+                for m2m_action in values["family_ids"]:
+                    if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
+                        partner_ids = PartnerEnv.browse(m2m_action[2])
+                        removed_parter_ids = PartnerEnv.browse(set(record.family_ids.ids) - set(m2m_action[2]))
+                        partner_ids.write({
+                            "member_ids": [[TYPE_ADD_EXISTING, record.id, False]],
+                        })
+                        removed_parter_ids.write({
+                            "member_ids": [[TYPE_REMOVE_NO_DELETE, record.id, False]],
+                        })
+                    
+            if "member_ids" in values:
+                for m2m_action in values["member_ids"]:
+                    if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
+                        partner_ids = PartnerEnv.browse(m2m_action[2])
+                        removed_parter_ids = PartnerEnv.browse(set(record.family_ids.ids) - set(m2m_action[2]))
+                        partner_ids.write({
+                            "family_ids": [[TYPE_ADD_EXISTING, record.id, False]],
+                        })
+                        removed_parter_ids.write({
+                            "family_ids": [[TYPE_REMOVE_NO_DELETE, record.id, False]],
+                        })
+
+
+
+        return super().write(values)
