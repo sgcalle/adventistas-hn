@@ -7,16 +7,17 @@
         <field name="arch" type="xml">
             <div name="button_box" position="before">
                 <field name="person_type" readonly="1" style="
-                    position: absolute;
-                    top: 0;
-                    font-size: xx-large;
-                    color: #875a7b;
-                    font-weight: bold; "/>
+                       position: absolute;
+                       top: 0;
+                       font-size: xx-large;
+                       color: #875a7b;
+                       font-weight: bold; "/>
             </div>
             <notebook position="inside">
                 <page string="School data">
                     <group>
                         <group>
+                            <field name="is_family"/>
                             <field name="person_type"/>
                             <field name="grade_level_id"/>
                             <field name="homeroom"/>
@@ -32,16 +33,16 @@
             </notebook>
             <xpath expr="//field[@name='child_ids']/parent::page" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': True}
+                    {'invisible': [('is_family', '=', True)]}
                 </attribute>
             </xpath>
             <xpath expr="//field[@name='parent_id']" position="attributes">
                 <attribute name="attrs">
-                    {'invisible': True}
+                    {'invisible': [('is_family', '=', True)]}
                 </attribute>
             </xpath>
             <xpath expr="//field[@name='child_ids']/parent::page" position="before">
-                <page string="Members" attrs="{'invisible': [('is_company', '=', False)]}">
+                <page string="Members" attrs="{'invisible': ['|', ('is_family', '=', False), ('is_company', '=', False)]}">
                     <field name="member_ids" mode="kanban" context="{'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_lang': lang, 'default_user_id': user_id}">
                         <kanban>
                             <field name="id"/>
@@ -78,7 +79,7 @@
                                             <t t-else="">
                                                 <img alt="Delivery" t-if="record.type.raw_value === 'delivery'" t-att-src="_s + &quot;/base/static/img/truck.png&quot;"/>
                                                 <img alt="Invoice" t-if="record.type.raw_value === 'invoice'" t-att-src="_s + &quot;/base/static/img/money.png&quot;"/>
-                                                <t t-if="record.type.raw_value !== 'invoice' &amp;&amp; record.type.raw_value !== 'delivery'">
+                                                <t t-if="record.type.raw_value !== 'invoice' || record.type.raw_value !== 'delivery'">
                                                     <img alt="Logo" t-if="record.is_company.raw_value === true" t-att-src="_s + &quot;/base/static/img/company_image.png&quot;"/>
                                                     <img alt="Avatar" t-if="record.is_company.raw_value === false" t-att-src="_s + &quot;/base/static/img/avatar_grey.png&quot;"/>
                                                 </t>
@@ -143,7 +144,7 @@
                                             <t t-else="">
                                                 <img alt="Delivery" t-if="record.type.raw_value === 'delivery'" t-att-src="_s + &quot;/base/static/img/truck.png&quot;"/>
                                                 <img alt="Invoice" t-if="record.type.raw_value === 'invoice'" t-att-src="_s + &quot;/base/static/img/money.png&quot;"/>
-                                                <t t-if="record.type.raw_value !== 'invoice' &amp;&amp; record.type.raw_value !== 'delivery'">
+                                                <t t-if="record.type.raw_value !== 'invoice' || record.type.raw_value !== 'delivery'">
                                                     <img alt="Logo" t-if="record.is_company.raw_value === true" t-att-src="_s + &quot;/base/static/img/company_image.png&quot;"/>
                                                     <img alt="Avatar" t-if="record.is_company.raw_value === false" t-att-src="_s + &quot;/base/static/img/avatar_grey.png&quot;"/>
                                                 </t>
@@ -171,7 +172,8 @@
                         </kanban>
                     </field>
                 </page>
-                <page string="Family Invoices" readonly="0" force_save="1" attrs="{'invisible': [('is_company', '=', False)]}">
+
+                <page string="Family Invoices" readonly="0" force_save="1" attrs="{'invisible': ['|', ('is_family', '=', False), ('is_company', '=', True)]}">
                     <field name="family_invoice_ids" widget="many2many" domain="[('type', 'in', ('out_invoice', 'out_refund','out_receipt'))]">
                         <tree string="Invoices"
                             decoration-info="state == 'draft'"
@@ -232,4 +234,63 @@
             </xpath>
         </field>
     </record>
+
+    <record id="base_view_res_partner_filter" model="ir.ui.view">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <search position="inside">
+                <field name="family_ids"/>
+                <filter string="Family" name="family" domain="['&amp;', ('is_company', '=', True), ('is_family', '=', True)]"/>
+                <filter string="Member" name="member" domain="['&amp;', ('is_company', '=', False), '&amp;', ('is_family', '=', False), ('family_ids', '!=', False)]"/>
+                <filter string="Parent" name="parent" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'student')]"/>
+                <filter string="Student" name="student" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'parent')]"/>
+            </search>
+        </field>
+    </record>
+
+    <act_window
+            id="action_family"
+            name="Family"
+            view_mode="kanban,tree,form,activity"
+            context="{'search_default_family': 1, 'default_family': True}"
+            res_model="res.partner"/>
+    <act_window
+            id="action_member"
+            name="Members"
+            view_mode="kanban,tree,form,activity"
+            context="{'search_default_member': 1}"
+            res_model="res.partner"/>
+    <act_window
+            id="action_parent"
+            name="Parent"
+            view_mode="kanban,tree,form,activity"
+            context="{'search_default_parent': 1}"
+            res_model="res.partner"/>
+    <act_window
+            id="action_student"
+            name="Student"
+            view_mode="kanban,tree,form,activity"
+            context="{'search_default_student': 1}"
+            res_model="res.partner"/>
+
+    <menuitem id="menu_contacts_school"
+        parent="contacts.menu_contacts"
+        name="School"/>
+
+    <menuitem id="menu_contact_family"
+        parent="menu_contacts_school"
+        action="action_family"/>
+
+    <menuitem id="menu_contact_member"
+        parent="menu_contacts_school"
+        action="action_member"/>
+
+    <menuitem id="menu_contact_parent"
+        parent="menu_contacts_school"
+        action="action_parent"/>
+
+    <menuitem id="menu_contact_student"
+        parent="menu_contacts_school"
+        action="action_student"/>
 </odoo>

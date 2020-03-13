@@ -29,6 +29,8 @@ class Contact(models.Model):
     family_invoice_ids = fields.Many2many("account.move", compute="_compute_family_invoice_ids", domain=[('type', '=', 'out_invoice')], context={'default_type': 'out_invoice', 'type': 'out_invoice','tree_view_ref': 'account.view_invoice_tree'})
     facts_id_int = fields.Integer("Fact id (Integer)")
     facts_id = fields.Char("Fact id")
+
+    is_family = fields.Boolean("Is a family?")
     
     def _compute_family_invoice_ids(self):
         for record in self:
@@ -38,8 +40,6 @@ class Contact(models.Model):
             record.family_invoice_ids = invoices
 
                 
-
-
     def write(self, values):
         PartnerEnv = self.env["res.partner"]
 
