@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-        <record id="invoice_payments_report" model="ir.actions.report">
+<!--         <record id="invoice_payments_report" model="ir.actions.report">
             <field name="model">account.move</field>
             <field name="binding_model_id" ref="account.model_account_move"/>
             <field name="binding_type">report</field>
@@ -9,7 +9,7 @@
             <field name="name">Invoice Payments</field>
             <field name="paperformat_id" ref="honduras_invoices.honduras_paper_format" />
             <field name="report_name">honduras_invoices.invoice_payments_report</field>
-        </record>
+        </record> -->
 
         <record id="honduras_paper_format" model="report.paperformat">
             <field name="name">Honduras Paper Format</field>
