@@ -248,8 +248,8 @@
                 <field name="family_ids"/>
                 <filter string="Family" name="family" domain="['&amp;', ('is_company', '=', True), ('is_family', '=', True)]"/>
                 <filter string="Member" name="member" domain="['&amp;', ('is_company', '=', False), '&amp;', ('is_family', '=', False), ('family_ids', '!=', False)]"/>
-                <filter string="Parent" name="parent" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'student')]"/>
-                <filter string="Student" name="student" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'parent')]"/>
+                <filter string="Parent" name="parent" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'parent')]"/>
+                <filter string="Student" name="student" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'student')]"/>
             </search>
         </field>
     </record>
