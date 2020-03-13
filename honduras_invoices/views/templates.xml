@@ -1,28 +1,36 @@
 <odoo>
     <template id="honduras_invoices.invoice_payments_report">
-        <t t-call="web.external_layout">
-            <t t-set="o" t-value="o.with_context(lang=lang)"/>
-            <t t-set="payments_vals" t-value="o._get_reconciled_info_JSON_values()"/>
-            <table>
-                <t t-foreach="payments_vals" t-as="payment_vals">
-                    <tr>
-                        <td>
-                            <i class="oe_form_field text-right oe_payment_label">Paid on <t t-esc="payment_vals['date']" t-options="{&quot;widget&quot;: &quot;date&quot;}"/></i>
-                        </td>
-                        <td class="text-right">
-                            <span t-esc="payment_vals['amount']" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
-                        </td>
-                    </tr>
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="lang" t-value="o.partner_id.lang"/>
+                <t t-call="web.external_layout">
+                    <t t-set="o" t-value="o.with_context(lang=lang)"/>
+                    <t t-set="payments_vals" t-value="o._get_reconciled_payments()"/>
+                    <div class="page">
+                        <div class="row mt64">
+                            <div class="col-6" t-if="o.invoice_date">
+                                <strong>Invoice Date: </strong> <span t-field="o.invoice_date"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Payment Date</th>
+                                <th>Payment Receipment</th>
+                                <th>Original Amounty</th>
+                                <th>Amount Paid</th>
+                            </tr>
+                            <t t-foreach="payments_vals" t-as="payment_id">
+                                <tr>
+                                    <td><span t-field="payment_id.payment_date"/></td>
+                                    <td><span t-field="payment_id.name"/></td>
+                                    <td class="text-right"><span t-field="o.amount_total"/></td>
+                                    <td class="text-right"><span t-esc="payment_id._get_invoice_payment_amount(o)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                </tr>
+                            </t>
+                        </table>
+                    </div>
                 </t>
-                <t t-if="len(payments_vals) &gt; 0">
-                    <tr class="border-black">
-                        <td><strong>Amount Due</strong></td>
-                        <td class="text-right">
-                                <span t-field="o.amount_residual"/>
-                        </td>
-                    </tr>
-                </t>
-            </table>
+            </t>
         </t>
     </template>
 
@@ -190,6 +198,13 @@
                         <t t-set="amount_descuento" t-value="0"/>
                         
                         <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
+                            <t t-if="invoice_line.discount != 0">
+                                <t t-set="amount_descuento" t-value=" amount_descuento + ( 100 * invoice_line.price_total / (100 - invoice_line.discount) ) - invoice_line.price_total"/>
+                            </t>    
+                            <t t-if="invoice_line.price_total &lt; 0">
+                                <t t-set="amount_descuento" t-value="amount_descuento - invoice_line.price_total"/>
+                            </t>
+
                             <t t-if="invoice_line.tax_ids" >
                                 <t t-foreach="invoice_line.tax_ids" t-as="tax_id">
                                     <t t-if="tax_id.amount == 15">
