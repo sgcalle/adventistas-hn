@@ -30,6 +30,11 @@
                         </group>
                     </group>
                 </page>
+                <page string="Financial">
+                    <group>
+                        <field name="financial_res_ids" widget="many2many_checkboxes" domain='["&amp;", ("id", "in", member_ids), ("person_type", "!=", "student")]'/>
+                    </group>
+                </page>
             </notebook>
             <xpath expr="//field[@name='child_ids']/parent::page" position="attributes">
                 <attribute name="attrs">
