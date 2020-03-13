@@ -7,6 +7,7 @@ selec_person_types = [
     ("parent", "Parent")
 ]
 
+
 selec_company_types = [
     ("person", "Person"),
     ("company", "Family")
