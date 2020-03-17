@@ -36,6 +36,7 @@
                     <tr>
                         <th>Payment Date</th>
                         <th>Payment Receipment</th>
+                        <th>Journal</th>
                         <th class="text-right">Remain Amount</th>
                         <th class="text-right">Amount Paid</th>
                         <th class="text-right">Balance</th>
@@ -46,6 +47,7 @@
                         <t t-set="balance" t-value="remain_amount - amount_paid"/>
                         <td><span t-field="payment_id.payment_date"/></td>
                         <td><span t-field="payment_id.name"/></td>
+                        <td><span t-field="payment_id.journal_id.name"/></td>
                         <td class="text-right"><span t-esc="remain_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
                         <td class="text-right"><span t-esc="payment_id._get_invoice_payment_amount(o)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
                         <td class="text-right"><span t-esc="balance" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
