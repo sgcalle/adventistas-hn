@@ -53,4 +53,8 @@ class Partner(models.Model):
 
     no_constant_registro_exonerado = fields.Char("No. CONSTAN. REGISTRO EXONERADO")
     
+class Invoice(models.Model):
+    _inherit = "account.move"
 
+    partner_family_ids = fields.Many2many(related="partner_id.family_ids")
+    family_id = fields.Many2one("res.partner", string="Family")

@@ -1,31 +1,42 @@
 <odoo>
-  <record model="ir.ui.view" id="journal_honduras_form_view">
-    <field name="name">journal.honduras</field>
-    <field name="model">account.journal</field>
-    <field name="inherit_id" ref="account.view_account_journal_form"/>
-    <field name="arch" type="xml">
-      <notebook position="inside">
-        <page string="Honduras">
-          <group>
-            <field name="prefix" />
-            <field name="authorized_range_from" />
-            <field name="authorized_range_to" />
-            <field name="cai" />
-            <field name="issue_limit_date" />
-          </group>
-        </page>
-      </notebook>
-    </field>
-  </record>
+    <record id="account_family_selection_form_view" model="ir.ui.view">
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <group id="header_left_group" position="inside">
+                <field name="partner_family_ids" invisible="1"/>
+                <field name="family_id" domain="[('id', 'in', partner_family_ids)]" />
+            </group>
+        </field>
+    </record>
 
-  <record model="ir.ui.view" id="res_partner_registro_exonerado_form_view">
-    <field name="name">res.partner.registro_exonerado</field>
-    <field name="model">res.partner</field>
-    <field name="inherit_id" ref="base.view_partner_form"/>
-    <field name="arch" type="xml">
-      <xpath expr="//field[@name='vat']" position="after">
-        <field name="no_constant_registro_exonerado" />
-      </xpath>
-    </field>
-  </record>
+    <record model="ir.ui.view" id="journal_honduras_form_view">
+        <field name="name">journal.honduras</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Honduras">
+                    <group>
+                        <field name="prefix" />
+                        <field name="authorized_range_from" />
+                        <field name="authorized_range_to" />
+                        <field name="cai" />
+                        <field name="issue_limit_date" />
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="res_partner_registro_exonerado_form_view">
+        <field name="name">res.partner.registro_exonerado</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="no_constant_registro_exonerado" />
+            </xpath>
+        </field>
+    </record>
 </odoo>

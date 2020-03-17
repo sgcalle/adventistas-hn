@@ -31,6 +31,7 @@ class Contact(models.Model):
     facts_id = fields.Char("Fact id")
 
     is_family = fields.Boolean("Is a family?")
+    invoice_address_id = fields.Many2one("res.partner", string="Invoice Address")
     
     # For Families
     financial_res_ids = fields.Many2many("res.partner", string="Financial responsability", relation="partner_financial_res", column1="partner_id", column2="partner_financial_id")

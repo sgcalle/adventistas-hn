@@ -30,9 +30,10 @@
                         </group>
                     </group>
                 </page>
-                <page string="Financial">
+                <page string="Financial" attr="{'invisible': [('is_family', '=', True)]}">
                     <group>
                         <field name="financial_res_ids" widget="many2many_checkboxes" domain='["&amp;", ("id", "in", member_ids), ("person_type", "!=", "student")]'/>
+                        <field name="invoice_address_id" domain='["&amp;", ("id", "in", member_ids), ("person_type", "!=", "student")]'/>
                     </group>
                 </page>
             </notebook>
@@ -253,6 +254,21 @@
             </search>
         </field>
     </record>
+
+    <record id="school_base_view_res_partner_filter" model="ir.ui.view">
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <search position="inside">
+                <field name="family_ids"/>
+                <filter string="Family" name="family" domain="['&amp;', ('is_company', '=', True), ('is_family', '=', True)]"/>
+                <filter string="Member" name="member" domain="['&amp;', ('is_company', '=', False), '&amp;', ('is_family', '=', False), ('family_ids', '!=', False)]"/>
+                <filter string="Parent" name="parent" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'parent')]"/>
+                <filter string="Student" name="student" domain="['&amp;', ('is_company', '=', False), ('person_type', '=', 'student')]"/>
+            </search>
+        </field>
+    </record>
+    
 
     <act_window
             id="action_family"

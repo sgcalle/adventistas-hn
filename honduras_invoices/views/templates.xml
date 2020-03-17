@@ -1,38 +1,60 @@
 <odoo>
-<!--     <template id="honduras_invoices.invoice_payments_report">
-        <t t-call="web.html_container">
-            <t t-foreach="docs" t-as="o">
-                <t t-set="lang" t-value="o.partner_id.lang"/>
-                <t t-call="web.external_layout">
-                    <t t-set="o" t-value="o.with_context(lang=lang)"/>
-                    <t t-set="payments_vals" t-value="o._get_reconciled_payments()"/>
-                    <div class="page">
-                        <div class="row mt64">
-                            <div class="col-6" t-if="o.invoice_date">
-                                <strong>Invoice Date: </strong> <span t-field="o.invoice_date"/>
-                            </div>
-                        </div>
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Payment Date</th>
-                                <th>Payment Receipment</th>
-                                <th>Original Amounty</th>
-                                <th>Amount Paid</th>
-                            </tr>
-                            <t t-foreach="payments_vals" t-as="payment_id">
-                                <tr>
-                                    <td><span t-field="payment_id.payment_date"/></td>
-                                    <td><span t-field="payment_id.name"/></td>
-                                    <td class="text-right"><span t-field="o.amount_total"/></td>
-                                    <td class="text-right"><span t-esc="payment_id._get_invoice_payment_amount(o)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
-                                </tr>
-                            </t>
-                        </table>
-                    </div>
+    <template id="invoice_payments_report">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.partner_id.lang"/>
+                    <t t-call="honduras_invoices.invoice_payments_report_document"/>
                 </t>
-            </t>
+            </t>        
+    </template>
+
+    <template id="invoice_payments_report_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=lang)"/>
+            <t t-set="payments_vals" t-value="o._get_reconciled_payments()"/>
+            <div class="page">
+                <h3><strong>Invoice: <span t-field="o.name"/></strong></h3>
+                <div class="row mt64">
+                    <div class="col-6" t-if="o.invoice_date">
+                        <strong>Invoice Date: </strong> <span t-field="o.invoice_date"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6" t-if="o.family_id">
+                        <strong>Customer: </strong> <span t-field="o.family_id.invoice_address_id.name"/>
+                    </div>
+                    <div class="col-6" t-else="">
+                        <strong>Customer: </strong> <span t-field="o.partner_id.name"/>
+                    </div>
+                </div>
+                <div class="row mb64">
+                    <div class="col-6" t-if="o.amount_total">
+                        <strong>Original amount: </strong> <span t-field="o.amount_total"/>
+                    </div>
+                </div>
+                <table class="table table-sm">
+                    <tr>
+                        <th>Payment Date</th>
+                        <th>Payment Receipment</th>
+                        <th class="text-right">Remain Amount</th>
+                        <th class="text-right">Amount Paid</th>
+                        <th class="text-right">Balance</th>
+                    </tr>
+                    <t t-set="remain_amount" t-value="o.amount_total"/>
+                    <tr t-foreach="payments_vals.sorted(key=lambda r: (r.payment_date, r.name))" t-as="payment_id">
+                        <t t-set="amount_paid" t-value="payment_id._get_invoice_payment_amount(o)"/>
+                        <t t-set="balance" t-value="remain_amount - amount_paid"/>
+                        <td><span t-field="payment_id.payment_date"/></td>
+                        <td><span t-field="payment_id.name"/></td>
+                        <td class="text-right"><span t-esc="remain_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                        <td class="text-right"><span t-esc="payment_id._get_invoice_payment_amount(o)" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                        <td class="text-right"><span t-esc="balance" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                        <t t-set="remain_amount" t-value="balance"/>
+                    </tr>
+                </table>
+            </div>
         </t>
-    </template> -->
+    </template>
 
     <template id="honduras_invoices.invoice_report"
         inherit_id="account.report_invoice_document">
@@ -97,6 +119,10 @@
                                 <tr>
                                     <td colspan="2" class="pb-4">
                                         CLIENTE: <span t-field="o.partner_id.name"/>
+                                        <t t-if="o.family_id and o.family_id.invoice_address_id and o.partner_id != o.family_id.invoice_address_id">
+                                            <br/>
+                                            NOMBRE DEL REPRESENTANTE: <span t-field="o.family_id.invoice_address_id.name"/>
+                                        </t>
                                     </td>
                                     <td class="pb-4">
                                         FECHA: <span t-field="o.invoice_date"/>
@@ -105,10 +131,12 @@
                                         CONDICION DE PAGO: <span t-field="o.invoice_date"/>
                                     </td>
                                 </tr>
-                                
+                        
+                                <!-- Un mismo "cliente" para todos los campos -->
+                                <t t-set="client_id" t-value="o.partner_id if not o.family_id or not o.family_id.invoice_address_id else o.family_id.invoice_address_id" />
                                 <tr>
                                     <td colspan="2" class="pb-4">
-                                        DIRECCION: <span t-field="o.partner_id.street"/>
+                                        DIRECCION: <span t-field="client_id.street"/>
                                     </td>
                                     <td class="pb-4">
                                         VENCIMIENTO: <span t-field="o.invoice_date_due"/>
@@ -120,7 +148,7 @@
                                 
                                 <tr>
                                     <td colspan="2" class="pb-4">
-                                        RTN: <span t-field="o.partner_id.vat"/>
+                                        RTN: <span t-field="client_id.vat"/>
                                     </td>
                                     <td class="pb-4">
                                         VENDEDOR: <span t-field="o.invoice_user_id.name"/>
@@ -135,7 +163,8 @@
                                         No O/C EXENTA:
                                     </td>
                                     <td colspan="2" class="pb-4">
-                                        No. CONSTAN. REGISTRO EXONERADO: <t t-esc="o.partner_id.no_constant_registro_exonerado"/>
+                                        No. CONSTAN. REGISTRO EXONERADO: <t t-esc="client_id.no_constant_registro_exonerado"/>
+                                        
                                     </td>
                                     </tr>
                                     
@@ -199,7 +228,7 @@
                         
                         <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
                             <t t-if="invoice_line.discount != 0">
-                                <t t-set="amount_descuento" t-value=" amount_descuento + ( 100 * invoice_line.price_total / (100 - invoice_line.discount) ) - invoice"/>
+                                <t t-set="amount_descuento" t-value=" amount_descuento + ( 100 * invoice_line.price_total / (100 - invoice_line.discount) )"/>
                             </t>    
                             <t t-if="invoice_line.price_total &lt; 0">
                                 <t t-set="amount_descuento" t-value="amount_descuento - invoice_line.price_total"/>
