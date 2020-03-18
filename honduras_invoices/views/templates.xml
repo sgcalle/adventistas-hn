@@ -120,10 +120,13 @@
                             <table class="border border-dark w-100 border-3" style="table-layout:fixed;">
                                 <tr>
                                     <td colspan="2" class="pb-4">
-                                        CLIENTE: <span t-field="o.partner_id.name"/>
                                         <t t-if="o.family_id and o.family_id.invoice_address_id and o.partner_id != o.family_id.invoice_address_id">
+                                            CLIENTE: <span t-field="o.family_id.invoice_address_id.name"/>
                                             <br/>
-                                            NOMBRE DEL REPRESENTANTE: <span t-field="o.family_id.invoice_address_id.name"/>
+                                            ESTUDIANTE: <span t-field="o.partner_id.name"/>
+                                        </t>
+                                        <t t-else="">
+                                            CLIENTE: <span t-field="o.partner_id.name"/>
                                         </t>
                                     </td>
                                     <td class="pb-4">
