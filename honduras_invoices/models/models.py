@@ -48,13 +48,11 @@ class AccountJournal(models.Model):
 #        for record in self:
 #            record.sequence_id.max_numnber = record.authorized_range_to
 
-class Partner(models.Model):
-    _inherit = 'res.partner'
-
-    no_constant_registro_exonerado = fields.Char("No. CONSTAN. REGISTRO EXONERADO")
-    
 class Invoice(models.Model):
     _inherit = "account.move"
 
     partner_family_ids = fields.Many2many(related="partner_id.family_ids")
+    family_members_ids = fields.Many2many(related="partner_family_ids.member_ids")
+
+    student_id = fields.Many2one("res.partner", string="Student", domain=[('person_type', '=', 'student')])
     family_id = fields.Many2one("res.partner", string="Family")

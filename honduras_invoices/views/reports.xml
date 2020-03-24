@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
-        
         <record id="honduras_paper_format" model="report.paperformat">
             <field name="name">Honduras Paper Format</field>
             <field name="format">Letter</field>

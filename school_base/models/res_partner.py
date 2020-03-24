@@ -78,6 +78,4 @@ class Contact(models.Model):
                             "family_ids": [[TYPE_REMOVE_NO_DELETE, record.id, False]],
                         })
 
-
-
         return super().write(values)

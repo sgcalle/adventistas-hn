@@ -30,12 +30,6 @@
                         </group>
                     </group>
                 </page>
-                <page string="Financial" attr="{'invisible': [('is_family', '=', True)]}">
-                    <group>
-                        <field name="financial_res_ids" widget="many2many_checkboxes" domain='["&amp;", ("id", "in", member_ids), ("person_type", "!=", "student")]'/>
-                        <field name="invoice_address_id" domain='["&amp;", ("id", "in", member_ids), ("person_type", "!=", "student")]'/>
-                    </group>
-                </page>
             </notebook>
             <xpath expr="//field[@name='child_ids']/parent::page" position="attributes">
                 <attribute name="attrs">
