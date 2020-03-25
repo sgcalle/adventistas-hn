@@ -43,6 +43,12 @@ class SaleOrderForStudents(models.Model):
 
             # Invoice values.
             invoice_vals = order._prepare_invoice()
+
+            partner_responsible_categ = {category.category_id for category in self.partner_id.family_res_finance_ids}
+            for line in order.order_line:
+                if not line.product_id.categ_id in partner_responsible_categ:
+                    raise UserError(_(f'There is no responsible family for {line.product_id.categ_id.name}'))
+
             for family_id in self.partner_id.family_ids:
                 invoice_vals["partner_id"] = family_id.invoice_address_id.id
                 invoice_vals["student_id"] = self.partner_id.id
@@ -59,10 +65,23 @@ class SaleOrderForStudents(models.Model):
                         if pending_section:
                             invoice_vals['invoice_line_ids'].append((0, 0, pending_section._prepare_invoice_line()))
                             pending_section = None
-                        invoice_vals['invoice_line_ids'].append((0, 0, line._prepare_invoice_line()))
+
+                        product_line = line._prepare_invoice_line()
+                        
+                        # Skip if we found that family isn't the category's responsible
+                        if not family_id in [category.family_id for category in self.partner_id.family_res_finance_ids if category.category_id == line.product_id.categ_id]:
+                            continue
+
+                        percent_sum = sum([category.percent for category in self.partner_id.family_res_finance_ids if category.category_id == line.product_id.categ_id and category.family_id == family_id])
+                        percent_sum /= 100
+
+                        product_line["price_unit"] *= percent_sum
+
+                        invoice_vals['invoice_line_ids'].append((0, 0, product_line))
 
                 if not invoice_vals['invoice_line_ids']:
-                    raise UserError(_('There is no invoiceable line. If a product has a Delivered quantities invoicing policy, please make sure that a quantity has been delivered.'))
+                    continue
+                    # raise UserError(_('There is no invoiceable line. If a product has a Delivered quantities invoicing policy, please make sure that a quantity has been delivered.'))
 
                 invoice_vals_list.append(invoice_vals)
 
@@ -71,28 +90,28 @@ class SaleOrderForStudents(models.Model):
                 'There is no invoiceable line. If a product has a Delivered quantities invoicing policy, please make sure that a quantity has been delivered.'))
 
         # 2) Manage 'grouped' parameter: group by (partner_id, currency_id).
-        if not grouped:
-            new_invoice_vals_list = []
-            for grouping_keys, invoices in groupby(invoice_vals_list, key=lambda x: (x.get('partner_id'), x.get('currency_id'))):
-                origins = set()
-                payment_refs = set()
-                refs = set()
-                ref_invoice_vals = None
-                for invoice_vals in invoices:
-                    if not ref_invoice_vals:
-                        ref_invoice_vals = invoice_vals
-                    else:
-                        ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
-                    origins.add(invoice_vals['invoice_origin'])
-                    payment_refs.add(invoice_vals['invoice_payment_ref'])
-                    refs.add(invoice_vals['ref'])
-                ref_invoice_vals.update({
-                    'ref': ', '.join(refs)[:2000],
-                    'invoice_origin': ', '.join(origins),
-                    'invoice_payment_ref': len(payment_refs) == 1 and payment_refs.pop() or False,
-                })
-                new_invoice_vals_list.append(ref_invoice_vals)
-            invoice_vals_list = new_invoice_vals_list
+        # if not grouped:
+        #    new_invoice_vals_list = []
+        #    for grouping_keys, invoices in groupby(invoice_vals_list, key=lambda x: (x.get('partner_id'), x.get('currency_id'))):
+        #        origins = set()
+        #        payment_refs = set()
+        #        refs = set()
+        #        ref_invoice_vals = None
+        #        for invoice_vals in invoices:
+        #            if not ref_invoice_vals:
+        #                ref_invoice_vals = invoice_vals
+        #            else:
+        #                ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
+        #            origins.add(invoice_vals['invoice_origin'])
+        #            payment_refs.add(invoice_vals['invoice_payment_ref'])
+        #            refs.add(invoice_vals['ref'])
+        #        ref_invoice_vals.update({
+        #            'ref': ', '.join(refs)[:2000],
+        #            'invoice_origin': ', '.join(origins),
+        #            'invoice_payment_ref': len(payment_refs) == 1 and payment_refs.pop() or False,
+        #        })
+        #        new_invoice_vals_list.append(ref_invoice_vals)
+        #    invoice_vals_list = new_invoice_vals_list
 
         # 3) Create invoices.
         # Manage the creation of invoices in sudo because a salesperson must be able to generate an invoice from a

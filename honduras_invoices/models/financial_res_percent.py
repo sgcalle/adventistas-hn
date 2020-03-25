@@ -3,7 +3,7 @@
 from odoo import models, fields
 
 class FinacialResponsabilityPercent(models.Model):
-    _name = "adm_uni.financial.res.percent"
+    _name = "honduras_invoices.financial.res.percent"
     _description = "Realted model to finance responsabilty"
 
     family_id = fields.Many2one("res.partner", required=True, string="Family", domain=['&', ("is_family", "=", True), ('is_company', '=', True)])

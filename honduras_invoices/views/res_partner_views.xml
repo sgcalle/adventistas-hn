@@ -7,7 +7,8 @@
         <field name="arch" type="xml">
             <notebook position="inside">
                 <page string="Finance" attr="{'invisible': [('is_family', '=', True)]}">
-                    <group attr="{'invisible': [('person_type', '!=', 'student')]}">
+<!--                     <group attr="{'invisible': [('person_type', '!=', 'student')]}"> -->
+                    <group invisible="1"> 
                         <field name="financial_res_ids" widget="many2many_checkboxes" domain='["&amp;", ("id", "in", member_ids), ("person_type", "!=", "student")]'/>
                         <field name="invoice_address_id" domain='["&amp;", ("id", "in", member_ids), ("person_type", "!=", "student")]'/>
                     </group>
