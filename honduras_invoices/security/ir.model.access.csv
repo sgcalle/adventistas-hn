@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_adventistas_reports_adventistas_reports,adventistas_reports.adventistas_reports,model_adventistas_reports_adventistas_reports,base.group_user,1,1,1,1
+access_honduras_invoices_financial_res_percent,access_honduras_invoices_financial_res_percent,model_honduras_invoices_financial_res_percent,base.group_user,1,1,1,1
