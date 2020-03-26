@@ -42,14 +42,13 @@ class SaleOrderForStudents(models.Model):
             pending_section = None
 
             # Invoice values.
-            invoice_vals = order._prepare_invoice()
-
             partner_responsible_categ = {category.category_id for category in self.partner_id.family_res_finance_ids}
             for line in order.order_line:
                 if not line.product_id.categ_id in partner_responsible_categ:
                     raise UserError(_(f'There is no responsible family for {line.product_id.categ_id.name}'))
 
             for family_id in self.partner_id.family_ids:
+                invoice_vals = order._prepare_invoice()
                 invoice_vals["partner_id"] = family_id.invoice_address_id.id
                 invoice_vals["student_id"] = self.partner_id.id
                 invoice_vals["family_id"] = family_id.id
@@ -76,8 +75,11 @@ class SaleOrderForStudents(models.Model):
                         percent_sum /= 100
 
                         product_line["price_unit"] *= percent_sum
-
                         invoice_vals['invoice_line_ids'].append((0, 0, product_line))
+
+                        # This gave error
+                        # product_line["account_id"] = line.product_id.property_account_income_id.id
+
 
                 if not invoice_vals['invoice_line_ids']:
                     continue
@@ -89,34 +91,14 @@ class SaleOrderForStudents(models.Model):
             raise UserError(_(
                 'There is no invoiceable line. If a product has a Delivered quantities invoicing policy, please make sure that a quantity has been delivered.'))
 
-        # 2) Manage 'grouped' parameter: group by (partner_id, currency_id).
-        # if not grouped:
-        #    new_invoice_vals_list = []
-        #    for grouping_keys, invoices in groupby(invoice_vals_list, key=lambda x: (x.get('partner_id'), x.get('currency_id'))):
-        #        origins = set()
-        #        payment_refs = set()
-        #        refs = set()
-        #        ref_invoice_vals = None
-        #        for invoice_vals in invoices:
-        #            if not ref_invoice_vals:
-        #                ref_invoice_vals = invoice_vals
-        #            else:
-        #                ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
-        #            origins.add(invoice_vals['invoice_origin'])
-        #            payment_refs.add(invoice_vals['invoice_payment_ref'])
-        #            refs.add(invoice_vals['ref'])
-        #        ref_invoice_vals.update({
-        #            'ref': ', '.join(refs)[:2000],
-        #            'invoice_origin': ', '.join(origins),
-        #            'invoice_payment_ref': len(payment_refs) == 1 and payment_refs.pop() or False,
-        #        })
-        #        new_invoice_vals_list.append(ref_invoice_vals)
-        #    invoice_vals_list = new_invoice_vals_list
-
+        # invoice_vals_list.append(invoice_vals_list[0])
         # 3) Create invoices.
         # Manage the creation of invoices in sudo because a salesperson must be able to generate an invoice from a
         # sale order without "billing" access rights. However, he should not be able to create an invoice from scratch.
-        moves = self.env['account.move'].sudo().with_context(default_type='out_invoice').create(invoice_vals_list)
+        moves = self.env['account.move']
+        
+        for invoice in invoice_vals_list:
+            moves += self.env['account.move'].sudo().with_context(default_type='out_invoice').create(invoice)
         # 4) Some moves might actually be refunds: convert them if the total amount is negative
         # We do this after the moves have been created since we need taxes, etc. to know if the total
         # is actually negative or not
