@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-from odoo import fields, models
+from odoo import fields, models, api
 
 selec_person_types = [
     ("student", "Student"),
@@ -44,6 +44,27 @@ class Contact(models.Model):
             record.family_invoice_ids = invoices
 
                 
+    @api.model
+    def create(self, values):
+        PartnerEnv = self.env["res.partner"]
+
+        # Some constant for making more readeable the code
+        ACTION_TYPE = 0
+        TYPE_REPLACE = 6
+        TYPE_ADD_EXISTING = 4
+        TYPE_REMOVE_NO_DELETE = 3
+
+        partners = super().create(values)
+
+        ctx = self._context
+        for record in partners:
+            if "member_id" in ctx:
+                record.write({
+                    "member_ids": [[TYPE_ADD_EXISTING, ctx.get("member_id"), False]]
+                })
+
+        return partners 
+
     def write(self, values):
         PartnerEnv = self.env["res.partner"]
 
