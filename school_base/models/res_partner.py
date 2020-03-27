@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
-from odoo import fields, models, api
+from odoo import fields, models, api, _
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 selec_person_types = [
     ("student", "Student"),
@@ -59,9 +60,12 @@ class Contact(models.Model):
         ctx = self._context
         for record in partners:
             if "member_id" in ctx:
-                record.write({
-                    "member_ids": [[TYPE_ADD_EXISTING, ctx.get("member_id"), False]]
-                })
+                if ctx.get("member_id"):
+                    record.write({
+                        "member_ids": [[TYPE_ADD_EXISTING, ctx.get("member_id"), False]]
+                    })
+                else:
+                    raise UserError( _("Contact should be save before adding families"))
 
         return partners 
 
