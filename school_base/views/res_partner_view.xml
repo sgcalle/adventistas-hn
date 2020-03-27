@@ -16,8 +16,10 @@
             <notebook position="inside">
                 <page string="School data">
                     <group>
-                        <group>
+                        <group attrs="{'invisible': [('is_company', '=', False)]}">
                             <field name="is_family"/>
+                        </group>
+                        <group attrs="{'invisible': [('is_company', '=', True)]}">
                             <field name="person_type"/>
                             <field name="grade_level_id"/>
                             <field name="homeroom"/>
