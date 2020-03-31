@@ -2,8 +2,7 @@
 {
     'name': "School Base",
 
-    'summary': """
-        Common models for eduwebgroup school modules as School Year, Grade Level, etc...""",
+    'summary': """ Common models for eduwebgroup school modules as School Year, Grade Level, etc... """,
 
     'description': """
         Common models for eduwebgroup school modules
@@ -19,13 +18,14 @@
     'version': '0.4',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account'],
+    'depends': ['base', 'portal', 'contacts', 'account'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
         'data/menudata.xml',
         'views/res_partner_view.xml',
+        'views/portal_views.xml',
         'views/views.xml'
     ],
     # only loaded in demonstration mode

@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+from ..utils import formatting
+
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 
@@ -36,6 +38,20 @@ class Contact(models.Model):
     
     # For Families
     financial_res_ids = fields.Many2many("res.partner", string="Financial responsability", relation="partner_financial_res", column1="partner_id", column2="partner_financial_id")
+
+    # Added 3/30/2020
+    first_name  = fields.Char("First Name")#, store=True, related="uni_application_id.first_name")
+    middle_name = fields.Char("Middle Name")#, store=True, related="uni_application_id.first_name")
+    last_name   = fields.Char("Last Name") #, store=True, related="uni_application_id.first_name")
+
+    # We need this field is readonly
+    name = fields.Char(index=True, compute="_compute_name", store=True)
+
+    @api.depends("first_name", "middle_name", "last_name")
+    def _compute_name(self):
+        for record in self:
+            record.name = formatting.format_name(record.first_name, record.middle_name, record.last_name)
+    
 
     def _compute_family_invoice_ids(self):
         for record in self:
