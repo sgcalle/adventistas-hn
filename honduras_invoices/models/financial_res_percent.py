@@ -7,6 +7,7 @@ class FinacialResponsabilityPercent(models.Model):
     _description = "Realted model to finance responsabilty"
 
     partner_id = fields.Many2one("res.partner", string="Customer", domain=[("is_family", "=", False)])
+    partner_family_ids = fields.Many2many(related="partner_id.family_ids")
 
     family_id = fields.Many2one("res.partner", required=True, string="Family", domain=[("is_family", "=", True), ('is_company', '=', True)])
     category_id = fields.Many2one("product.category", required=True, string="Category", domain=[("parent_id", "=", False)])
