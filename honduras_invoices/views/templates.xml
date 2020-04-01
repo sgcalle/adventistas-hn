@@ -10,6 +10,7 @@
 
     <template id="invoice_payments_report_document">
         <t t-call="web.external_layout">
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
             <t t-set="o" t-value="o.with_context(lang=lang)" />
             <t t-set="payments_vals" t-value="o._get_reconciled_payments()" />
             <div class="page">
