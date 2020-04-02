@@ -5,21 +5,21 @@ from ..utils import formatting
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 
-selec_person_types = [
+SELEC_PERSON_TYPES = [
     ("student", "Student"),
     ("parent", "Parent")
 ]
 
-selec_company_types = [
+SELEC_COMPANY_TYPES = [
     ("person", "Person"),
-    ("company", "Family")
+    ("company", "Company/Family")
 ]
 
 class Contact(models.Model):
     _inherit = "res.partner"
 
-    company_type = fields.Selection(selec_company_types, string="Company Type")
-    person_type = fields.Selection(selec_person_types, string="Person Type")
+    company_type = fields.Selection(SELEC_COMPANY_TYPES, string="Company Type")
+    person_type = fields.Selection(SELEC_PERSON_TYPES, string="Person Type")
 
     grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level")
     homeroom = fields.Char("Homeroom")    
@@ -71,6 +71,12 @@ class Contact(models.Model):
         TYPE_ADD_EXISTING = 4
         TYPE_REMOVE_NO_DELETE = 3
 
+        if "name" not in values:
+            first_name = values["first_name"] if "first_name" in values else ""
+            middle_name = values["first_name"] if "middle_name" in values else ""
+            last_name = values["last_name"] if "last_name" in values else ""
+
+            values["name"] = formatting.format_name(first_name, middle_name, last_name)
         partners = super().create(values)
 
         ctx = self._context
