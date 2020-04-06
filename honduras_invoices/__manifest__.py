@@ -19,7 +19,7 @@
     'version': '0.3-beta',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'account', 'sale', 'account_reports', 'school_base'],
+    'depends': ['base', 'account', 'sale', 'product', 'account_reports', 'school_base'],
 
     # always loaded
     'data': [
@@ -28,6 +28,7 @@
         'views/templates.xml',
         'views/res_partner_views.xml',
         'views/reports.xml',
+        'wizard/res_partner_make_sale.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

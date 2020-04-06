@@ -10,7 +10,7 @@
 
     <template id="invoice_payments_report_document">
         <t t-call="web.external_layout">
-            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
             <t t-set="o" t-value="o.with_context(lang=lang)" />
             <t t-set="payments_vals" t-value="o._get_reconciled_payments()" />
             <div class="page">
@@ -79,7 +79,8 @@
     <template id="honduras_invoices.invoice_report" inherit_id="account.report_invoice_document">
         <xpath expr="//t[@t-call='web.external_layout']" position="replace">
             <!--             <t t-call="web.external_layout"> -->
-            <div class="container-fluid">
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+            <div class="container-fluid p-0">
 
                 <style>
                             .border-3{
@@ -95,138 +96,136 @@
                             }
                             
                             table {
-                                font-size: 12px;
+                                font-size: 10px !important;
                             }
                         
                         </style>
 
                 <!--Header-->
-                <header class="row font-weight-bold">
-                    <div class="col-2 d-flex align-item-center align-self-center">
-                        <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" class="w-100" alt="Logo" />
-                    </div>
-
-                    <div class="col-10">
-
-                        <div class="row justify-content-center">
-                            <h1 align="center">
-                                <t t-esc="o.company_id.name" />
-                            </h1>
-                        </div>
-
-                        <div class="row">
-                            <div t-field="o.company_id.street" class="col-6" />
-                            <div class="col-6">
+                <header class="font-weight-bold">
+                    <table class="w-100" style="table-layout: fixed">
+                        <tr>
+                            <td rowspan="4">
+                                <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" class="w-100" alt="Logo" />
+                            </td>
+                            <td colspan="3">
+                                <span class="h1" t-field="o.company_id.name" />
+                            </td>
+                        </tr>
+                        <tr>
+<!--                             <td /> -->
+                            <td colspan="2">
+                                <t t-esc="o.company_id.street" />
+                            </td>
+                            <td>
                                 FACTURA:
-                                <span t-field="o.name" class="col-6" />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-3">
+                                <span t-field="o.name" />
+                            </td>
+                        </tr>
+                        <tr>
+<!--                             <td /> -->
+                            <td>
                                 RTN:
                                 <span t-field="o.company_id.vat" class="col" />
-                            </div>
-                            <div class="col-3">
+                            </td>
+                            <td>
                                 Correo:
                                 <span t-field="o.company_id.email" />
-                            </div>
-                            <div class="col-6">
+                            </td>
+                            <td>
                                 RANGO AUTORIZADO DEL
                                 <t t-esc="'{}{:>08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)" />
                                 AL
                                 <t t-esc="'{}{:>08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)" />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-4">
+                            </td>
+                        </tr>
+                        <tr>
+<!--                             <td /> -->
+                            <td>
                                 TEL.
                                 <span t-field="o.company_id.phone" class="col" />
-                            </div>
-                            <div class="col-4">
+                            </td>
+                            <td>
                                 FECHA LIMITE DE EMISION:
                                 <span t-field="o.journal_id.issue_limit_date" />
-                            </div>
-                            <div class="col-4">
+                            </td>
+                            <td>
                                 CAI:
                                 <span t-field="o.journal_id.cai" />
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="border border-dark w-100 border-3" style="table-layout:fixed;">
+                        <tr>
+                            <td colspan="2" class="pb-4">
+                                CLIENTE:
+                                <span t-field="o.partner_id.name" />
+                                <br />
+                                <div t-if="o.student_id">
+                                    ESTUDIANTE:
+                                    <span t-field="o.student_id.name" />
+                                </div>
+                            </td>
+                            <td class="pb-4">
+                                FECHA:
+                                <span t-field="o.invoice_date" />
+                            </td>
+                            <td class="pb-4">
+                                CONDICION DE PAGO:
+                                <span t-field="o.invoice_date" />
+                            </td>
+                        </tr>
 
-                <table class="border border-dark w-100 border-3" style="table-layout:fixed;">
-                    <tr>
-                        <td colspan="2" class="pb-4">
-                            CLIENTE:
-                            <span t-field="o.partner_id.name" />
-                            <br />
-                            <div t-if="o.student_id">
-                                ESTUDIANTE:
-                                <span t-field="o.student_id.name" />
-                            </div>
-                        </td>
-                        <td class="pb-4">
-                            FECHA:
-                            <span t-field="o.invoice_date" />
-                        </td>
-                        <td class="pb-4">
-                            CONDICION DE PAGO:
-                            <span t-field="o.invoice_date" />
-                        </td>
-                    </tr>
+                        <!-- Un mismo "cliente" para todos los campos -->
+                        <t t-set="client_id" t-value="o.partner_id" />
+                        <tr>
+                            <td colspan="2" class="pb-4">
+                                DIRECCION:
+                                <span t-field="client_id.street" />
+                            </td>
+                            <td class="pb-4">
+                                VENCIMIENTO:
+                                <span t-field="o.invoice_date_due" />
+                            </td>
+                            <td class="pb-4">
+                                ORDEN DE COMPRA:
+                                <span t-field="o.invoice_origin" />
+                            </td>
+                        </tr>
 
-                    <!-- Un mismo "cliente" para todos los campos -->
-                    <t t-set="client_id" t-value="o.partner_id" />
-                    <tr>
-                        <td colspan="2" class="pb-4">
-                            DIRECCION:
-                            <span t-field="client_id.street" />
-                        </td>
-                        <td class="pb-4">
-                            VENCIMIENTO:
-                            <span t-field="o.invoice_date_due" />
-                        </td>
-                        <td class="pb-4">
-                            ORDEN DE COMPRA:
-                            <span t-field="o.invoice_origin" />
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="2" class="pb-4">
+                                RTN:
+                                <span t-field="client_id.vat" />
+                            </td>
+                            <td class="pb-4">
+                                VENDEDOR:
+                                <span t-field="o.invoice_user_id.name" />
+                            </td>
+                            <td class="pb-4">
+                                <t t-esc="modo" />
+                            </td>
+                        </tr>
 
-                    <tr>
-                        <td colspan="2" class="pb-4">
-                            RTN:
-                            <span t-field="client_id.vat" />
-                        </td>
-                        <td class="pb-4">
-                            VENDEDOR:
-                            <span t-field="o.invoice_user_id.name" />
-                        </td>
-                        <td class="pb-4">
-                            <t t-esc="modo" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td colspan="2" class="pb-4">
+                        <tr>
+                            <td colspan="2" class="pb-4">
                                         No O/C EXENTA:
                                     </td>
-                        <td colspan="2" class="pb-4">
-                            No. CONSTAN. REGISTRO EXONERADO:
-                            <t t-esc="client_id.no_constant_registro_exonerado" />
+                            <td colspan="2" class="pb-4">
+                                No. CONSTAN. REGISTRO EXONERADO:
+                                <t t-esc="client_id.no_constant_registro_exonerado" />
 
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
 
-                    <tr>
-                        <td colspan="4">
+                        <tr>
+                            <td colspan="4">
                                         No REGISTRO S.A.G.
                                     </td>
-                    </tr>
+                        </tr>
 
-                </table>
-
+                    </table>
+                </header> 
                 <table class="mt-4 table-border-3 w-100">
                     <thead>
                         <tr>
