@@ -117,6 +117,10 @@
                                 color: rgba(81, 156, 154, 0.5);
                             }
                             
+                            .table-total th {
+                                text-align: center;
+                            }
+                            
                         </style>
 
                 <h1 t-if="modo == 'COPIA'" class="markwater w-100">COPIA</h1>
@@ -125,10 +129,10 @@
                 <header class="font-weight-bold">
 
                     <!-- Calculo de cantidad a pagar -->
-                    <table class="w-100" style="table-layout: fixed">
+                    <table class="w-100">
                         <tr>
-                            <td rowspan="4">
-                                <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" class="w-100" alt="Logo" />
+                            <td rowspan="4" style="text-align: center; width: 110px; vertical-align: middle !important;">
+                                <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="width: 100px;" alt="Logo" />
                             </td>
                             <td colspan="3">
                                 <div class="h1">Fundación Centros Educativos Adventistas</div>
@@ -138,9 +142,23 @@
                         <tr>
                             <!--                             <td /> -->
                             <td colspan="2">
-                                <t t-esc="o.company_id.street" />
+                                <t t-if="o.company_id.country_id">
+                                    <span t-field="o.company_id.country_id" />
+                                    ,
+                                </t>
+                                <t t-if="o.company_id.state_id">
+                                    <span t-field="o.company_id.state_id" />
+                                    ,
+                                </t>
+                                <t t-if="o.company_id.city">
+                                    <span t-field="o.company_id.city" />
+                                    ,
+                                </t>
+                                <t t-if="o.company_id.street">
+                                    <span t-field="o.company_id.street" />
+                                </t>
                             </td>
-                            <td>
+                            <td style="font-size: 24px; font-weight: 1000 !important; text-align: center;">
                                 FACTURA:
                                 <span t-field="o.name" />
                             </td>
@@ -157,9 +175,9 @@
                             </td>
                             <td>
                                 RANGO AUTORIZADO DEL
-                                <t t-esc="'{}{:>08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)" />
+                                <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)" />
                                 AL
-                                <t t-esc="'{}{:>08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)" />
+                                <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)" />
                             </td>
                         </tr>
                         <tr>
@@ -172,7 +190,7 @@
                                 FECHA LIMITE DE EMISION:
                                 <span t-field="o.journal_id.issue_limit_date" />
                             </td>
-                            <td style="font-size: 20px;">
+                            <td>
                                 <span>CAI:</span>
                                 <span t-field="o.journal_id.cai" />
                             </td>
@@ -197,7 +215,7 @@
                                 CONDICION DE PAGO:
                                 <span t-if="o.invoice_payment_state != 'paid'">CRÉDITO</span>
                                 <span t-else="">CONTADO</span>
-<!--                                 <span t-field="o.invoice_date" /> -->
+                                <!--                                 <span t-field="o.invoice_date" /> -->
                             </td>
                         </tr>
 
@@ -206,7 +224,21 @@
                         <tr>
                             <td colspan="2" class="pb-4">
                                 DIRECCION:
-                                <span t-field="client_id.street" />
+                                <t t-if="client_id.country_id">
+                                    <span t-field="client_id.country_id" />
+                                    ,
+                                </t>
+                                <t t-if="client_id.state_id">
+                                    <span t-field="client_id.state_id" />
+                                    ,
+                                </t>
+                                <t t-if="client_id.city">
+                                    <span t-field="client_id.city" />
+                                    ,
+                                </t>
+                                <t t-if="client_id.street">
+                                    <span t-field="client_id.street" />
+                                </t>
                             </td>
                             <td class="pb-4">
                                 VENCIMIENTO:
@@ -332,7 +364,7 @@
 
                 <section class="clearfix">
                     <div id="total">
-                        <table class="mt-4 table-border-3 w-100">
+                        <table class="mt-4 table-border-3 w-100 table-total">
                             <thead>
                                 <tr>
                                     <th colspan="4">SUBTOTAL / IMPORTE</th>
