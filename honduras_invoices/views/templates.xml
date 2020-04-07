@@ -80,8 +80,9 @@
         <xpath expr="//t[@t-call='web.external_layout']" position="replace">
             <!--             <t t-call="web.external_layout"> -->
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
-            <div class="container-fluid p-0">
+            <div class="container-fluid p-0 position-relative">
 
+                <t t-set="payments_vals" t-value="o._get_reconciled_payments()" />
                 <style>
                             .border-3{
                                 border-width: 2px !important;
@@ -92,17 +93,38 @@
                             }
                             
                             header {
-                                font-size: 8px;
+                                font-size: 12px !important;
                             }
                             
                             table {
-                                font-size: 10px !important;
+                                font-size: 16px !important;
                             }
-                        
+
+                            .markwater {
+                                position: absolute;
+                                top: 38%;
+                                text-align: center;
+
+                                -webkit-transform: rotate(-45deg);
+                                -webkit-transform: rotate(-45deg);
+                                -moz-transform:    rotate(-45deg);
+                                -ms-transform:     rotate(-45deg);
+                                -o-transform:      rotate(-45deg);
+                                transform:         rotate(-45deg);
+
+                                font-size: 273px;
+                                z-index: -1;
+                                color: rgba(81, 156, 154, 0.5);
+                            }
+                            
                         </style>
+
+                <h1 t-if="modo == 'COPIA'" class="markwater w-100">COPIA</h1>
 
                 <!--Header-->
                 <header class="font-weight-bold">
+
+                    <!-- Calculo de cantidad a pagar -->
                     <table class="w-100" style="table-layout: fixed">
                         <tr>
                             <td rowspan="4">
@@ -150,8 +172,8 @@
                                 FECHA LIMITE DE EMISION:
                                 <span t-field="o.journal_id.issue_limit_date" />
                             </td>
-                            <td>
-                                CAI:
+                            <td style="font-size: 20px;">
+                                <span>CAI:</span>
                                 <span t-field="o.journal_id.cai" />
                             </td>
                         </tr>
@@ -173,7 +195,9 @@
                             </td>
                             <td class="pb-4">
                                 CONDICION DE PAGO:
-                                <span t-field="o.invoice_date" />
+                                <span t-if="o.invoice_payment_state != 'paid'">CRÉDITO</span>
+                                <span t-else="">CONTADO</span>
+<!--                                 <span t-field="o.invoice_date" /> -->
                             </td>
                         </tr>
 
@@ -209,9 +233,7 @@
                         </tr>
 
                         <tr>
-                            <td colspan="2" class="pb-4">
-                                        No O/C EXENTA:
-                                    </td>
+                            <td colspan="2" class="pb-4"> No O/C EXENTA: </td>
                             <td colspan="2" class="pb-4">
                                 No. CONSTAN. REGISTRO EXONERADO:
                                 <t t-esc="client_id.no_constant_registro_exonerado" />
@@ -220,9 +242,7 @@
                         </tr>
 
                         <tr>
-                            <td colspan="4">
-                                        No REGISTRO S.A.G.
-                                    </td>
+                            <td colspan="4"> No REGISTRO S.A.G. </td>
                         </tr>
 
                     </table>
@@ -273,9 +293,7 @@
                                         </t>
                                     </t>
                                 </t>
-                                <t t-if="keep_loop">
-                                                E
-                                            </t>
+                                <t t-if="keep_loop">E</t>
                             </td>
                         </tr>
                     </t>
