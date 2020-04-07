@@ -109,7 +109,8 @@
                                 <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" class="w-100" alt="Logo" />
                             </td>
                             <td colspan="3">
-                                <span class="h1" t-field="o.company_id.name" />
+                                <div class="h1">Fundación Centros Educativos Adventistas</div>
+                                <div class="h3" t-field="o.company_id.name" />
                             </td>
                         </tr>
                         <tr>
