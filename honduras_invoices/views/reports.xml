@@ -26,7 +26,7 @@
     
             <field name="name">Invoice Payments</field>
             <field name="paperformat_id" ref="base.paperformat_us" />
-            <field name="report_name">honduras_invoices.invoice_payments_report</field>
+            <field name="report_name">honduras_invoices.invoice_payments_template</field>
         </record>
     </data>
 </odoo>

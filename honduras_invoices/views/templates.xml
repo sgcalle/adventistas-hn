@@ -1,5 +1,5 @@
 <odoo>
-    <template id="invoice_payments_report">
+    <template id="honduras_invoices.invoice_payments_template">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="o.partner_id.lang" />
@@ -8,7 +8,7 @@
         </t>
     </template>
 
-    <template id="invoice_payments_report_document">
+    <template id="honduras_invoices.invoice_payments_report_document">
         <t t-call="web.external_layout">
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
             <t t-set="o" t-value="o.with_context(lang=lang)" />
@@ -113,7 +113,7 @@
                             </td>
                         </tr>
                         <tr>
-<!--                             <td /> -->
+                            <!--                             <td /> -->
                             <td colspan="2">
                                 <t t-esc="o.company_id.street" />
                             </td>
@@ -123,7 +123,7 @@
                             </td>
                         </tr>
                         <tr>
-<!--                             <td /> -->
+                            <!--                             <td /> -->
                             <td>
                                 RTN:
                                 <span t-field="o.company_id.vat" class="col" />
@@ -140,7 +140,7 @@
                             </td>
                         </tr>
                         <tr>
-<!--                             <td /> -->
+                            <!--                             <td /> -->
                             <td>
                                 TEL.
                                 <span t-field="o.company_id.phone" class="col" />
@@ -225,7 +225,7 @@
                         </tr>
 
                     </table>
-                </header> 
+                </header>
                 <table class="mt-4 table-border-3 w-100">
                     <thead>
                         <tr>
@@ -311,54 +311,56 @@
                     <t t-if="not invoice_line.tax_ids" t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
                 </t>
 
-                <section>
-                    <table class="mt-4 table-border-3 w-100">
-                        <thead>
-                            <tr>
-                                <th colspan="4">SUBTOTAL / IMPORTE</th>
-                                <th rowspan="2">DESCUENTOS Y REBAJAS OTORGADOS</th>
-                                <th colspan="2">IMPUESTO SOBRE VENTAS</th>
-                                <th rowspan="2">TOTAL A PAGAR</th>
-                            </tr>
-                            <tr>
-                                <th>EXENTO</th>
-                                <th>GRAVADO 15%</th>
-                                <th>GRAVADO 18%</th>
-                                <th>EXONERADO</th>
+                <section class="clearfix">
+                    <div id="total">
+                        <table class="mt-4 table-border-3 w-100">
+                            <thead>
+                                <tr>
+                                    <th colspan="4">SUBTOTAL / IMPORTE</th>
+                                    <th rowspan="2">DESCUENTOS Y REBAJAS OTORGADOS</th>
+                                    <th colspan="2">IMPUESTO SOBRE VENTAS</th>
+                                    <th rowspan="2">TOTAL A PAGAR</th>
+                                </tr>
+                                <tr>
+                                    <th>EXENTO</th>
+                                    <th>GRAVADO 15%</th>
+                                    <th>GRAVADO 18%</th>
+                                    <th>EXONERADO</th>
 
-                                <th>ISV 15%</th>
-                                <th>ISV 18%</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-right">
-                                    <t t-esc="amount_exento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                                <td class="text-right">
-                                    <t t-esc="amount_15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                                <td class="text-right">
-                                    <t t-esc="amount_18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                                <td class="text-right">
-                                    <t t-esc="amount_exonerado" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                                <td class="text-right">
-                                    <t t-esc="amount_descuento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                                <td class="text-right">
-                                    <t t-esc="amount_15 * 0.15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                                <td class="text-right">
-                                    <t t-esc="amount_18 * 0.18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                                <td class="text-right">
-                                    <t t-esc="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                    <th>ISV 15%</th>
+                                    <th>ISV 18%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-right">
+                                        <t t-esc="amount_exento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="amount_15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="amount_18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="amount_exonerado" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="amount_descuento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="amount_15 * 0.15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="amount_18 * 0.18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </section>
             </div>
             <!--             </t> -->
