@@ -15,6 +15,9 @@
             <field name="dpi">125</field>
         </record>
         
+        <record id="account.action_report_payment_receipt" model="ir.actions.report">
+            <field name="paperformat_id" ref="honduras_invoices.honduras_paper_format"/>
+        </record>
         <record id="account.account_invoices" model="ir.actions.report">
             <field name="paperformat_id" ref="honduras_invoices.honduras_paper_format"/>
         </record>
