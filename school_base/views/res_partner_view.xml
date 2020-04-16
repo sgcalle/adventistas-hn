@@ -5,6 +5,13 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']/parent::h1" position="after">
+                <group>
+                    <field name="first_name"/>
+                    <field name="middle_name"/>
+                    <field name="last_name"/>
+                </group>
+            </xpath>
             <div name="button_box" position="before">
                 <field name="person_type" readonly="1" style="
                        position: absolute;
@@ -16,8 +23,10 @@
             <notebook position="inside">
                 <page string="School data">
                     <group>
-                        <group>
+                        <group attrs="{'invisible': [('is_company', '=', False)]}">
                             <field name="is_family"/>
+                        </group>
+                        <group attrs="{'invisible': [('is_company', '=', True)]}">
                             <field name="person_type"/>
                             <field name="grade_level_id"/>
                             <field name="homeroom"/>
@@ -43,7 +52,12 @@
             </xpath>
             <xpath expr="//field[@name='child_ids']/parent::page" position="before">
                 <page string="Members" attrs="{'invisible': ['|', ('is_family', '=', False), ('is_company', '=', False)]}">
-                    <field name="member_ids" mode="kanban" context="{'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_lang': lang, 'default_user_id': user_id}">
+                    <field name="member_ids" mode="kanban" 
+                           domain="[('is_company', '=', False)]" 
+                           context="{'default_street': street, 'default_street2': street2, 'default_city': city, 
+                                     'default_is_company': True,
+                                     'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 
+                                     'default_lang': lang, 'default_user_id': user_id}">
                         <kanban>
                             <field name="id"/>
                             <field name="color"/>
@@ -108,7 +122,14 @@
                     </field>
                 </page>
                 <page string="Families" attrs="{'invisible': [('is_company', '=', True)]}">
-                    <field name="family_ids" mode="kanban" context="{'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_lang': lang, 'default_user_id': user_id}">
+                    <field name="family_ids" mode="kanban" 
+                           domain="[('is_company', '=', True), ('is_family', '=', True)]" 
+                           context="{'member_id': active_id, 'default_street': street, 
+                                     'default_is_company': True, 'default_is_family': True,
+                                     'default_street2': street2, 'default_city': city, 
+                                     'default_state_id': state_id, 'default_zip': zip, 
+                                     'default_country_id': country_id, 'default_lang': lang, 
+                                     'default_user_id': user_id}">
                         <kanban>
                             <field name="id"/>
                             <field name="color"/>

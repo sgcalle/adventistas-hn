@@ -105,6 +105,7 @@ class SaleOrderForStudents(models.Model):
         if final:
             moves.sudo().filtered(lambda m: m.amount_total < 0).action_switch_invoice_into_refund_credit_note()
         for move in moves:
+            move.message_subscribe(move.family_id.financial_res_ids.ids)
             move.message_post_with_view('mail.message_origin_link',
                 values={'self': move, 'origin': move.line_ids.mapped('sale_line_ids.order_id')},
                 subtype_id=self.env.ref('mail.mt_note').id
