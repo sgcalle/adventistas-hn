@@ -23,8 +23,15 @@ class SaleOrderForStudents(models.Model):
         """
 
         # If it isn't a student, then we proceed with default behaviour
-        if self.partner_id.person_type != 'student':
-            return super()._create_invoices(grouped, final)
+
+
+        # return super(SaleOrderForStudents, self)._create_invoices(grouped, final)
+        no_student_records = self.filtered( lambda record: record.partner_id.person_type != "student")
+        student_recods     = self.filtered( lambda record: record.partner_id.person_type == "student")
+        invoice_no_students = self.env["account.move"]
+        
+        if no_student_records:
+            invoice_no_students = super(SaleOrderForStudents, no_student_records)._create_invoices(grouped, final)
 
 
         if not self.env['account.move'].check_access_rights('create', False):
@@ -38,7 +45,7 @@ class SaleOrderForStudents(models.Model):
 
         # 1) Create invoices.
         invoice_vals_list = []
-        for order in self:
+        for order in student_recods:
             pending_section = None
 
             # Invoice values.
@@ -87,7 +94,7 @@ class SaleOrderForStudents(models.Model):
 
                 invoice_vals_list.append(invoice_vals)
 
-        if not invoice_vals_list:
+        if not invoice_vals_list and not invoice_no_students:
             raise UserError(_(
                 'There is no invoiceable line. If a product has a Delivered quantities invoicing policy, please make sure that a quantity has been delivered.'))
 
@@ -110,5 +117,24 @@ class SaleOrderForStudents(models.Model):
                 values={'self': move, 'origin': move.line_ids.mapped('sale_line_ids.order_id')},
                 subtype_id=self.env.ref('mail.mt_note').id
             )
-        return moves
+        return moves + invoice_no_students
         
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+    @api.onchange('product_uom', 'product_uom_qty')
+    def product_uom_change(self):
+        super().product_uom_change()
+        if not self.order_id.pricelist_id and not self.order_id.partner_id:
+            self.price_unit = self.product_id.lst_price
+
+    @api.onchange('product_id')
+    def product_id_change(self):
+        res = super().product_id_change()
+
+        if not self.order_id.pricelist_id and not self.order_id.partner_id:
+            price_unit = self.product_id.lst_price
+            self.write({"price_unit": price_unit})
+        
+        return res
+        
+
