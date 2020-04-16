@@ -356,6 +356,7 @@
                             </td>
                         </tr>
                         <tr>
+                            <!--                             <td /> -->
                             <td>
                                 RTN:
                                 <span t-field="o.company_id.vat" class="col" />
@@ -373,7 +374,6 @@
                         </tr>
                         <tr>
                             <!--                             <td /> -->
-
                             <td>
                                 TEL.
                                 <span t-field="o.company_id.phone" class="col" />

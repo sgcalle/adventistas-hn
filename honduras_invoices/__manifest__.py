@@ -25,8 +25,8 @@
         'sale',
         'product',
         'account_reports',
-        'school_base'
-    ]
+        'school_finance'
+    ],
 
     # always loaded
     'data': [
