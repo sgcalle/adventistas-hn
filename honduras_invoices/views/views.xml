@@ -1,16 +1,4 @@
 <odoo>
-    <record id="account_family_selection_form_view" model="ir.ui.view">
-        <field name="model">account.move</field>
-        <field name="inherit_id" ref="account.view_move_form"/>
-        <field name="arch" type="xml">
-            <group id="header_left_group" position="inside">
-                <field name="partner_family_ids" invisible="1"/>
-                <field name="family_members_ids" invisible="1"/>
-                <field name="student_id" domain="['&amp;', ('id', 'in', family_members_ids), ('person_type', '=', 'student')]" />
-                <field name="family_id" domain="[('id', 'in', partner_family_ids)]" />
-            </group>
-        </field>
-    </record>
 
     <record model="ir.ui.view" id="journal_honduras_form_view">
         <field name="name">journal.honduras</field>

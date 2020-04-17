@@ -18,7 +18,11 @@
     'version': '0.4',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'portal', 'contacts', 'account'],
+    'depends': [
+        'base',
+        'portal',
+        'contacts',
+    ],
 
     # always loaded
     'data': [
@@ -27,9 +31,5 @@
         'views/res_partner_view.xml',
         'views/portal_views.xml',
         'views/views.xml'
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
     ],
 }
