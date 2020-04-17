@@ -32,16 +32,16 @@
             <t t-call="honduras_invoices.report_payment_receipt_document" t-lang="lang">
                 <t t-set="modo" t-value="'ORIGINAL'" />
             </t>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
             <div class="position-relative" style="margin-top: 40px;">
                 <t t-call="honduras_invoices.report_payment_receipt_document" t-lang="lang">
                     <t t-set="modo" t-value="'COPIA'" />
@@ -63,7 +63,7 @@
                             <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="width: 100px;" alt="Logo" />
                         </td>
                         <td colspan="3">
-                            <div class="h1" t-field="o.company_id.parent_id"/>
+                            <div class="h1" t-field="o.company_id.parent_id" />
                             <div class="h3" t-field="o.company_id.name" />
                         </td>
                     </tr>
@@ -86,7 +86,8 @@
                             </t>
                         </td>
                         <td style="font-size: 24px; text-align: center;">
-                            <strong>Payment recipment:</strong> <span t-field="o.name" />
+                            <strong>Payment recipment:</strong>
+                            <span t-field="o.name" />
                         </td>
                     </tr>
                     <tr>
@@ -113,8 +114,7 @@
             </header>
             <div class="page">
                 <h3>
-                    <strong>
-                    </strong>
+                    <strong></strong>
                 </h3>
                 <div class="row mt64">
                     <div class="col-6" t-if="o.payment_date">
@@ -195,7 +195,7 @@
                 </table>
                 <div class="d-flex" style="margin-top: 4cm;">
                     <div class="col-3">Sign and casher stamp</div>
-                    <div class="col" style="border-bottom: 2px solid black !important;"/>
+                    <div class="col" style="border-bottom: 2px solid black !important;" />
                 </div>
             </div>
         </xpath>
@@ -269,13 +269,12 @@
         </t>
     </template>
 
-    <template id="honduras_invoices.report_invoice_document" inherit_id="account.report_invoice_document">
-        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
-            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
-            <div class="container-fluid p-0 position-relative">
+    <template id="honduras_invoices.report_invoice_document">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+        <div class="container-fluid p-0 position-relative">
 
-                <t t-set="payments_vals" t-value="o._get_reconciled_payments()" />
-                <style>
+            <t t-set="payments_vals" t-value="o._get_reconciled_payments()" />
+            <style>
                             .border-3{
                                 border-width: 2px !important;
                             }
@@ -316,388 +315,315 @@
                             
                         </style>
 
-                <h1 t-if="modo == 'COPIA'" class="markwater w-100">COPIA</h1>
+            <h1 t-if="modo == 'COPIA'" class="markwater w-100">COPIA</h1>
 
-                <!--Header-->
-                <header class="font-weight-bold">
-                    <!-- Calculo de cantidad a pagar -->
-                    <table class="w-100">
-                        <tr>
-                            <td rowspan="4" style="text-align: center; width: 110px; vertical-align: middle !important;">
-                                <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="width: 100px;" alt="Logo" />
-                            </td>
-                            <td colspan="3">
-                                <div class="h1">Fundación Centros Educativos Adventistas</div>
-                                <div class="h3" t-field="o.company_id.name" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <!--                             <td /> -->
-                            <td colspan="2">
-                                <t t-if="o.company_id.country_id">
-                                    <span t-field="o.company_id.country_id" />
-                                    ,
-                                </t>
-                                <t t-if="o.company_id.state_id">
-                                    <span t-field="o.company_id.state_id" />
-                                    ,
-                                </t>
-                                <t t-if="o.company_id.city">
-                                    <span t-field="o.company_id.city" />
-                                    ,
-                                </t>
-                                <t t-if="o.company_id.street">
-                                    <span t-field="o.company_id.street" />
-                                </t>
-                            </td>
-                            <td style="font-size: 24px; font-weight: 1000 !important; text-align: center;">
-                                FACTURA:
-                                <span t-field="o.name" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <!--                             <td /> -->
-                            <td>
-                                RTN:
-                                <span t-field="o.company_id.vat" class="col" />
-                            </td>
-                            <td>
-                                Correo:
-                                <span t-field="o.company_id.email" />
-                            </td>
-                            <td>
-                                RANGO AUTORIZADO DEL
-                                <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)" />
-                                AL
-                                <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <!--                             <td /> -->
-                            <td>
-                                TEL.
-                                <span t-field="o.company_id.phone" class="col" />
-                            </td>
-                            <td>
-                                FECHA LIMITE DE EMISION:
-                                <span t-field="o.journal_id.issue_limit_date" />
-                            </td>
-                            <td>
-                                <span>CAI:</span>
-                                <span t-field="o.journal_id.cai" />
-                            </td>
-                        </tr>
-                    </table>
-                    <table class="border border-dark w-100 border-3" style="table-layout:fixed;">
-                        <tr>
-                            <td colspan="2" class="pb-4">
-                                CLIENTE:
-                                <span t-field="o.partner_id.name" />
-                                <br />
-                                <div t-if="o.student_id">
-                                    ESTUDIANTE:
-                                    <span t-field="o.student_id.name" />
-                                </div>
-                            </td>
-                            <td class="pb-4">
-                                FECHA:
-                                <span t-field="o.invoice_date" />
-                            </td>
-                            <td class="pb-4">
-                                CONDICION DE PAGO:
-                                <span t-if="o.invoice_payment_state != 'paid'">CRÉDITO</span>
-                                <span t-else="">CONTADO</span>
-                                <!--                                 <span t-field="o.invoice_date" /> -->
-                            </td>
-                        </tr>
+            <!--Header-->
+            <header class="font-weight-bold">
+                <!-- Calculo de cantidad a pagar -->
+                <table class="w-100">
+                    <tr>
+                        <td rowspan="4" style="text-align: center; width: 110px; vertical-align: middle !important;">
+                            <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)" style="width: 100px;" alt="Logo" />
+                        </td>
+                        <td colspan="3">
+                            <div class="h1">Fundación Centros Educativos Adventistas</div>
+                            <div class="h3" t-field="o.company_id.name" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <!--                             <td /> -->
+                        <td colspan="2">
+                            <t t-if="o.company_id.country_id">
+                                <span t-field="o.company_id.country_id" />
+                                ,
+                            </t>
+                            <t t-if="o.company_id.state_id">
+                                <span t-field="o.company_id.state_id" />
+                                ,
+                            </t>
+                            <t t-if="o.company_id.city">
+                                <span t-field="o.company_id.city" />
+                                ,
+                            </t>
+                            <t t-if="o.company_id.street">
+                                <span t-field="o.company_id.street" />
+                            </t>
+                        </td>
+                        <td style="font-size: 24px; font-weight: 1000 !important; text-align: center;">
+                            FACTURA:
+                            <span t-field="o.name" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <!--                             <td /> -->
+                        <td>
+                            RTN:
+                            <span t-field="o.company_id.vat" class="col" />
+                        </td>
+                        <td>
+                            Correo:
+                            <span t-field="o.company_id.email" />
+                        </td>
+                        <td>
+                            RANGO AUTORIZADO DEL
+                            <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)" />
+                            AL
+                            <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <!--                             <td /> -->
+                        <td>
+                            TEL.
+                            <span t-field="o.company_id.phone" class="col" />
+                        </td>
+                        <td>
+                            FECHA LIMITE DE EMISION:
+                            <span t-field="o.journal_id.issue_limit_date" />
+                        </td>
+                        <td>
+                            <span>CAI:</span>
+                            <span t-field="o.journal_id.cai" />
+                        </td>
+                    </tr>
+                </table>
+                <table class="border border-dark w-100 border-3" style="table-layout:fixed;">
+                    <tr>
+                        <td colspan="2" class="pb-4">
+                            CLIENTE:
+                            <span t-field="o.partner_id.name" />
+                            <br />
+                            <div t-if="o.student_id">
+                                ESTUDIANTE:
+                                <span t-field="o.student_id.name" />
+                            </div>
+                        </td>
+                        <td class="pb-4">
+                            FECHA:
+                            <span t-field="o.invoice_date" />
+                        </td>
+                        <td class="pb-4">
+                            CONDICION DE PAGO:
+                            <span t-if="o.invoice_payment_state != 'paid'">CRÉDITO</span>
+                            <span t-else="">CONTADO</span>
+                            <!--                                 <span t-field="o.invoice_date" /> -->
+                        </td>
+                    </tr>
 
-                        <!-- Un mismo "cliente" para todos los campos -->
-                        <t t-set="client_id" t-value="o.partner_id" />
-                        <tr>
-                            <td colspan="2" class="pb-4">
-                                DIRECCION:
-                                <t t-if="client_id.country_id">
-                                    <span t-field="client_id.country_id" />
-                                    ,
-                                </t>
-                                <t t-if="client_id.state_id">
-                                    <span t-field="client_id.state_id" />
-                                    ,
-                                </t>
-                                <t t-if="client_id.city">
-                                    <span t-field="client_id.city" />
-                                    ,
-                                </t>
-                                <t t-if="client_id.street">
-                                    <span t-field="client_id.street" />
-                                </t>
-                            </td>
-                            <td class="pb-4">
-                                VENCIMIENTO:
-                                <span t-field="o.invoice_date_due" />
-                            </td>
-                            <td class="pb-4">
-                                ORDEN DE COMPRA:
-                                <span t-field="o.invoice_origin" />
-                            </td>
-                        </tr>
+                    <!-- Un mismo "cliente" para todos los campos -->
+                    <t t-set="client_id" t-value="o.partner_id" />
+                    <tr>
+                        <td colspan="2" class="pb-4">
+                            DIRECCION:
+                            <t t-if="client_id.country_id">
+                                <span t-field="client_id.country_id" />
+                                ,
+                            </t>
+                            <t t-if="client_id.state_id">
+                                <span t-field="client_id.state_id" />
+                                ,
+                            </t>
+                            <t t-if="client_id.city">
+                                <span t-field="client_id.city" />
+                                ,
+                            </t>
+                            <t t-if="client_id.street">
+                                <span t-field="client_id.street" />
+                            </t>
+                        </td>
+                        <td class="pb-4">
+                            VENCIMIENTO:
+                            <span t-field="o.invoice_date_due" />
+                        </td>
+                        <td class="pb-4">
+                            ORDEN DE COMPRA:
+                            <span t-field="o.invoice_origin" />
+                        </td>
+                    </tr>
 
-                        <tr>
-                            <td colspan="2" class="pb-4">
-                                RTN:
-                                <span t-field="client_id.vat" />
-                            </td>
-                            <td class="pb-4">
-                                VENDEDOR:
-                                <span t-field="o.invoice_user_id.name" />
-                            </td>
-                            <td class="pb-4">
-                                <t t-esc="modo" />
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="2" class="pb-4">
+                            RTN:
+                            <span t-field="client_id.vat" />
+                        </td>
+                        <td class="pb-4">
+                            VENDEDOR:
+                            <span t-field="o.invoice_user_id.name" />
+                        </td>
+                        <td class="pb-4">
+                            <t t-esc="modo" />
+                        </td>
+                    </tr>
 
-                        <tr>
-                            <td colspan="2" class="pb-4"> No O/C EXENTA: </td>
-                            <td colspan="2" class="pb-4">
-                                No. CONSTAN. REGISTRO EXONERADO:
-                                <t t-esc="client_id.no_constant_registro_exonerado" />
+                    <tr>
+                        <td colspan="2" class="pb-4"> No O/C EXENTA: </td>
+                        <td colspan="2" class="pb-4">
+                            No. CONSTAN. REGISTRO EXONERADO:
+                            <t t-esc="client_id.no_constant_registro_exonerado" />
 
-                            </td>
-                        </tr>
+                        </td>
+                    </tr>
 
-                        <tr>
-                            <td colspan="4"> No REGISTRO S.A.G. </td>
-                        </tr>
+                    <tr>
+                        <td colspan="4"> No REGISTRO S.A.G. </td>
+                    </tr>
 
-                    </table>
-                </header>
-                <table class="mt-4 table-border-3 w-100">
-                    <thead>
-                        <tr>
-                            <th>cod Alterno</th>
-                            <th>Nombre</th>
-                            <th>Precio</th>
-                            <th>Cant.</th>
-                            <th>Subtotal</th>
-                            <th>Desc</th>
-                            <th>Total</th>
-                            <th>E/G</th>
-                        </tr>
-                    </thead>
-                    <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
-                        <tr>
-                            <td class="font-italic">
-                                <t t-esc="invoice_line.product_id.default_code" />
-                            </td>
-                            <td>
-                                <t t-esc="invoice_line.product_id.name" />
-                            </td>
-                            <td class="text-right">
-                                <span t-field="invoice_line.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                            </td>
-                            <td class="text-right">
-                                <t t-esc="round(invoice_line.quantity)" />
-                            </td>
-                            <td class="text-right">
-                                <span t-field="invoice_line.price_subtotal" />
-                            </td>
-                            <td class="text-right">
-                                <span t-field="invoice_line.discount" />
-                            </td>
-                            <td class="text-right">
-                                <span t-field="invoice_line.price_total" />
-                            </td>
-                            <td>
-                                <t t-set="keep_loop" t-value="true" />
-                                <t t-foreach="invoice_line.tax_ids" t-as="tax_id">
-                                    <t t-if="keep_loop">
-                                        <t t-if="tax_id.amount != 0">
-                                            <t t-set="keep_loop" t-value="false" />
-                                            G
-                                        </t>
+                </table>
+            </header>
+            <table class="mt-4 table-border-3 w-100">
+                <thead>
+                    <tr>
+                        <th>cod Alterno</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Cant.</th>
+                        <th>Subtotal</th>
+                        <th>Desc</th>
+                        <th>Total</th>
+                        <th>E/G</th>
+                    </tr>
+                </thead>
+                <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
+                    <tr>
+                        <td class="font-italic">
+                            <t t-esc="invoice_line.product_id.default_code" />
+                        </td>
+                        <td>
+                            <t t-esc="invoice_line.product_id.name" />
+                        </td>
+                        <td class="text-right">
+                            <span t-field="invoice_line.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                        </td>
+                        <td class="text-right">
+                            <t t-esc="round(invoice_line.quantity)" />
+                        </td>
+                        <td class="text-right">
+                            <span t-field="invoice_line.price_subtotal" />
+                        </td>
+                        <td class="text-right">
+                            <span t-field="invoice_line.discount" />
+                        </td>
+                        <td class="text-right">
+                            <span t-field="invoice_line.price_total" />
+                        </td>
+                        <td>
+                            <t t-set="keep_loop" t-value="true" />
+                            <t t-foreach="invoice_line.tax_ids" t-as="tax_id">
+                                <t t-if="keep_loop">
+                                    <t t-if="tax_id.amount != 0">
+                                        <t t-set="keep_loop" t-value="false" />
+                                        G
                                     </t>
                                 </t>
-                                <t t-if="keep_loop">E</t>
-                            </td>
-                        </tr>
-                    </t>
-                </table>
-
-                <!--Setting up 15% and 18% bases-->
-                <t t-set="amount_15" t-value="0" />
-                <t t-set="amount_18" t-value="0" />
-                <t t-set="amount_exento" t-value="0" />
-                <t t-set="amount_exonerado" t-value="0" />
-                <t t-set="amount_descuento" t-value="0" />
-
-                <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
-                    <t t-if="invoice_line.discount != 0">
-                        <t t-set="amount_descuento" t-value=" amount_descuento + ( 100 * invoice_line.price_total / (100 - invoice_line.discount) )" />
-                    </t>
-                    <t t-if="invoice_line.price_total &lt; 0">
-                        <t t-set="amount_descuento" t-value="amount_descuento - invoice_line.price_total" />
-                    </t>
-
-                    <t t-if="invoice_line.tax_ids">
-                        <t t-foreach="invoice_line.tax_ids" t-as="tax_id">
-                            <t t-if="tax_id.amount == 15">
-                                <t t-set="amount_15" t-value="amount_15 + invoice_line.price_subtotal" />
                             </t>
-                            <t t-if="tax_id.amount == 18">
-                                <t t-set="amount_18" t-value="amount_18 + invoice_line.price_subtotal" />
-                            </t>
-                            <t t-if="tax_id.amount == 0">
-                                <t t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
-                            </t>
-                        </t>
-                    </t>
-                    <t t-if="not invoice_line.tax_ids" t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
+                            <t t-if="keep_loop">E</t>
+                        </td>
+                    </tr>
+                </t>
+            </table>
+
+            <!--Setting up 15% and 18% bases-->
+            <t t-set="amount_15" t-value="0" />
+            <t t-set="amount_18" t-value="0" />
+            <t t-set="amount_exento" t-value="0" />
+            <t t-set="amount_exonerado" t-value="0" />
+            <t t-set="amount_descuento" t-value="0" />
+
+            <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
+                <t t-if="invoice_line.discount != 0">
+                    <t t-set="amount_descuento" t-value=" amount_descuento + ( 100 * invoice_line.price_total / (100 - invoice_line.discount) )" />
+                </t>
+                <t t-if="invoice_line.price_total &lt; 0">
+                    <t t-set="amount_descuento" t-value="amount_descuento - invoice_line.price_total" />
                 </t>
 
-                <section class="clearfix">
-                    <div id="total">
-                        <table class="mt-4 table-border-3 w-100 table-total">
-                            <thead>
-                                <tr>
-                                    <th colspan="4">SUBTOTAL / IMPORTE</th>
-                                    <th rowspan="2">DESCUENTOS Y REBAJAS OTORGADOS</th>
-                                    <th colspan="2">IMPUESTO SOBRE VENTAS</th>
-                                    <th rowspan="2">TOTAL A PAGAR</th>
-                                </tr>
-                                <tr>
-                                    <th>EXENTO</th>
-                                    <th>GRAVADO 15%</th>
-                                    <th>GRAVADO 18%</th>
-                                    <th>EXONERADO</th>
+                <t t-if="invoice_line.tax_ids">
+                    <t t-foreach="invoice_line.tax_ids" t-as="tax_id">
+                        <t t-if="tax_id.amount == 15">
+                            <t t-set="amount_15" t-value="amount_15 + invoice_line.price_subtotal" />
+                        </t>
+                        <t t-if="tax_id.amount == 18">
+                            <t t-set="amount_18" t-value="amount_18 + invoice_line.price_subtotal" />
+                        </t>
+                        <t t-if="tax_id.amount == 0">
+                            <t t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
+                        </t>
+                    </t>
+                </t>
+                <t t-if="not invoice_line.tax_ids" t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
+            </t>
 
-                                    <th>ISV 15%</th>
-                                    <th>ISV 18%</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-right">
-                                        <t t-esc="amount_exento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="amount_15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="amount_18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="amount_exonerado" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="amount_descuento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="amount_15 * 0.15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="amount_18 * 0.18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-esc="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-            <!--             </t> -->
-        </xpath>
+            <section class="clearfix">
+                <div id="total">
+                    <table class="mt-4 table-border-3 w-100 table-total">
+                        <thead>
+                            <tr>
+                                <th colspan="4">SUBTOTAL / IMPORTE</th>
+                                <th rowspan="2">DESCUENTOS Y REBAJAS OTORGADOS</th>
+                                <th colspan="2">IMPUESTO SOBRE VENTAS</th>
+                                <th rowspan="2">TOTAL A PAGAR</th>
+                            </tr>
+                            <tr>
+                                <th>EXENTO</th>
+                                <th>GRAVADO 15%</th>
+                                <th>GRAVADO 18%</th>
+                                <th>EXONERADO</th>
+
+                                <th>ISV 15%</th>
+                                <th>ISV 18%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-right">
+                                    <t t-esc="amount_exento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                                <td class="text-right">
+                                    <t t-esc="amount_15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                                <td class="text-right">
+                                    <t t-esc="amount_18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                                <td class="text-right">
+                                    <t t-esc="amount_exonerado" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                                <td class="text-right">
+                                    <t t-esc="amount_descuento" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                                <td class="text-right">
+                                    <t t-esc="amount_15 * 0.15" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                                <td class="text-right">
+                                    <t t-esc="amount_18 * 0.18" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                                <td class="text-right">
+                                    <t t-esc="o.amount_total" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </template>
 
-    <template id="honduras_invoices.invoice_report_with_payments" inherit_id="account.report_invoice_with_payments">
-        <xpath expr="//t[@t-call='account.report_invoice_document_with_payments']" position="replace">
-            <style>
-                .bottom-page{
-                    page-break-before: auto;
-                }
-            </style>
-            <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
-                <section class="position-relative">
+    <template id="honduras_invoices.report_invoice_with_copy">
+        <style>
+            .bottom-page{
+                page-break-before: auto;
+            }
+        </style>
+        <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+            <section class="position-relative">
+                <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
+                    <t t-set="modo" t-value="'ORIGINAL'" />
+                </t>
+                <div class="bottom-page">
                     <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
-                        <t t-set="modo" t-value="'ORIGINAL'" />
+                        <t t-set="modo" t-value="'COPIA'" />
                     </t>
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <div class="bottom-page">
-                        <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
-                            <t t-set="modo" t-value="'COPIA'" />
-                        </t>
-                    </div>
-                </section>
-            </div>
-        </xpath>
-    </template>
-
-    <template id="honduras_invoices.report_invoice" inherit_id="account.report_invoice">
-        <xpath expr="//t[@t-call='account.report_invoice_document']" position="replace">
-            <style>
-                .bottom-page{
-                    page-break-before: auto;
-                }
-            </style>
-            <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
-                <section class="position-relative">
-                    <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
-                        <t t-set="modo" t-value="'ORIGINAL'" />
-                    </t>
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <br />
-                    <div class="bottom-page">
-                        <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
-                            <t t-set="modo" t-value="'COPIA'" />
-                        </t>
-                    </div>
-                </section>
-            </div>
-        </xpath>
+                </div>
+            </section>
+        </div>
     </template>
 </odoo>

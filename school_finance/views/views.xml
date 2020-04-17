@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <field name="type" position="after">
                 <field name="template_id"/>
+                <field name="template_with_payment_id"/>
             </field>
         </field>
     </record>
