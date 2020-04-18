@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import AccessError, UserError, ValidationError
 
 class school_finance(models.Model):
     _inherit = 'res.partner'

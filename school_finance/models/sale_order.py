@@ -49,8 +49,16 @@ class SaleOrderForStudents(models.Model):
             # Invoice values.
             partner_responsible_categ = {category.category_id for category in self.partner_id.family_res_finance_ids}
             for line in order.order_line:
-                if not line.product_id.categ_id in partner_responsible_categ:
-                    raise UserError(_(f'There is no responsible family for {line.product_id.categ_id.name}'))
+                product_categs = list()
+                parent_category_id = line.product_id.categ_id
+
+                while parent_category_id:
+                    if parent_category_id in partner_responsible_categ:
+                        break;
+                    parent_category_id = parent_category_id.parent_id
+
+                if not parent_category_id:
+                    raise UserError(_('There is no responsible family for %s') % (line.product_id.categ_id.name))
 
             for family_id in self.partner_id.family_ids:
                 invoice_vals = order._prepare_invoice()
@@ -73,10 +81,10 @@ class SaleOrderForStudents(models.Model):
                         product_line = line._prepare_invoice_line()
                         
                         # Skip if we found that family isn't the category's responsible
-                        if not family_id in [category.family_id for category in self.partner_id.family_res_finance_ids if category.category_id == line.product_id.categ_id]:
+                        if not family_id in [category.family_id for category in self.partner_id.family_res_finance_ids if category.category_id == parent_category_id]:
                             continue
 
-                        percent_sum = sum([category.percent for category in self.partner_id.family_res_finance_ids if category.category_id == line.product_id.categ_id and category.family_id == family_id])
+                        percent_sum = sum([category.percent for category in self.partner_id.family_res_finance_ids if category.category_id == parent_category_id and category.family_id == family_id])
                         percent_sum /= 100
 
                         product_line["price_unit"] *= percent_sum
