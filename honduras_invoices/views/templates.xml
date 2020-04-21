@@ -10,42 +10,20 @@
 
     <template id="honduras_invoices.report_payment_receipt" inherit_id="account.report_payment_receipt">
         <xpath expr="//t[@t-call='account.report_payment_receipt_document']" position="replace">
-            <style>
-                .markwater {
-                    position: absolute;
-                    top: 50%;
-                    margin-top: -140px;
-                    text-align: center;
-
-                    -webkit-transform: rotate(-45deg);
-                    -webkit-transform: rotate(-45deg);
-                    -moz-transform:    rotate(-45deg);
-                    -ms-transform:     rotate(-45deg);
-                    -o-transform:      rotate(-45deg);
-                    transform:         rotate(-45deg);
-
-                    font-size: 280px;
-                    z-index: -1;
-                    color: rgba(81, 156, 154, 0.5);
-                }
-            </style>
-            <t t-call="honduras_invoices.report_payment_receipt_document" t-lang="lang">
-                <t t-set="modo" t-value="'ORIGINAL'" />
-            </t>
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <div class="position-relative" style="margin-top: 40px;">
-                <t t-call="honduras_invoices.report_payment_receipt_document" t-lang="lang">
-                    <t t-set="modo" t-value="'COPIA'" />
-                </t>
+            <div class="letter-page" style="height: 15in">
+    
+                <section class="section-page" style="min-height: 50%">
+                    <t t-call="honduras_invoices.report_payment_receipt_document" t-lang="lang">
+                        <t t-set="modo" t-value="'ORIGINAL'" />
+                    </t>
+                </section>
+                <section class="section-page position-relative" style="min-height: 50%">
+                    <div class="position-absolute" style="bottom: 0">
+                        <t t-call="honduras_invoices.report_payment_receipt_document" t-lang="lang">
+                            <t t-set="modo" t-value="'COPIA'" />
+                        </t>
+                    </div>
+                </section>
             </div>
         </xpath>
     </template>
@@ -53,6 +31,23 @@
     <template id="honduras_invoices.report_payment_receipt_document" inherit_id="account.report_payment_receipt_document">
         <xpath expr="//t[@t-call='web.external_layout']" position="replace">
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+            <style>
+                .markwater {
+                    position: absolute;
+                    top: 33%;
+                    margin-top: -140px;
+                    text-align: center;
+                    -webkit-transform: rotate(-45deg);
+                    -webkit-transform: rotate(-45deg);
+                    -moz-transform: rotate(-45deg);
+                    -ms-transform: rotate(-45deg);
+                    -o-transform: rotate(-45deg);
+                    transform: rotate(-45deg);
+                    font-size: 280px;
+                    z-index: -1;
+                    color: rgba(81, 156, 154, 0.5);
+                }
+            </style>
             <t t-set="o" t-value="o.with_context(lang=lang)" />
             <h1 t-if="modo == 'COPIA'" class="markwater w-100">COPIA</h1>
             <header class="font-weight-bold">
@@ -608,22 +603,23 @@
     </template>
 
     <template id="honduras_invoices.report_invoice_with_copy">
-        <style>
-            .bottom-page{
-                page-break-before: auto;
-            }
-        </style>
-        <div class="article o_report_layout_standard" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
-            <section class="position-relative">
+        <div class="article o_report_layout_standard position-relative letter-page" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id">
+            <section class="section-page">
                 <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
                     <t t-set="modo" t-value="'ORIGINAL'" />
                 </t>
-                <div class="bottom-page">
-                    <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
-                        <t t-set="modo" t-value="'COPIA'" />
-                    </t>
-                </div>
+            </section>
+            <section class="section-page">
+                <t t-call="honduras_invoices.report_invoice_document" t-lang="lang">
+                    <t t-set="modo" t-value="'COPIA'" />
+                </t>
             </section>
         </div>
+    </template>
+
+    <template id="honduras_invoices.report_common" inherit_id="web.report_assets_common">
+        <xpath expr="." position="inside">
+            <link href="/honduras_invoices/static/src/css/honduras_invoice.css" rel="stylesheet" />
+        </xpath>
     </template>
 </odoo>
