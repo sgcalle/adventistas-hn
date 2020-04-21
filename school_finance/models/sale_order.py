@@ -47,7 +47,7 @@ class SaleOrderForStudents(models.Model):
             pending_section = None
 
             # Invoice values.
-            partner_responsible_categ = {category.category_id for category in self.partner_id.family_res_finance_ids}
+            partner_responsible_categ = {category.category_id for category in order.partner_id.family_res_finance_ids}
             for line in order.order_line:
                 product_categs = list()
                 parent_category_id = line.product_id.categ_id
@@ -63,7 +63,7 @@ class SaleOrderForStudents(models.Model):
             for family_id in self.partner_id.family_ids:
                 invoice_vals = order._prepare_invoice()
                 invoice_vals["partner_id"] = family_id.invoice_address_id.id
-                invoice_vals["student_id"] = self.partner_id.id
+                invoice_vals["student_id"] = order.partner_id.id
                 invoice_vals["family_id"] = family_id.id
 
                 # Invoice line values (keep only necessary sections).
@@ -81,10 +81,10 @@ class SaleOrderForStudents(models.Model):
                         product_line = line._prepare_invoice_line()
                         
                         # Skip if we found that family isn't the category's responsible
-                        if not family_id in [category.family_id for category in self.partner_id.family_res_finance_ids if category.category_id == parent_category_id]:
+                        if not family_id in [category.family_id for category in order.partner_id.family_res_finance_ids if category.category_id == parent_category_id]:
                             continue
 
-                        percent_sum = sum([category.percent for category in self.partner_id.family_res_finance_ids if category.category_id == parent_category_id and category.family_id == family_id])
+                        percent_sum = sum([category.percent for category in order.partner_id.family_res_finance_ids if category.category_id == parent_category_id and category.family_id == family_id])
                         percent_sum /= 100
 
                         product_line["price_unit"] *= percent_sum
@@ -124,7 +124,10 @@ class SaleOrderForStudents(models.Model):
                 subtype_id=self.env.ref('mail.mt_note').id
             )
         all_moves = moves + invoice_no_students
-        all_moves.write({"journal_id": self.journal_id.id})
+
+        for move in all_moves:
+            move.journal_id = move.journal_id.id
+
         return all_moves
         
         
