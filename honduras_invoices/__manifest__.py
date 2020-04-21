@@ -35,6 +35,5 @@
         'views/templates.xml',
         'views/res_partner_views.xml',
         'views/reports.xml',
-        'wizard/res_partner_make_sale.xml',
     ]
 }
