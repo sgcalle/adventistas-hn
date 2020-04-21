@@ -11,7 +11,7 @@
     <template id="honduras_invoices.report_payment_receipt" inherit_id="account.report_payment_receipt">
         <xpath expr="//t[@t-call='account.report_payment_receipt_document']" position="replace">
             <div class="letter-page" style="height: 15in">
-    
+
                 <section class="section-page" style="min-height: 50%">
                     <t t-call="honduras_invoices.report_payment_receipt_document" t-lang="lang">
                         <t t-set="modo" t-value="'ORIGINAL'" />
@@ -360,10 +360,8 @@
                             <span t-field="o.company_id.email" />
                         </td>
                         <td>
-                            RANGO AUTORIZADO DEL
-                            <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)" />
-                            AL
-                            <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)" />
+                            <span>CAI:</span>
+                            <span t-field="o.journal_id.cai" />
                         </td>
                     </tr>
                     <tr>
@@ -377,8 +375,10 @@
                             <span t-field="o.journal_id.issue_limit_date" />
                         </td>
                         <td>
-                            <span>CAI:</span>
-                            <span t-field="o.journal_id.cai" />
+                            RANGO AUTORIZADO DEL
+                            <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_from)" />
+                            AL
+                            <t t-esc="'{}{:&gt;08}'.format(o.journal_id.prefix, o.journal_id.authorized_range_to)" />
                         </td>
                     </tr>
                 </table>
