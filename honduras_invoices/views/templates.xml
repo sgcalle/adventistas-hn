@@ -100,10 +100,6 @@
                             <strong>TEL.</strong>
                             <span t-field="o.company_id.phone" class="col" />
                         </td>
-                        <td>
-                            <strong>FECHA LIMITE DE EMISION:</strong>
-                            <span t-field="o.journal_id.issue_limit_date" />
-                        </td>
                     </tr>
                 </table>
             </header>
