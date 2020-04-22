@@ -5,8 +5,11 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form"/>
         <field name="arch" type="xml">
+            <field name="type" position="after">
+                <field name="is_honduras_invoice"/>
+            </field>
             <notebook position="inside">
-                <page string="Honduras">
+                <page string="Honduras" attrs="{'invisible': [('is_honduras_invoice', '=', False)]}">
                     <group>
                         <field name="prefix" />
                         <field name="authorized_range_from" />

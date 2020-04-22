@@ -184,6 +184,12 @@
                         </tr>
                     </tbody>
                 </table>
+<!--                 <section class="mt-4 border border-dark">
+                    <div class="amount-in-letter text-center" id="amount_payment" t-att-data-amount="o.amount"><t t-esc="o.amount"/></div>
+                    <t t-js="ctx">
+                        console.log("Foo is");
+                    </t>
+                </section> -->
                 <div class="d-flex" style="margin-top: 4cm;">
                     <div class="col-3">Sign and casher stamp</div>
                     <div class="col" style="border-bottom: 2px solid black !important;" />
@@ -595,6 +601,9 @@
                     </table>
                 </div>
             </section>
+<!--             <section class="mt-4 border border-dark">
+                <div class="amount-in-letter text-center" t-att-data-amount="o.amount_total"/>
+            </section> -->
         </div>
     </template>
 
@@ -616,6 +625,7 @@
     <template id="honduras_invoices.report_common" inherit_id="web.report_assets_common">
         <xpath expr="." position="inside">
             <link href="/honduras_invoices/static/src/css/honduras_invoice.css" rel="stylesheet" />
+            <script type="text/javascript" src="/honduras_invoices/static/src/js/NumeroALetras.js" />
         </xpath>
     </template>
 </odoo>
