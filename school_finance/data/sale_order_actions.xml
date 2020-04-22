@@ -7,7 +7,8 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
-            records.action_confirm()
+            for order in records:
+                order.action_confirm()
         </field>
     </record>
 </odoo>
