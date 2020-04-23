@@ -29,12 +29,10 @@ class Contact(models.Model):
     family_ids = fields.Many2many("res.partner", string="Families", relation="partner_families", column1="partner_id", column2="partner_family_id")
     member_ids = fields.Many2many("res.partner", string="Members", relation="partner_members", column1="partner_id", column2="partner_member_id")
 
-    family_invoice_ids = fields.Many2many("account.move", compute="_compute_family_invoice_ids", domain=[('type', '=', 'out_invoice')], context={'default_type': 'out_invoice', 'type': 'out_invoice','tree_view_ref': 'account.view_invoice_tree'})
     facts_id_int = fields.Integer("Fact id (Integer)")
     facts_id = fields.Char("Fact id")
 
     is_family = fields.Boolean("Is a family?")
-    invoice_address_id = fields.Many2one("res.partner", string="Invoice Address")
     
     # For Families
     financial_res_ids = fields.Many2many("res.partner", string="Financial responsability", relation="partner_financial_res", column1="partner_id", column2="partner_financial_id")
@@ -44,23 +42,14 @@ class Contact(models.Model):
     middle_name = fields.Char("Middle Name")#, store=True, related="uni_application_id.first_name")
     last_name   = fields.Char("Last Name") #, store=True, related="uni_application_id.first_name")
 
-    # We need this field is readonly
-    name = fields.Char(index=True, compute="_compute_name", store=True)
+    # We need this field as readonly
+    name = fields.Char(index=True, compute="_compute_name", store=True, readonly=False)
 
     @api.depends("first_name", "middle_name", "last_name")
     def _compute_name(self):
         for record in self:
             record.name = formatting.format_name(record.first_name, record.middle_name, record.last_name)
     
-
-    def _compute_family_invoice_ids(self):
-        for record in self:
-            invoices = False
-            if record.is_company:
-                invoices = self.member_ids.invoice_ids + self.invoice_ids
-            record.family_invoice_ids = invoices
-
-                
     @api.model
     def create(self, values):
         PartnerEnv = self.env["res.partner"]
