@@ -6,3 +6,7 @@ section.section-page {
     /*     background-color: red; */
     min-height: 50%;
 }
+
+.border-3 {
+    border-width: 3px;
+}
