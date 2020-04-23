@@ -1,9 +1,35 @@
 # -*- coding: utf-8 -*-
 
+from ..tools import tools
+
 from odoo import models, fields, api, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 # raise UserError(_('There is no responsible family for %s') % (line.product_id.categ_id.name))
+class Invoice(models.Model):
+    _inherit = "account.payment"
+
+    amount_total_letters = fields.Char("Amount total in letters", compute="_compute_amount_total_letters")
+
+    def _compute_amount_total_letters(self):
+        amount_total = self.amount
+        number_converter = tools.NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
+        amount_total_letters = number_converter.numero_a_letra(amount_total)
+
+        self.amount_total_letters = amount_total_letters
+
+class Invoice(models.Model):
+    _inherit = "account.move"
+
+    amount_total_letters = fields.Char("Amount total in letters", compute="_compute_amount_total_letters")
+
+    def _compute_amount_total_letters(self):
+        amount_total = self.amount_total
+        number_converter = tools.NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
+        amount_total_letters = number_converter.numero_a_letra(amount_total)
+
+        self.amount_total_letters = amount_total_letters
+    
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
