@@ -25,7 +25,7 @@
         'sale',
         'product',
         'account_reports',
-        'school_finance'
+        'school_finance',
     ],
 
     # always loaded
