@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields
+from odoo import models, fields, api, _
 
 
 class SchoolCode(models.Model):
@@ -10,6 +10,7 @@ class SchoolCode(models.Model):
 
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
+    district_code_id = fields.Many2one("school_base.district_code")
 
 
 class SchoolYear(models.Model):
@@ -20,6 +21,13 @@ class SchoolYear(models.Model):
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
     school_code_id = fields.Many2one("school_base.school_code", string="School code")
+    district_code_id = fields.Many2one("school_base.district_code", string="District code")
+
+    @api.onchange('school_code_id')
+    def _get_school_code_id_domain(self):
+        self.ensure_one()
+        school_code_ids = self.district_code_id.school_code_ids.ids
+        return  {'domain':{'school_code_id':[('id', 'in', school_code_ids)]}}
 
 
 class GradeLevel(models.Model):
@@ -30,3 +38,20 @@ class GradeLevel(models.Model):
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
     school_code_id = fields.Many2one("school_base.school_code", string="School code")
+    district_code_id = fields.Many2one("school_base.district_code", string="District code")
+
+    @api.onchange('school_code_id')
+    def _get_school_code_id_domain(self):
+        self.ensure_one()
+        school_code_ids = self.district_code_id.school_code_ids.ids
+        return  {'domain':{'school_code_id':[('id', 'in', school_code_ids)]}}
+
+class DistrictCode(models.Model):
+    _name = "school_base.district_code"
+    _description = "District code"
+    _order = "sequence"
+
+    name = fields.Char(string="Name", required=True)
+    sequence = fields.Integer(default=1)
+    school_code_ids = fields.One2many("school_base.school_code", "district_code_id", string="District code")
+
