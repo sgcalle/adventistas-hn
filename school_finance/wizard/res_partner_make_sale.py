@@ -10,6 +10,11 @@ class ResPartnerMakeSale(models.TransientModel):
 
     order_line_ids = fields.Many2many("sale.order.line", string="Order Lines", ondelete="cascade")
     journal_id = fields.Many2one("account.journal", string="Journal", domain=[("type", "=", "sale")])
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
+    analytic_account_id = fields.Many2one( 'account.analytic.account', 'Analytic Account',
+                                           check_company=True,  # Unrequired company
+                                           domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+                                           help="The analytic account related to a sales order.")
 
     @api.model
     def create(self, values):
@@ -21,6 +26,7 @@ class ResPartnerMakeSale(models.TransientModel):
                 SaleOrderEnv.create({
                     "date_order": datetime.now(), 
                     "partner_id": partner_id.id,
+                    "analytic_account_id": values["analytic_account_id"],
                     "journal_id": values["journal_id"],
                     "order_line": values["order_line_ids"]
                 })
