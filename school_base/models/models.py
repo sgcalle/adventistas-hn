@@ -10,7 +10,7 @@ class SchoolCode(models.Model):
 
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
-    district_code_id = fields.Many2one("school_base.district_code")
+    district_code_id = fields.Many2one("school_base.district_code", "District Code")
 
 
 class SchoolYear(models.Model):
