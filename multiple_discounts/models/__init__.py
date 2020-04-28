@@ -2,3 +2,4 @@
 
 from . import multiple_discount
 from . import res_partner 
+from . import sale_order
