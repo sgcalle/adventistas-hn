@@ -2,7 +2,6 @@
 
 from odoo import models, fields, api, _
 
-
 class SchoolCode(models.Model):
     _name = "school_base.school_code"
     _order = "sequence"
@@ -45,6 +44,7 @@ class GradeLevel(models.Model):
         self.ensure_one()
         school_code_ids = self.district_code_id.school_code_ids.ids
         return  {'domain':{'school_code_id':[('id', 'in', school_code_ids)]}}
+
 
 class DistrictCode(models.Model):
     _name = "school_base.district_code"
