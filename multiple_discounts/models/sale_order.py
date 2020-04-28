@@ -28,6 +28,7 @@ def apply_discount(move_id, discount_ids):
                 (0, 0, {
                     "product_id": discount.product_id.get_single_product_variant().get("product_id", False),
                     "price_unit": discount_count,
+                    "analytic_account_id": discount.analytic_account_id.id,
                     }
                 )
             )
