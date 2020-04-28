@@ -13,3 +13,23 @@ class MultipleDiscounts(models.Model):
     
     account_id = fields.Many2one('account.account', required=True, string='Account', index=True, ondelete="cascade", domain=[('deprecated', '=', False)])
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True)
+
+    product_id = fields.Many2one('product.template', string='Product')
+
+    @api.model
+    def create(self, vals):
+        product_id = self.env["product.template"].create({
+            "name": vals["name"],
+            "property_account_income_id": vals["account_id"],
+            "categ_id": vals["category_id"],
+            "type": "service",
+            "list_price": 0.0,
+            "taxes_id": False,
+        })
+
+        vals.update({
+            "product_id": product_id.id
+        })
+
+        return super().create(vals)
+
