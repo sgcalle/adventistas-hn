@@ -13,7 +13,7 @@
     # Check https://github.com/odoo/odoo/blob/13.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Invoicing',
-    'version': '0.4.0',
+    'version': '0.5',
 
     # any module necessary for this one to work correctly
     'depends': [
@@ -29,8 +29,14 @@
         # Actions
         'data/sale_order_actions.xml',
 
+        # Views
         'views/views.xml',
         'views/templates.xml',
+        'views/config_views.xml',
+
+        # Wizards
         'wizard/res_partner_make_sale.xml',
+
+
     ],
 }
