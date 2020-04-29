@@ -13,7 +13,7 @@ from odoo.tools import float_is_zero, float_compare
 class SaleOrderForStudents(models.Model):
     _inherit = "sale.order"
 
-    journal_id = fields.Many2one("account.journal", string="Journal")
+    journal_id = fields.Many2one("account.journal", string="Journal", domain="[('type', '=', 'sale')]")
     def _create_invoices(self, grouped=False, final=False):
         """
         Create the invoice associated to the SO.
@@ -125,9 +125,21 @@ class SaleOrderForStudents(models.Model):
             )
         all_moves = moves + invoice_no_students
 
-        for move in all_moves:
-            move.journal_id = move.journal_id.id
+        receivable_behaviour = self.env["ir.config_parameter"].get_param('school_finance.receivable_behaviour')
+            
 
+        for order in self:
+            if receivable_behaviour == 'student' and order.partner_id.person_type == 'student':
+                receivable_lines = order.invoice_ids.line_ids.filtered(lambda line: line.account_id.internal_type == 'receivable')
+                receivable_lines.sudo().write({
+                    "account_id": order.partner_id.property_account_receivable_id.id
+                })
+
+            if order.journal_id:
+                order.invoice_ids.write({
+                    "journal_id": order.journal_id.id
+                })
+        
         return all_moves
         
         
