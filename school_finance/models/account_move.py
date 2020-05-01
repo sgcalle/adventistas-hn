@@ -14,5 +14,7 @@ class Invoice(models.Model):
 class Invoice(models.Model):
     _inherit = "account.journal"
 
-    template_with_payment_id = fields.Many2one("ir.ui.view", string="Template with payment", domain=[("type", "=", "qweb")])
-    template_id = fields.Many2one("ir.ui.view", string="Template without payment", domain=[("type", "=", "qweb")])
+    template_with_payment_id = fields.Many2one("ir.ui.view", string="Template with payment",
+                                                 domain=[("type", "=", "qweb")], default=lambda self: self.env.ref('account.report_invoice_document_with_payments'))
+    template_id = fields.Many2one("ir.ui.view", string="Template without payment",
+                                   domain=[("type", "=", "qweb")], default=lambda self: self.env.ref('account.report_invoice_document'))
