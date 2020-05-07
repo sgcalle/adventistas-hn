@@ -188,7 +188,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <section class="mt-4 border border-dark text-center border-3" t-field="o.amount_total_letters"/>
+                <section class="mt-4 border border-dark text-center border-3" t-field="o.amount_total_letters" />
                 <div class="d-flex" style="margin-top: 4cm;">
                     <div class="col-3">Sign and casher stamp</div>
                     <div class="col" style="border-bottom: 2px solid black !important;" />
@@ -535,20 +535,23 @@
                     <t t-set="amount_descuento" t-value="amount_descuento - invoice_line.price_total" />
                 </t>
 
+                <!-- Sum total, we check if subtotal is greater than 0 because if it less... that means that this is a discount. -->
                 <t t-if="invoice_line.tax_ids">
                     <t t-foreach="invoice_line.tax_ids" t-as="tax_id">
-                        <t t-if="tax_id.amount == 15">
-                            <t t-set="amount_15" t-value="amount_15 + invoice_line.price_subtotal" />
-                        </t>
-                        <t t-if="tax_id.amount == 18">
-                            <t t-set="amount_18" t-value="amount_18 + invoice_line.price_subtotal" />
-                        </t>
-                        <t t-if="tax_id.amount == 0">
-                            <t t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
+                        <t t-if="invoice_line.price_subtotal > 0">
+                            <t t-if="tax_id.amount == 15">
+                                <t t-set="amount_15" t-value="amount_15 + invoice_line.price_subtotal" />
+                            </t>
+                            <t t-if="tax_id.amount == 18">
+                                <t t-set="amount_18" t-value="amount_18 + invoice_line.price_subtotal" />
+                            </t>
+                            <t t-if="tax_id.amount == 0">
+                                <t t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
+                            </t>
                         </t>
                     </t>
                 </t>
-                <t t-if="not invoice_line.tax_ids" t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
+                <t t-if="not invoice_line.tax_ids and invoice_line.price_subtotal > 0" t-set="amount_exento" t-value="amount_exento + invoice_line.price_subtotal" />
             </t>
 
             <section class="clearfix">
@@ -602,7 +605,7 @@
                     </table>
                 </div>
             </section>
-            <section class="mt-4 border border-dark text-center border-3" t-field="o.amount_total_letters"/>
+            <section class="mt-4 border border-dark text-center border-3" t-field="o.amount_total_letters" />
         </div>
     </template>
 
