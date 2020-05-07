@@ -11,12 +11,14 @@ class Invoice(models.Model):
 
     amount_total_letters = fields.Char("Amount total in letters", compute="_compute_amount_total_letters")
 
-    def _compute_amount_total_letters(self):
-        amount_total = self.amount
-        number_converter = tools.NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
-        amount_total_letters = number_converter.numero_a_letra(amount_total)
 
-        self.amount_total_letters = amount_total_letters
+    def _compute_amount_total_letters(self):
+        for record in self:
+            amount_total = record.amount
+            number_converter = tools.NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
+            amount_total_letters = number_converter.numero_a_letra(amount_total)
+
+            record.amount_total_letters = amount_total_letters
 
 class Invoice(models.Model):
     _inherit = "account.move"
@@ -24,11 +26,12 @@ class Invoice(models.Model):
     amount_total_letters = fields.Char("Amount total in letters", compute="_compute_amount_total_letters")
 
     def _compute_amount_total_letters(self):
-        amount_total = self.amount_total
-        number_converter = tools.NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
-        amount_total_letters = number_converter.numero_a_letra(amount_total)
+        for record in self:
+            amount_total = record.amount_total
+            number_converter = tools.NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
+            amount_total_letters = number_converter.numero_a_letra(amount_total)
 
-        self.amount_total_letters = amount_total_letters
+            record.amount_total_letters = amount_total_letters
     
 
 class AccountJournal(models.Model):
