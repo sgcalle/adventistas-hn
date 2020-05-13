@@ -16,7 +16,7 @@
     # Check https://github.com/odoo/odoo/blob/13.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Accounting',
-    'version': '0.6.1',
+    'version': '0.7',
 
     # any module necessary for this one to work correctly
     'depends': [
@@ -33,6 +33,7 @@
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
+        'views/template_nota_interna.xml',
         'views/res_partner_views.xml',
         'views/reports.xml',
     ]
