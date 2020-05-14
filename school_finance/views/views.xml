@@ -18,6 +18,10 @@
             <div class="oe_title" position="inside">
                 <group><field name="journal_id"/></group>
             </div>
+            <field name="payment_term_id" position="after">
+                <field name="invoice_date"/>
+                <field name="invoice_date_due"/>
+            </field>
         </field>
     </record>
 
