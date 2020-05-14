@@ -14,6 +14,12 @@ class SaleOrderForStudents(models.Model):
     _inherit = "sale.order"
 
     journal_id = fields.Many2one("account.journal", string="Journal", domain="[('type', '=', 'sale')]")
+    
+    # Invoice Date
+    invoice_date_due = fields.Datetime(string='Due Date')
+    invoice_date     = fields.Datetime(string='Invoice Date')
+
+
     def _create_invoices(self, grouped=False, final=False):
         """
         Create the invoice associated to the SO.
@@ -135,10 +141,21 @@ class SaleOrderForStudents(models.Model):
                     "account_id": order.partner_id.property_account_receivable_id.id
                 })
 
+            # Update values
+
+            write_variables = dict()
+
             if order.journal_id:
-                order.invoice_ids.write({
-                    "journal_id": order.journal_id.id
-                })
+                write_variables["journal_id"] = order.journal_id.id
+            
+            if order.invoice_date:
+                write_variables["invoice_date"] = order.invoice_date
+            
+            if order.invoice_date:
+                write_variables["invoice_date_due"] = order.invoice_date_due
+
+            if write_variables:
+                order.invoice_ids.write(write_variables)
         
         return all_moves
         

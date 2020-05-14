@@ -57,7 +57,7 @@ class FinacialResponsabilityPercent(models.Model):
     partner_id = fields.Many2one("res.partner", string="Customer", domain=[("is_family", "=", False)])
     partner_family_ids = fields.Many2many(related="partner_id.family_ids")
 
-    family_id = fields.Many2one("res.partner", required=True, string="Family", domain=[("is_family", "=", True), ('is_company', '=', True)])
+    family_id = fields.Many2one("res.partner", required=True, string="Family")
     category_id = fields.Many2one("product.category", required=True, string="Category", domain=[("parent_id", "=", False)])
     percent = fields.Integer("Percent")
 
@@ -65,5 +65,13 @@ class FinacialResponsabilityPercent(models.Model):
     def _get_family_domain(self):
         self.ensure_one()
         family_ids = self.partner_id.family_ids.ids
-        return  {'domain':{'family_id':[('id', 'in', family_ids)]}}
+        return  {'domain':{'family_id':[("is_family", "=", True), ("is_company", "=", True), ('id', 'in', family_ids)]}}
 
+    @api.model
+    def create(self, vals):
+        
+        family_id = self.env["res.partner"].browse(vals["family_id"])
+        if not family_id.is_family:
+            raise ValidationError(_("%s is not a family!") % family_id.display_name)
+
+        return super().create(vals)
