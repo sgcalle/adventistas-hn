@@ -134,7 +134,7 @@
                     </div>
                 </div>
                 <t t-if="o.reconciled_invoice_ids">
-                    <div class="row" t-if="o.reconciled_invoice_ids.student_id0">
+                    <div class="row" t-if="o.reconciled_invoice_ids.student_id">
                         <div class="col-6">
                             <strong>Student: </strong>
                             <span t-field="o.reconciled_invoice_ids.student_id" />
