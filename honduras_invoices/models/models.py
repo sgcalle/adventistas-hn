@@ -24,6 +24,8 @@ class Invoice(models.Model):
     _inherit = "account.move"
 
     amount_total_letters = fields.Char("Amount total in letters", compute="_compute_amount_total_letters")
+    
+    surcharge_invoice_id = fields.Many2one("Surcharge Invoice")
 
     def _compute_amount_total_letters(self):
         for record in self:
@@ -33,6 +35,7 @@ class Invoice(models.Model):
 
             record.amount_total_letters = amount_total_letters
     
+
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
