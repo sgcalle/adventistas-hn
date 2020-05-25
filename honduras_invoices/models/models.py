@@ -23,9 +23,28 @@ class Invoice(models.Model):
 class Invoice(models.Model):
     _inherit = "account.move"
 
+
+
     amount_total_letters = fields.Char("Amount total in letters", compute="_compute_amount_total_letters")
     
     surcharge_invoice_id = fields.Many2one("Surcharge Invoice")
+
+    def _formatLang(self, value):
+        lang = self.partner_id.lang
+        lang_objs = self.env['res.lang'].search([('code', '=', lang)])
+        if not lang_objs:
+            lang_objs = self.env['res.lang'].search([], limit=1)
+        lang_obj = lang_objs[0]
+
+        res = lang_obj.format('%.' + str(2) + 'f', value, grouping=True, monetary=True)
+        currency_obj = self.currency_id;
+
+        if currency_obj and currency_obj.symbol:
+            if currency_obj.position == 'after':
+                res = '%s %s' % (res, currency_obj.symbol)
+            elif currency_obj and currency_obj.position == 'before':
+                res = '%s %s' % (currency_obj.symbol, res)
+        return res
 
     def _compute_amount_total_letters(self):
         for record in self:

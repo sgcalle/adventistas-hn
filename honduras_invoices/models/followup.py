@@ -32,6 +32,7 @@ class AccountFollowupReport(models.AbstractModel):
 
     def _get_lines(self, options, line_id=None):
         lines = super()._get_lines(options, line_id)
+        AccountMoveEnv = self.env["account.move"]
 
         student_ids = self.env["res.partner"]
         for line in lines:
@@ -69,7 +70,7 @@ class AccountFollowupReport(models.AbstractModel):
                     {"name": ""},
                     {"name": ""},
                     {"name": ""},
-                    {"name": students_amount},
+                    {"name": AccountMoveEnv._formatLang(students_amount)},
                 ]
             })
 
@@ -95,7 +96,7 @@ class AccountFollowupReport(models.AbstractModel):
                 {"name": ""},
                 {"name": ""},
                 {"name": ""},
-                {"name": no_students_amount},
+                {"name": AccountMoveEnv._formatLang(no_students_amount)},
             ]
         })
         new_lines.extend(no_students_lines)
