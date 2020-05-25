@@ -6,6 +6,7 @@ from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
+
 class AccountFollowupReport(models.AbstractModel):
     _inherit = "account.followup.report"
 
@@ -15,7 +16,8 @@ class AccountFollowupReport(models.AbstractModel):
         Return the name of the columns of the follow-ups report
         """
         headers = super()._get_columns_name(options)
-        headers.append({'name': _('Student'), 'style': 'text-align:right; white-space:nowrap;'})
+        headers.append(
+            {'name': _('Student'), 'style': 'text-align:right; white-space:nowrap;'})
         #            {'name': _('Date2'), 'class': 'date', 'style': 'text-align:center; white-space:nowrap;'},
         #            {'name': _('Due Date2'), 'class': 'date', 'style': 'text-align:center; white-space:nowrap;'},
         #            {'name': _('Source Document2'), 'style': 'text-align:center; white-space:nowrap;'},
@@ -39,19 +41,63 @@ class AccountFollowupReport(models.AbstractModel):
             student_ids += line["account_move"].student_id
             student_name = line["account_move"].student_id.name
             line["columns"].append({"name": student_name})
-        
-        new_line = list()
+
+        new_lines = list()
         student_ids = list(set(student_ids))
         for student_id in student_ids:
-            student_invoice_ids = list(filter(lambda line: "account_move" in line and line["account_move"].student_id == student_id, lines))
-            new_line.append({
-                "name": student_id.name,
-                "level": 2,
-                "unfoldable": not not student_invoice_ids,
-                "id": student_id.id,
-            })
+            student_invoice_ids = list(filter(
+                lambda line: "account_move" in line and line["account_move"].student_id == student_id, lines))
+
+            students_amount = 0
+            student_lines = []
             for student_invoice_id in student_invoice_ids:
                 student_invoice_id["parent_id"] = student_id
-                new_line.append(student_invoice_id)
-        
-        return new_line
+
+                students_amount += student_invoice_id["account_move"].amount_total
+
+                student_lines.append(student_invoice_id)
+
+            new_lines.append({
+                "name": student_id.name,
+                "level": 2,
+                "unfoldable": True,
+                "id": student_id.id,
+                "columns": [
+                    {"name": ""},
+                    {"name": ""},
+                    {"name": ""},
+                    {"name": ""},
+                    {"name": ""},
+                    {"name": ""},
+                    {"name": students_amount},
+                ]
+            })
+
+            new_lines.extend(student_lines)
+
+        no_students_lines = [line_id for line_id in lines if not line_id.get("account_move", self.env["account.move"]).student_id]
+
+        no_students_amount = 0
+        for no_student_line in no_students_lines:
+            if "account_move" in no_student_line:
+                no_students_amount += no_student_line["account_move"].amount_total
+            no_student_line["parent_id"] = 0
+
+        new_lines.append({
+            "name": _("Invoices without student"),
+            "level": 2,
+            "unfoldable": True,
+            "id": 0,
+            "columns": [
+                {"name": ""},
+                {"name": ""},
+                {"name": ""},
+                {"name": ""},
+                {"name": ""},
+                {"name": ""},
+                {"name": no_students_amount},
+            ]
+        })
+        new_lines.extend(no_students_lines)
+
+        return new_lines
