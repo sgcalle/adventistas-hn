@@ -150,7 +150,7 @@ class StudentController(http.Controller):
             record["datosLinea"] = []
             
 #            for lineas in invoice_line_id:           
-            
+             
                 #crea una variable con el modelo desde donde se va a tomar la información
             datosLinea = http.request.env['account.invoice.line']        
 
