@@ -152,7 +152,7 @@ class StudentController(http.Controller):
 #            for lineas in invoice_line_id:           
              
                 #crea una variable con el modelo desde donde se va a tomar la información
-            datosLinea = http.request.env['account.invoice.line']        
+            datosLinea = http.request.env['account.move.line']        
 
                 #filtro del modelo basados en parametros de la url 
             search_domain_attach = [("invoice_id","=",record["id"])]
