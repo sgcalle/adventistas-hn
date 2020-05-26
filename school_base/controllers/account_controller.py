@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from odoo import http 
-from . import base_controller as base
 
 import json
 from datetime import datetime
