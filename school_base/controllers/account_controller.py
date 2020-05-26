@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import http 
+from . import base_controller as base
 
 import json
 from datetime import datetime
@@ -28,7 +29,7 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)      
         
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
-        students_values = students_record.read(["id"]#,"city","country_id","state_id", "street_address","zip","first_name","middle_name","last_name","name","email", "birthdate","gender","phone", "status_id","status_type","current_school","current_school_address","create_date","create_uid","write_date","write_uid"])
+        students_values = students_record.read(["id"])#,"city","country_id","state_id", "street_address","zip","first_name","middle_name","last_name","name","email", "birthdate","gender","phone", "status_id","status_type","current_school","current_school_address","create_date","create_uid","write_date","write_uid"])
 
 
             
