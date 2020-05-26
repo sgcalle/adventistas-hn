@@ -112,9 +112,6 @@ class StudentController(http.Controller):
                 
         #data = json.loads(data)
         #data = json.loads(kw["data"])        
-       
-        
-
         
        
         students = http.request.env['account.invoice']        
@@ -122,6 +119,7 @@ class StudentController(http.Controller):
 
         
         #filtro del modelo basados en parametros de la url
+        #Recogemos el parametro id. Si no esta en kw le pone unos []
 #        search_domain = [("partner_id","=",int(kw['id']))] #if "id" in kw else []
         
         id = kw["fact_id"] if "fact_id" in kw else kw["id"]
