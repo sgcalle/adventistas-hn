@@ -114,7 +114,7 @@ class StudentController(http.Controller):
         #data = json.loads(kw["data"])        
         
        
-        students = http.request.env['account.invoice']        
+        students = http.request.env['account.move']        
         #students = http.request.env['account.invoice']
 
         
