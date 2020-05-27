@@ -120,7 +120,7 @@ class StudentController(http.Controller):
         
         #filtro del modelo basados en parametros de la url
         #Recogemos el parametro id. Si no esta en kw le pone unos []
-        search_domain = [("partner_id","=",int(kw['id']))] #if "id" in kw else []
+        search_domain = [("partner_id","=",int(kw['id']))] if "id" in kw else []
         
 #        id = kw["fact_id"] if "fact_id" in kw else kw["id"]
 #        search_domain = [("facts_id","=",int(id))]         
@@ -134,19 +134,9 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)      
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior        
-        students_values = students_record.read(["access_token","amount_total","date_invoice"])#,"payment_term_id","user_id","invoice_line_ids"])
+        students_values = students_record.read(["access_token","amount_total"])#,"date_invoice","payment_term_id","user_id","invoice_line_ids"])
         
-        for record in students_values: 
-            if record["date_invoice"]:
-                record["date_invoice"] = record["date_invoice"].strftime('%m/%d/%Y')
-            else:
-                record["date_invoice"] = ''      
-                
-            record["datosLinea"] = []
-            
-#            for lineas in invoice_line_id:           
-             
-         
+        
 
         return json.dumps(students_values)
 
