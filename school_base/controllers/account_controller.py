@@ -148,7 +148,7 @@ class StudentController(http.Controller):
             for lineaId in record["invoice_line_ids"]:
                 
                 datosLinea2 = http.request.env['account.move.line']  
-                search_domain_linea2 = [("move_id","=",lineaId)]
+                search_domain_linea2 = [("move_id","=",lineaId["id"])]
                 datosLinea_record2 = datosLinea2.search(search_domain_linea2)      
                 datosLinea_values2 = datosLinea_record2.read(["product_id","quantity"])
                 record["datos2"] = datosLinea_values2
