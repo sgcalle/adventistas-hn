@@ -113,6 +113,14 @@ class StudentController(http.Controller):
         #data = json.loads(data)
         #data = json.loads(kw["data"])        
         
+        compania = http.request.env['res.company']
+        search_conpania = [("x_district_code","="(kw['dist']))]
+        compania_record = compania.search(search_conpania)
+        compania_values = compania_record.read(["company_id"])
+        
+        for comp in compania_values:
+            distCod = comp["company_id"]
+        
        
         students = http.request.env['account.move']        
         #students = http.request.env['account.invoice'] 
@@ -120,7 +128,7 @@ class StudentController(http.Controller):
         
         #filtro del modelo basados en parametros de la url
         #Recogemos el parametro id. Si no esta en kw le pone unos []
-        search_domain = [("company_id","=",3),("partner_id","=",int(kw['id']))] if "id" in kw else []
+        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
         
 #        id = kw["fact_id"] if "fact_id" in kw else kw["id"]
 #        search_domain = [("facts_id","=",int(id))]         
