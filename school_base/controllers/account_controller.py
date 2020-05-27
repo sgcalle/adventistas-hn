@@ -144,7 +144,7 @@ class StudentController(http.Controller):
 
                
                 
-            record["datosLinea"] = []
+            record["datos"] = []
             
 #            for lineas in invoice_line_id:           
              
@@ -152,7 +152,7 @@ class StudentController(http.Controller):
             datosLinea = http.request.env['account.move.line']        
 
                 #filtro del modelo basados en parametros de la url 
-            search_domain_attach = [("invoice_id","=",record["id"])]
+            search_domain_attach = [("source_id","=",record["id"])]
 
                 #Tomar informacion basado en el modelo y en el domain IDS
             datosLinea_record = datosLinea.search(search_domain_attach)      
@@ -162,7 +162,7 @@ class StudentController(http.Controller):
                 
  #           record["datosLinea"] = json.dumps(datosLinea_values)         
 
-            record["datosLinea"] = datosLinea_values
+            record["datos"] = datosLinea_values
                 
 
         return json.dumps(students_values)
