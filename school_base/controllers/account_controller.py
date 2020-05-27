@@ -134,34 +134,30 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)      
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior       "invoice_payment_term_id", 
-        students_values = students_record.read(["access_token","amount_total","invoice_date","invoice_line_ids"])
+        students_values = students_record.read(["partner_id","access_token","amount_total","invoice_date","invoice_line_ids"])
         
         for record in students_values: 
             if record["invoice_date"]:
                 record["invoice_date"] = record["invoice_date"].strftime('%m/%d/%Y')
             else:
-                record["invoice_date"] = ''               
+                record["invoice_date"] = ''  
+            
+            #datosCustomer = http.request.env['res.partner']
+            #search_domain_customer = [("parent_id","=",record["partner_id"])]
 
                
                 
             record["datos"] = []
             
-#            for lineas in invoice_line_id:           
-             
-                #crea una variable con el modelo desde donde se va a tomar la información
+            #crea una variable con el modelo desde donde se va a tomar la información
             datosLinea = http.request.env['account.move.line']        
-
-                #filtro del modelo basados en parametros de la url 
+            #filtro del modelo basados en parametros de la url 
             search_domain_attach = [("id","=",record["id"])]
-
-                #Tomar informacion basado en el modelo y en el domain IDS
+            #Tomar informacion basado en el modelo y en el domain IDS
             datosLinea_record = datosLinea.search(search_domain_attach)      
-
-                #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
+            #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
             datosLinea_values = datosLinea_record.read(["product_id","quantity"]) 
-                
- #           record["datosLinea"] = json.dumps(datosLinea_values)         
-
+ 
             record["datos"] = datosLinea_values
                 
 
