@@ -119,7 +119,7 @@ class StudentController(http.Controller):
         compania_values = compania_record.read(["id"])
         
         for com in compania_values:
-            distCod = com["company_id"]
+            distCod = com["id"]
         
        
         students = http.request.env['account.move']        
