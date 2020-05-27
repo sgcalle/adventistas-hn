@@ -152,7 +152,7 @@ class StudentController(http.Controller):
             datosLinea = http.request.env['account.move.line']        
 
                 #filtro del modelo basados en parametros de la url 
-            search_domain_attach = [("invoice_id","=",record["id"])]
+            search_domain_attach = [("id","=",record["id"])]
 
                 #Tomar informacion basado en el modelo y en el domain IDS
             datosLinea_record = datosLinea.search(search_domain_attach)      
