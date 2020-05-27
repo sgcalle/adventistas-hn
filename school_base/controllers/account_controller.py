@@ -134,7 +134,7 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)      
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior        
-        students_values = students_record.read(["access_token","amount_total","date_invoice","payment_term_id","user_id","invoice_line_ids"])
+        students_values = students_record.read(["access_token","amount_total","date_invoice"])#,"payment_term_id","user_id","invoice_line_ids"])
         
         for record in students_values: 
             if record["date_invoice"]:
@@ -142,7 +142,27 @@ class StudentController(http.Controller):
             else:
                 record["date_invoice"] = ''               
 
-          
+               
+                
+            #record["datosLinea"] = []
+            
+#            for lineas in invoice_line_id:           
+             
+                #crea una variable con el modelo desde donde se va a tomar la información
+            #datosLinea = http.request.env['account.move.line']        
+
+                #filtro del modelo basados en parametros de la url 
+            #search_domain_attach = [("invoice_id","=",record["id"])]
+
+                #Tomar informacion basado en el modelo y en el domain IDS
+            #datosLinea_record = datosLinea.search(search_domain_attach)      
+
+                #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
+            #datosLinea_values = datosLinea_record.read(["product_id","quantity"]) 
+                
+ #           record["datosLinea"] = json.dumps(datosLinea_values)         
+
+            #record["datosLinea"] = datosLinea_values
                 
 
         return json.dumps(students_values)
