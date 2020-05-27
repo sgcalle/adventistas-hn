@@ -115,8 +115,8 @@ class StudentController(http.Controller):
         
         compania = http.request.env['res.company']
         search_conpania = [("x_district_code","=",(kw['dist']))]
-        compania_record = compania.search(search_conpania)
-        compania_values = compania_record.read(["company_id"])
+        compania_record = compania.search(search_compania)
+        compania_values = compania_record.read(["id"])
         
         for com in compania_values:
             distCod = com["company_id"]
