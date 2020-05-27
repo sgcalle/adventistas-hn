@@ -113,14 +113,8 @@ class StudentController(http.Controller):
         #data = json.loads(data)
         #data = json.loads(kw["data"])        
         
-        compania = http.request.env['res.company']
-        search_conpania = [("x_district_code","="(kw['dist']))]
-        compania_record = compania.search(search_conpania)
-        compania_values = compania_record.read(["company_id"])
-        
-        for comp in compania_values:
-            distCod = comp["company_id"]
-        
+       
+        distCod = 3
        
         students = http.request.env['account.move']        
         #students = http.request.env['account.invoice'] 
