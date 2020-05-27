@@ -134,7 +134,7 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)       
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior        
-        students_values = students_record.read(["id","partner_id","access_token","amount_total","invoice_date","journal_id","company_id","invoice_line_ids"])
+        students_values = students_record.read(["partner_id","access_token","amount_total","invoice_date","journal_id","company_id","invoice_line_ids"])
         
         for record in students_values: 
             if record["invoice_date"]:
@@ -145,17 +145,17 @@ class StudentController(http.Controller):
                 
             record["datos"] = []
             
-            #crea una variable con el modelo desde donde se va a tomar la información
-            datosLinea = http.request.env['account.move.line']        
-            #filtro del modelo basados en parametros de la url 
-            search_domain_linea = [("move_id","=",record["id"])]
-            #Tomar informacion basado en el modelo y en el domain IDS
-            datosLinea_record = datosLinea.search(search_domain_linea)      
-            #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
-            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","account_id","tax_ids","name","subtotal"]) 
- 
-            record["datos"] = datosLinea_values
+            for lineaId in invoice_line_ids:
                 
+                datosLinea2 = http.request.env['account.move.line']  
+                search_domain_linea2 = [("move_id","=",lineaId)]
+                datosLinea_record2 = datosLinea2.search(search_domain_linea2)      
+                datosLinea_values2 = datosLinea_record2.read(["product_id","quantity"])
+                record["datos2"] = datosLinea_values2
+                
+                
+                
+
 
         return json.dumps(students_values)
 
