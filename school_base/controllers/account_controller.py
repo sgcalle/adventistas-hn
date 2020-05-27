@@ -148,7 +148,7 @@ class StudentController(http.Controller):
             #crea una variable con el modelo desde donde se va a tomar la información
             datosLinea = http.request.env['account.move.line']        
             #filtro del modelo basados en parametros de la url 
-            search_domain_attach = [("move_id","=",record["id"])]
+            search_domain_attach = [("move_id","=",record["invoice_line_ids"])]
             #Tomar informacion basado en el modelo y en el domain IDS
             datosLinea_record = datosLinea.search(search_domain_attach)      
             #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
