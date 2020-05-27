@@ -145,13 +145,6 @@ class StudentController(http.Controller):
                 
             record["datos"] = []
             
-
-                
-                #record["datos2"] = datosLinea_values2
-                
-                
-                
-            
             #crea una variable con el modelo desde donde se va a tomar la información
             datosLinea = http.request.env['account.move.line']        
             #filtro del modelo basados en parametros de la url 
