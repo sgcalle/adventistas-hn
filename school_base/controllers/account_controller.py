@@ -145,14 +145,7 @@ class StudentController(http.Controller):
                 
             record["datos"] = []
             
-            for lineaId in record["invoice_line_ids"]:
-                
-                datosLinea2 = http.request.env['account.move.line']  
-                search_domain_linea2 = [("move_id","=",lineaId)]
-                datosLinea_record2 = datosLinea2.search(search_domain_linea2)      
-                datosLinea_values2 = datosLinea_record2.read(["product_id","quantity"])
-                
-                record["datos2"] = json.dumps(datosLinea_values2)
+
                 
                 #record["datos2"] = datosLinea_values2
                 
@@ -160,15 +153,15 @@ class StudentController(http.Controller):
                 
             
             #crea una variable con el modelo desde donde se va a tomar la información
-#            datosLinea = http.request.env['account.move.line']        
+            datosLinea = http.request.env['account.move.line']        
             #filtro del modelo basados en parametros de la url 
-#            search_domain_linea = [("move_id","=",record["id"])]
+            search_domain_linea = [("move_id","=",record["id"])]
             #Tomar informacion basado en el modelo y en el domain IDS
-#            datosLinea_record = datosLinea.search(search_domain_linea)      
+            datosLinea_record = datosLinea.search(search_domain_linea)      
             #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
-#            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","account_id","tax_ids","name","subtotal"]) 
+            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","account_id","tax_ids","name","subtotal"]) 
  
-#            record["datos"] = datosLinea_values
+            record["datos"] = datosLinea_values
                 
 
         return json.dumps(students_values)
