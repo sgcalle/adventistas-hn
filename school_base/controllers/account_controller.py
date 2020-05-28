@@ -145,7 +145,7 @@ class StudentController(http.Controller):
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior       "invoice_payment_term_id", 
         students_values = students_record.read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
-                                                "amount_total","invoice_line_ids"])
+                                                "amount_total","invoice_line_ids","line_ids"])
         
         for record in students_values: 
             if record["invoice_date"]:
@@ -163,7 +163,7 @@ class StudentController(http.Controller):
             #Tomar informacion basado en el modelo y en el domain IDS
             datosLinea_record = datosLinea.search(search_domain_linea)      
             #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
-            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","analytics_tag_id","subcription_id"]) 
+            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","analytic_tag_id","subcription_id"]) 
  
             record["datos"] = datosLinea_values
                 
