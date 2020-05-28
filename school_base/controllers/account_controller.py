@@ -128,7 +128,7 @@ class StudentController(http.Controller):
         
         idFacts = http.request.env['res.partner']
         #filtro del modelo basados en parametros de la url.
-        search_idFacts = [("facts_id","=",(kw['idF']))]        
+        search_idFacts = [("facts_id","=",int(kw['idF'])]        
         #Buscamos informacion en el modelo con el filtro definido
         idFacts_record = idFacts.search(search_idFacts)
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 
@@ -146,7 +146,7 @@ class StudentController(http.Controller):
         
         #filtro del modelo basados en parametros de la url. Filtramos por el districtCode
         #Recogemos el parametro id. Si no esta en kw le pone unos []
-        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw[facts]))] if "id" in kw else []
+        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw[facts]))] #if "id" in kw else []
 #                search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
 
         
