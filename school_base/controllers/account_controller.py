@@ -163,7 +163,7 @@ class StudentController(http.Controller):
             #Tomar informacion basado en el modelo y en el domain IDS
             datosLinea_record = datosLinea.search(search_domain_linea)      
             #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
-            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","analytic_tag_id","subcription_id"]) 
+            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","analytic_tag_ids","subscription_id","account_id","tax_ids"]) 
  
             record["datos"] = datosLinea_values
                 
