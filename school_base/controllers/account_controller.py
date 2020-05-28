@@ -128,7 +128,7 @@ class StudentController(http.Controller):
         
         idFacts = http.request.env['res.partner']
         #filtro del modelo basados en parametros de la url.
-        search_idFacts = [("facts_id","=",int(kw['idF'])]        
+        search_idFacts = [("facts_id","=",int(kw['idF']))]        
         #Buscamos informacion en el modelo con el filtro definido
         idFacts_record = idFacts.search(search_idFacts)
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 
