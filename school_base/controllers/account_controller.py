@@ -135,11 +135,9 @@ class StudentController(http.Controller):
         idFacts_values = idFacts_record.read(["id"])
         #Sacamos el valor del districtCode. Lo guardamos para usarlo en el siguiente filtro
         for ids in idFacts_values:
-            facts = com["id"]
+            facts = ids["id"]
             
-        
-        print(facts)
-        
+      
         
         
         #Por cada factura buscamos todos los datos que tiene asignados:
