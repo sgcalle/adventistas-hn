@@ -113,14 +113,20 @@ class StudentController(http.Controller):
         #data = json.loads(data)
         #data = json.loads(kw["data"])        
         
+        compania = http.request.env['res.company']
+        search_compania = [("x_district_code","=",(kw['dist']))]
+        compania_record = compania.search(search_compania)
+        compania_values = compania_record.read(["id"])
+        
+        for com in compania_values:
+            distCod = com["id"]
        
         students = http.request.env['account.move']        
         #students = http.request.env['account.invoice'] 
 
-        
         #filtro del modelo basados en parametros de la url
         #Recogemos el parametro id. Si no esta en kw le pone unos []
-        search_domain = [("partner_id","=",int(kw['id']))] #if "id" in kw else []
+        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
         
 #        id = kw["fact_id"] if "fact_id" in kw else kw["id"]
 #        search_domain = [("facts_id","=",int(id))]         
@@ -131,22 +137,30 @@ class StudentController(http.Controller):
         #if kw['id'] != None: 
         
         #Tomar informacion basado en el modelo y en el domain IDS
-        students_record = students.search(search_domain)      
+        students_record = students.search(search_domain)       
 
-        #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior        
-        students_values = students_record.read(["access_token","amount_total","date_invoice"])#,"payment_term_id","user_id","invoice_line_ids"])
+        #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior       "invoice_payment_term_id", 
+        students_values = students_record.read(["partner_id","access_token","amount_total","invoice_date","invoice_line_ids"])
         
         for record in students_values: 
-            if record["date_invoice"]:
-                record["date_invoice"] = record["date_invoice"].strftime('%m/%d/%Y')
+            if record["invoice_date"]:
+                record["invoice_date"] = record["invoice_date"].strftime('%m/%d/%Y')
             else:
-                record["date_invoice"] = ''      
+                record["invoice_date"] = ''  
+                           
                 
-            record["datosLinea"] = []
+            record["datos"] = []
             
-#            for lineas in invoice_line_id:           
-             
-         
+            #crea una variable con el modelo desde donde se va a tomar la información
+            datosLinea = http.request.env['account.move.line']        
+            #filtro del modelo basados en parametros de la url 
+            search_domain_linea = [("move_id","=",record["id"])]
+            #Tomar informacion basado en el modelo y en el domain IDS
+            datosLinea_record = datosLinea.search(search_domain_linea)      
+            #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
+            datosLinea_values = datosLinea_record.read(["product_id","quantity"]) 
+ 
+            record["datos"] = datosLinea_values
 
         return json.dumps(students_values)
 
