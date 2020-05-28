@@ -27,7 +27,9 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)      
         
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
-        students_values = students_record.read(["id","city","country_id","state_id", "street_address","zip","first_name","middle_name","last_name","name","email", "birthdate","gender","phone", "status_id","status_type","current_school","current_school_address","create_date","create_uid","write_date","write_uid"])
+        students_values = students_record.read(["id","city","country_id","state_id", "street_address","zip","first_name","middle_name","last_name","name","email",
+                                                "birthdate","gender","phone", "status_id","status_type","current_school","current_school_address","create_date",
+                                                "create_uid","write_date","write_uid"])
 
         # Se recorre por cada estudiante
         for record in students_values: 
@@ -142,7 +144,8 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)       
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior       "invoice_payment_term_id", 
-        students_values = students_record.read(["partner_id","ref","student_id","access_token","amount_total","invoice_date","invoice_line_ids"])
+        students_values = students_record.read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
+                                                "amount_total","invoice_line_ids"])
         
         for record in students_values: 
             if record["invoice_date"]:
