@@ -145,7 +145,7 @@ class StudentController(http.Controller):
         #Recogemos el parametro id de odoo o el id de facts.Este codigo es para el id de facts.
 #        search_facturas = [("company_id","=",distCod),("partner_id","=",facts)] #if "id" in kw else []
         #Si usamos el id de odoo ponemos este codigo
-        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []  
+        search_facturas = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []  
 
         #Buscamos informacion en el modelo con el filtro definido
         facturas_record = facturas.search(search_facturas)       
