@@ -124,48 +124,37 @@ class StudentController(http.Controller):
         for com in compania_values:
             distCod = com["id"]
         
-        
-        
+        #Codigo para filtrar por el facts Id que llega en la URL. Solo queremos las facturas de esa persona
+        #crea una variable con el modelo desde donde se va a tomar la información:'res.partner'        
         idFacts = http.request.env['res.partner']
         #filtro del modelo basados en parametros de la url.
-        search_idFacts = [("facts_id","=",kw['idF'])]        
+        search_idFacts = [("facts_id","=",kw['idF'])] if "idF" in kw else []
         #Buscamos informacion en el modelo con el filtro definido
         idFacts_record = idFacts.search(search_idFacts)
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 
         idFacts_values = idFacts_record.read(["id"])
         #Sacamos el valor del districtCode. Lo guardamos para usarlo en el siguiente filtro
         for ids in idFacts_values:
-            facts = ids["id"]
-            
-      
-        
+            facts = ids["id"]                   
         
         #Por cada factura buscamos todos los datos que tiene asignados:
         #crea una variable con el modelo desde donde se va a tomar la información:'account.move'          
-        students = http.request.env['account.move']        
+        facturas = http.request.env['account.move']        
         
         #filtro del modelo basados en parametros de la url. Filtramos por el districtCode
-        #Recogemos el parametro id. Si no esta en kw le pone unos []
-        search_domain = [("company_id","=",distCod),("partner_id","=",facts)] #if "id" in kw else []
-#                search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
+        #Recogemos el parametro id de odoo o el id de facts.Este codigo es para el id de facts.
+#        search_facturas = [("company_id","=",distCod),("partner_id","=",facts)] #if "id" in kw else []
+        #Si usamos el id de odoo ponemos este codigo
+        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []  
 
-        
-#        id = kw["fact_id"] if "fact_id" in kw else kw["id"]
-#        search_domain = [("facts_id","=",int(id))]         
-        
-        #search_domain = [("status_type","=","fact_integration")] #,("country_id", "=", int(params['country_id']))] if "country_id" in params else []
-        #search_domain = [("status_type","=","fact_integration"),("country_id", "=", int(params['country_id']))]        
-        
-        #if kw['id'] != None: 
-        
-        #Tomar informacion basado en el modelo y en el domain IDS
-        students_record = students.search(search_domain)       
+        #Buscamos informacion en el modelo con el filtro definido
+        facturas_record = facturas.search(search_facturas)       
 
-        #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior       "invoice_payment_term_id", 
-        students_values = students_record.read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
+        #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
+        facturas_values = facturas_record.read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
                                                 "amount_untaxed","amount_by_group","amount_total","invoice_line_ids","line_ids"])
         
-        for record in students_values: 
+        for record in facturas_values: 
             if record["invoice_date"]:
                 record["invoice_date"] = record["invoice_date"].strftime('%m/%d/%Y')
             else:
@@ -187,5 +176,5 @@ class StudentController(http.Controller):
             record["datos"] = datosLinea_values
                 
 
-        return json.dumps(students_values)
+        return json.dumps(facturas_values)
     
