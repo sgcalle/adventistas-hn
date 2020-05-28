@@ -14,11 +14,12 @@ class StudentController(http.Controller):
     # define una funcion principal
     def get_adm_uni(self, **params): 
         
+        #Codigo para buscar en un modelo los datos que nos interesan        
         #crea una variable con el modelo desde donde se va a tomar la información:'adm_uni.application'          
         students = http.request.env['adm_uni.application']        
         
         #filtro del modelo basados en parametros de la url 
-        #Filtramos para recoger unicamente los datos de los alumnos con un status_type = a stage
+        #Filtramos para recoger unicamente los datos de los alumnos con un status_type = stage. Los otro filtros solo sirven de ejemplo
         search_domain = [("status_type","=","stage")]
         #search_domain = [("status_type","=","fact_integration"),("country_id", "=", int(params['country_id']))]      
         #search_domain = [("status_type","=","fact_integration")] #,("country_id", "=", int(params['country_id']))] if "country_id" in params else []
@@ -31,8 +32,9 @@ class StudentController(http.Controller):
                                                 "birthdate","gender","phone", "status_id","status_type","current_school","current_school_address","create_date",
                                                 "create_uid","write_date","write_uid"])
 
-        # Se recorre por cada estudiante
+        #Se recorren por cada estudiante los datos que hemos buscado anteriormente
         for record in students_values: 
+            
             # Convertir fechas a string
             if record["birthdate"]:
                 record["birthdate"] = record["birthdate"].strftime('%m/%d/%Y')
@@ -53,25 +55,22 @@ class StudentController(http.Controller):
             else:
                 record["write_date"] = ''
                 
-            # record["__last_update"] = record["__last_update"].strftime('%m/%d/%Y')
-            # record["create_date"] = record["create_date"].strftime('%m/%d/%Y')
-            # record["write_date"] = record["write_date"].strftime('%m/%d/%Y')   
-            
-            #crea una variable con el modelo desde donde se va a tomar la información
+            #Por cada estudiante buscamos todos los archivos que tiene asignados
+            #crea una variable con el modelo desde donde se va a tomar la información:'ir.attachment'          
             attachments = http.request.env['ir.attachment']        
         
-            #filtro del modelo basados en parametros de la url
+            #filtro del modelo basados en parametros de la url. El res_id debe ser igual a el id de cada registro.
             search_domain_attach = [("res_model", "=", "adm_uni.application"),("res_id","=",record["id"])]
         
-            #Tomar informacion basado en el modelo y en el domain IDS
+            #Buscamos informacion en el modelo con el filtro definido
             attachments_record = attachments.search(search_domain_attach)      
         
-            #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
+            #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
             attachments_values = attachments_record.read(["id","name"])    
+            #Insertamos en el registro los valores obtenidos en esta busqueda en un campo que nos creamos llamado attachIds
             record["attachIds"] = json.dumps(attachments_values)
             
-        #students_values.append("test")
-        #pintar la información obtenida, esto lo utilizamos para parsearlo en el ajax.         
+        #pasamos la informacion a Facts. Es lo que devuelve la funcion ajax.         
         return json.dumps(students_values)
 
     #metodo encargado de insertar en Odoo un personId que viene desde FACTS
@@ -108,12 +107,7 @@ class StudentController(http.Controller):
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
     @http.route("/account/getDataOdooFromFamilyID", auth="public", methods=["GET"], cors='*', csrf=False)
     # define una funcion principal
-    def datosFact(self, **kw):                         
-        #{"id": 17, "first_name": "Luis"}
-        #data = '[{"id": 16}]'
-                
-        #data = json.loads(data)
-        #data = json.loads(kw["data"])        
+    def datosFact(self, **kw):         
         
         compania = http.request.env['res.company']
         search_compania = [("x_district_code","=",(kw['dist']))]
@@ -145,7 +139,7 @@ class StudentController(http.Controller):
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior       "invoice_payment_term_id", 
         students_values = students_record.read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
-                                                "amount_total","invoice_line_ids","line_ids"])
+                                                "amount_untaxed","amount_by_group","amount_total","invoice_line_ids","line_ids"])
         
         for record in students_values: 
             if record["invoice_date"]:
