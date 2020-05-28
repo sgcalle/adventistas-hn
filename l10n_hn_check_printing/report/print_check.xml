@@ -14,18 +14,22 @@
 <template id="ckhn_check">
     <div class="ckhn_check">
         <div class="ckhn_date">
-            <t t-esc="page['company'].partner_id.city"/>, <t t-esc="page['company'].partner_id.state_id.name"/>
+            <t t-esc="page['company'].partner_id.city"/>,
+            <t t-esc="page['company'].partner_id.state_id.name"/>
+            <![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]>
             <t t-esc="page['payment_date_honduras']"/>
         </div>
+        <div class="ckhn_payee_name">*** <t t-esc="page['partner_name']"/> ****</div>
         <div class="ckhn_amount" t-esc="page['amount']"/>
-        <div class="ckhn_amount_in_word" t-esc="page['amount_in_word']"/>
-        <div class="ckhn_payee_name" t-esc="page['partner_name']"/>
+        <div class="ckhn_amount_in_word">**** <t t-esc="page['amount_in_word']"/> *****</div>
     </div>
 </template>
 <template id="ckhn_stub_1">
     <div class="ckhn_stub_1">
         <div class="ckhn_date">
-            <t t-esc="page['company'].partner_id.city"/>, <t t-esc="page['company'].partner_id.state_id.name"/>
+            <t t-esc="page['company'].partner_id.city"/>,
+            <t t-esc="page['company'].partner_id.state_id.name"/>
+            <![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]><![CDATA[&nbsp;]]>
             <t t-esc="page['payment_date_honduras']"/>
         </div>
         <div class="ckhn_payee_name" t-esc="page['partner_name']"/>
@@ -44,9 +48,9 @@
                 <t t-foreach="page['move_lines']" t-as="move_line">
                     <tr>
                         <td style="width:2.05in;"><t t-esc="move_line.account_id.code"/></td>
-                        <td style="width:2.95in;"><t t-esc="move_line.account_id.name"/></td>
-                        <td style="width:1.25in;"><t t-esc="move_line.debit"/></td>
-                        <td style="width:1.25in;"><t t-esc="move_line.credit"/></td>
+                        <td style="width:3.05in;"><t t-esc="move_line.account_id.name"/></td>
+                        <td style="width:1.12in;"><t t-esc="move_line.debit"/></td>
+                        <td style="width:1.28in;"><t t-esc="move_line.credit"/></td>
                     </tr>
                     <t t-set="total_debit" t-value="total_debit + move_line.debit"/>
                     <t t-set="total_credit" t-value="total_credit + move_line.credit"/>
