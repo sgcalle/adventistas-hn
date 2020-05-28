@@ -136,6 +136,8 @@ class StudentController(http.Controller):
         #Sacamos el valor del districtCode. Lo guardamos para usarlo en el siguiente filtro
         for ids in idFacts_values:
             facts = com["id"]
+            
+        
         
         
         
@@ -146,7 +148,7 @@ class StudentController(http.Controller):
         
         #filtro del modelo basados en parametros de la url. Filtramos por el districtCode
         #Recogemos el parametro id. Si no esta en kw le pone unos []
-        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw[facts]))] #if "id" in kw else []
+        search_domain = [("company_id","=",distCod),("partner_id","=",facts)] #if "id" in kw else []
 #                search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
 
         
