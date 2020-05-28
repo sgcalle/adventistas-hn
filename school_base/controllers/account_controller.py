@@ -55,11 +55,11 @@ class StudentController(http.Controller):
             else:
                 record["write_date"] = ''
                 
-            #Por cada estudiante buscamos todos los archivos que tiene asignados
+            #Por cada estudiante buscamos todos los archivos que tiene asignados:
             #crea una variable con el modelo desde donde se va a tomar la información:'ir.attachment'          
             attachments = http.request.env['ir.attachment']        
         
-            #filtro del modelo basados en parametros de la url. El res_id debe ser igual a el id de cada registro.
+            #filtro del modelo. El res_id debe ser igual a el id de cada registro. El modelo debe ser "adm_uni.application"
             search_domain_attach = [("res_model", "=", "adm_uni.application"),("res_id","=",record["id"])]
         
             #Buscamos informacion en el modelo con el filtro definido
@@ -73,17 +73,19 @@ class StudentController(http.Controller):
         #pasamos la informacion a Facts. Es lo que devuelve la funcion ajax.         
         return json.dumps(students_values)
 
-    #metodo encargado de insertar en Odoo un personId que viene desde FACTS
+    #metodo encargado de insertar en Odoo un personId que viene desde FACTS. Llega un array de odooId y factsId
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
     @http.route("/account/adm_insertId", auth="public", methods=["POST"], cors='*', csrf=False)
-    # define una funcion principal 
+    #Define una funcion principal 
     def insertId(self, **kw):  
+        #Convertimos el json que nos llega
         data = json.loads(kw["data"])
+        #Recorremos el data
         for itemData in data: 
             #itemData["odooId"]
             #itemData["factsId"]
             application = http.request.env['adm_uni.application']
-          
+            
             search_domain = [("id","=",itemData["odooId"])]
             
             #Tomar informacion basado en el modelo y en el domain IDS
@@ -109,22 +111,44 @@ class StudentController(http.Controller):
     # define una funcion principal
     def datosFact(self, **kw):         
         
+        #Codigo para filtrar por el districtCode que llega en la URL. Solo queremos las facturas de ese districtCode
+        #crea una variable con el modelo desde donde se va a tomar la información:'res.company'          
         compania = http.request.env['res.company']
-        search_compania = [("x_district_code","=",(kw['dist']))]
+        #filtro del modelo basados en parametros de la url.
+        search_compania = [("x_district_code","=",(kw['dist']))]        
+        #Buscamos informacion en el modelo con el filtro definido
         compania_record = compania.search(search_compania)
+        #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 
         compania_values = compania_record.read(["id"])
-        
+        #Sacamos el valor del districtCode. Lo guardamos para usarlo en el siguiente filtro
         for com in compania_values:
             distCod = com["id"]
         
-       
-        students = http.request.env['account.move']        
-        #students = http.request.env['account.invoice'] 
-
         
-        #filtro del modelo basados en parametros de la url
+        
+        idFacts = http.request.env['res.partner']
+        #filtro del modelo basados en parametros de la url.
+        search_idFacts = [("facts_id","=",(kw['idF']))]        
+        #Buscamos informacion en el modelo con el filtro definido
+        idFacts_record = idFacts.search(search_idFacts)
+        #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 
+        idFacts_values = idFacts_record.read(["id"])
+        #Sacamos el valor del districtCode. Lo guardamos para usarlo en el siguiente filtro
+        for ids in idFacts_values:
+            facts = com["id"]
+        
+        
+        
+        
+        #Por cada factura buscamos todos los datos que tiene asignados:
+        #crea una variable con el modelo desde donde se va a tomar la información:'account.move'          
+        students = http.request.env['account.move']        
+        
+        #filtro del modelo basados en parametros de la url. Filtramos por el districtCode
         #Recogemos el parametro id. Si no esta en kw le pone unos []
-        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
+        search_domain = [("company_id","=",distCod),("partner_id","=",int(kw[facts]))] if "id" in kw else []
+#                search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
+
         
 #        id = kw["fact_id"] if "fact_id" in kw else kw["id"]
 #        search_domain = [("facts_id","=",int(id))]         
@@ -164,6 +188,4 @@ class StudentController(http.Controller):
                 
 
         return json.dumps(students_values)
-
-
-#if(row[1] != None and row[2] != None):
+    
