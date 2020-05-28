@@ -120,12 +120,10 @@ class StudentController(http.Controller):
         
         for com in compania_values:
             distCod = com["id"]
-        
        
         students = http.request.env['account.move']        
         #students = http.request.env['account.invoice'] 
 
-        
         #filtro del modelo basados en parametros de la url
         #Recogemos el parametro id. Si no esta en kw le pone unos []
         search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
@@ -163,7 +161,6 @@ class StudentController(http.Controller):
             datosLinea_values = datosLinea_record.read(["product_id","quantity"]) 
  
             record["datos"] = datosLinea_values
-                
 
         return json.dumps(students_values)
 
