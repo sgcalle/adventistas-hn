@@ -6,28 +6,27 @@ import json
 from datetime import datetime
 from datetime import date
 
-##
-#controlador encargado de devolver data de estudiantes, para insertarlo en FACTS
 class StudentController(http.Controller):
     
+    #metodo encargado de devolver datos de estudiantes para insertarlos en FACTS
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
     @http.route("/account/dataAccount", auth="public", methods=["GET"], cors='*')
     # define una funcion principal
     def get_adm_uni(self, **params): 
-        #crea una variable con el modelo desde donde se va a tomar la información 
-        # adm_uni.application
-        # status_type
+        
+        #crea una variable con el modelo desde donde se va a tomar la información:'adm_uni.application'          
         students = http.request.env['adm_uni.application']        
         
         #filtro del modelo basados en parametros de la url 
+        #Filtramos para recoger unicamente los datos de los alumnos con un status_type = a stage
         search_domain = [("status_type","=","stage")]
+        #search_domain = [("status_type","=","fact_integration"),("country_id", "=", int(params['country_id']))]      
         #search_domain = [("status_type","=","fact_integration")] #,("country_id", "=", int(params['country_id']))] if "country_id" in params else []
-        #search_domain = [("status_type","=","fact_integration"),("country_id", "=", int(params['country_id']))] 
-        
-        #Tomar informacion basado en el modelo y en el domain IDS
+                
+        #Buscamos informacion en el modelo con el filtro definido
         students_record = students.search(search_domain)      
         
-        #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
+        #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
         students_values = students_record.read(["id","city","country_id","state_id", "street_address","zip","first_name","middle_name","last_name","name","email", "birthdate","gender","phone", "status_id","status_type","current_school","current_school_address","create_date","create_uid","write_date","write_uid"])
 
         # Se recorre por cada estudiante
@@ -73,6 +72,7 @@ class StudentController(http.Controller):
         #pintar la información obtenida, esto lo utilizamos para parsearlo en el ajax.         
         return json.dumps(students_values)
 
+    #metodo encargado de insertar en Odoo un personId que viene desde FACTS
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
     @http.route("/account/adm_insertId", auth="public", methods=["POST"], cors='*', csrf=False)
     # define una funcion principal 
@@ -102,7 +102,7 @@ class StudentController(http.Controller):
         
         return json.dumps(data)
     
-    
+    #metodo encargado de recuperar datos de una factura y enviarla a FACTS
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
     @http.route("/account/getDataOdooFromFamilyID", auth="public", methods=["GET"], cors='*', csrf=False)
     # define una funcion principal
@@ -120,10 +120,12 @@ class StudentController(http.Controller):
         
         for com in compania_values:
             distCod = com["id"]
+        
        
         students = http.request.env['account.move']        
         #students = http.request.env['account.invoice'] 
 
+        
         #filtro del modelo basados en parametros de la url
         #Recogemos el parametro id. Si no esta en kw le pone unos []
         search_domain = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []
@@ -140,7 +142,7 @@ class StudentController(http.Controller):
         students_record = students.search(search_domain)       
 
         #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior       "invoice_payment_term_id", 
-        students_values = students_record.read(["partner_id","access_token","amount_total","invoice_date","invoice_line_ids"])
+        students_values = students_record.read(["partner_id","ref","student_id","access_token","amount_total","invoice_date","invoice_line_ids"])
         
         for record in students_values: 
             if record["invoice_date"]:
@@ -161,6 +163,7 @@ class StudentController(http.Controller):
             datosLinea_values = datosLinea_record.read(["product_id","quantity"]) 
  
             record["datos"] = datosLinea_values
+                
 
         return json.dumps(students_values)
 
