@@ -21,5 +21,6 @@
         'views/account_student_ledger_templates.xml',
         'views/account_student_ledger_views.xml',
         'views/res_partner_views.xml',
+        'views/account_move_line_views.xml',
     ],
 }
