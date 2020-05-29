@@ -55,8 +55,19 @@ class AccountStudentLedger(models.AbstractModel):
         domain.append(('account_id.internal_type', 'in', [t['id'] for t in self._get_options_account_type(options)]))
 
         # Partner must be set.
-        domain.append(('partner_id', '!=', False))
+        domain.append(('student_id', '!=', False))
 
+        return domain
+
+    @api.model
+    def _get_options_partner_domain(self, options):
+        domain = []
+        if options.get('partner_ids'):
+            partner_ids = [int(partner) for partner in options['partner_ids']]
+            domain.append(('student_id', 'in', partner_ids))
+        if options.get('partner_categories'):
+            partner_category_ids = [int(category) for category in options['partner_categories']]
+            domain.append(('partner_id.category_id', 'in', partner_category_ids))
         return domain
 
     @api.model
@@ -112,7 +123,7 @@ class AccountStudentLedger(models.AbstractModel):
         queries = []
 
         if expanded_partner:
-            domain = [('partner_id', '=', expanded_partner.id)]
+            domain = [('student_id', '=', expanded_partner.id)]
         else:
             domain = []
 
@@ -126,7 +137,7 @@ class AccountStudentLedger(models.AbstractModel):
         params += where_params
         queries.append('''
             SELECT
-                account_move_line.partner_id        AS groupby,
+                account_move_line.student_id        AS groupby,
                 'sum'                               AS key,
                 SUM(ROUND(account_move_line.debit * currency_table.rate, currency_table.precision))   AS debit,
                 SUM(ROUND(account_move_line.credit * currency_table.rate, currency_table.precision))  AS credit,
@@ -134,7 +145,7 @@ class AccountStudentLedger(models.AbstractModel):
             FROM %s
             LEFT JOIN %s ON currency_table.company_id = account_move_line.company_id
             WHERE %s
-            GROUP BY account_move_line.partner_id
+            GROUP BY account_move_line.student_id
         ''' % (tables, ct_query, where_clause))
 
         # Get sums for the initial balance.
@@ -144,7 +155,7 @@ class AccountStudentLedger(models.AbstractModel):
         params += where_params
         queries.append('''
             SELECT
-                account_move_line.partner_id        AS groupby,
+                account_move_line.student_id        AS groupby,
                 'initial_balance'                   AS key,
                 SUM(ROUND(account_move_line.debit * currency_table.rate, currency_table.precision))   AS debit,
                 SUM(ROUND(account_move_line.credit * currency_table.rate, currency_table.precision))  AS credit,
@@ -152,7 +163,7 @@ class AccountStudentLedger(models.AbstractModel):
             FROM %s
             LEFT JOIN %s ON currency_table.company_id = account_move_line.company_id
             WHERE %s
-            GROUP BY account_move_line.partner_id
+            GROUP BY account_move_line.student_id
         ''' % (tables, ct_query, where_clause))
 
         return ' UNION ALL '.join(queries), params
@@ -172,11 +183,11 @@ class AccountStudentLedger(models.AbstractModel):
         # Get sums for the account move lines.
         # period: [('date' <= options['date_to']), ('date', '>=', options['date_from'])]
         if expanded_partner:
-            domain = [('partner_id', '=', expanded_partner.id)]
+            domain = [('student_id', '=', expanded_partner.id)]
         elif unfold_all:
             domain = []
         elif options['unfolded_lines']:
-            domain = [('partner_id', 'in', [int(line[8:]) for line in options['unfolded_lines']])]
+            domain = [('student_id', 'in', [int(line[8:]) for line in options['unfolded_lines']])]
 
         new_options = self._get_options_sum_balance(options)
         tables, where_clause, where_params = self._query_get(new_options, domain=domain)
@@ -192,7 +203,7 @@ class AccountStudentLedger(models.AbstractModel):
                 account_move_line.company_id,
                 account_move_line.account_id,             
                 account_move_line.payment_id,
-                account_move_line.partner_id,
+                account_move_line.student_id,
                 account_move_line.currency_id,
                 account_move_line.amount_currency,
                 ROUND(account_move_line.debit * currency_table.rate, currency_table.precision)   AS debit,
@@ -211,7 +222,7 @@ class AccountStudentLedger(models.AbstractModel):
             LEFT JOIN account_move account_move_line__move_id ON account_move_line__move_id.id = account_move_line.move_id
             LEFT JOIN %s ON currency_table.company_id = account_move_line.company_id
             LEFT JOIN res_company company               ON company.id = account_move_line.company_id
-            LEFT JOIN res_partner partner               ON partner.id = account_move_line.partner_id
+            LEFT JOIN res_partner partner               ON partner.id = account_move_line.student_id
             LEFT JOIN account_account account           ON account.id = account_move_line.account_id
             LEFT JOIN account_journal journal           ON journal.id = account_move_line.journal_id
             LEFT JOIN account_full_reconcile full_rec   ON full_rec.id = account_move_line.full_reconcile_id
@@ -268,10 +279,10 @@ class AccountStudentLedger(models.AbstractModel):
             query, params = self._get_query_amls(options, expanded_partner=expanded_partner)
             self._cr.execute(query, params)
             for res in self._cr.dictfetchall():
-                if res['partner_id'] not in groupby_partners:
+                if res['student_id'] not in groupby_partners:
                     continue
-                groupby_partners[res['partner_id']].setdefault('lines', [])
-                groupby_partners[res['partner_id']]['lines'].append(res)
+                groupby_partners[res['student_id']].setdefault('lines', [])
+                groupby_partners[res['student_id']]['lines'].append(res)
 
         # Retrieve the partners to browse.
         # groupby_partners.keys() contains all account ids affected by:
@@ -519,7 +530,6 @@ class AccountStudentLedger(models.AbstractModel):
             columns.append({'name': _('Amount Currency'), 'class': 'number'})
 
         columns.append({'name': _('Balance'), 'class': 'number'})
-
         return columns
 
     @api.model
@@ -530,10 +540,14 @@ class AccountStudentLedger(models.AbstractModel):
 
         if offset > 0:
             # Case a line is expanded using the load more.
-            return self._load_more_lines(options, line_id, offset, remaining, balance_progress)
+            res = self._load_more_lines(options, line_id, offset, remaining, balance_progress)
+            # import pdb; pdb.set_trace()
+            return res
         else:
             # Case the whole report is loaded or a line is expanded for the first time.
-            return self._get_partner_ledger_lines(options, line_id=line_id)
+            res = self._get_partner_ledger_lines(options, line_id=line_id)
+            # import pdb; pdb.set_trace()
+            return res
 
     @api.model
     def _get_report_name(self):
