@@ -21,8 +21,7 @@
     'depends': [
         'base',
         'portal',
-        'contacts',
-        'website' #modificado
+        'contacts'
     ],
 
     # always loaded
