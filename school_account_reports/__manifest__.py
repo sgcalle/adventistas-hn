@@ -18,6 +18,7 @@
     ],
 
     'data': [
+        'views/assets.xml',
         'views/account_student_ledger_templates.xml',
         'views/account_student_ledger_views.xml',
         'views/res_partner_views.xml',

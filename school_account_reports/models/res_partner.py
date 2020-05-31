@@ -15,3 +15,13 @@ class ResPartner(models.Model):
             'ignore_session': 'both',
             'context': "{'model':'account.student.ledger'}"
         }
+    
+    def open_family_ledger(self):
+        return {
+            'type': 'ir.actions.client',
+            'name': _('Family Ledger'),
+            'tag': 'account_report',
+            'options': {'family_ids': [self.id]},
+            'ignore_session': 'both',
+            'context': "{'model':'account.student.ledger'}"
+        }
