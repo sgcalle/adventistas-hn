@@ -7,6 +7,9 @@
         <field name="arch" type="xml">
             <field name="partner_id" position="after">
                 <field name="student_id"/>
+                <field name="family_id"/>
+                <field name="grade_level_id" attrs="{'invisible': [('student_id','=',False)]}"/>
+                <field name="homeroom" attrs="{'invisible': [('student_id','=',False)]}"/>
             </field>
         </field>
     </record>

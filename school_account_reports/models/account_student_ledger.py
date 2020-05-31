@@ -20,16 +20,20 @@ class AccountStudentLedger(models.AbstractModel):
     ]
     filter_unreconciled = False
     filter_partner = True
-
-    @api.model
-    def _get_templates(self):
-        templates = super(AccountStudentLedger, self)._get_templates()
-        templates['line_template'] = 'school_account_reports.line_template_student_ledger_report'
-        return templates
+    filter_family = True
 
     ####################################################
     # OPTIONS
     ####################################################
+    @api.model
+    def _init_filter_partner(self, options, previous_options=None):
+        if not self.filter_partner:
+            return
+        super(AccountStudentLedger, self)._init_filter_partner(options, previous_options)
+        options['family_ids'] = previous_options and previous_options.get('family_ids') or []
+        selected_family_ids = [int(category) for category in options['family_ids']]
+        selected_families = selected_family_ids and self.env['res.partner'].browse(selected_family_ids) or self.env['res.partner']
+        options['selected_family_ids'] = selected_families.mapped('name')
 
     @api.model
     def _get_options_account_type(self, options):
@@ -53,21 +57,20 @@ class AccountStudentLedger(models.AbstractModel):
         if options.get('unreconciled'):
             domain.append(('full_reconcile_id', '=', False))
         domain.append(('account_id.internal_type', 'in', [t['id'] for t in self._get_options_account_type(options)]))
-
-        # Partner must be set.
-        domain.append(('student_id', '!=', False))
-
         return domain
 
     @api.model
     def _get_options_partner_domain(self, options):
         domain = []
         if options.get('partner_ids'):
-            partner_ids = [int(partner) for partner in options['partner_ids']]
-            domain.append(('student_id', 'in', partner_ids))
+            student_ids = [int(student) for student in options['partner_ids']]
+            domain.append(('student_id', 'in', student_ids))
+        if options.get('family_ids'):
+            family_ids = [int(family) for family in options['family_ids']]
+            domain.append(('family_id', 'in', family_ids))
         if options.get('partner_categories'):
             partner_category_ids = [int(category) for category in options['partner_categories']]
-            domain.append(('partner_id.category_id', 'in', partner_category_ids))
+            domain.append(('student_id.category_id', 'in', partner_category_ids))
         return domain
 
     @api.model
@@ -103,6 +106,18 @@ class AccountStudentLedger(models.AbstractModel):
         })
         return new_options
 
+    def _set_context(self, options):
+        ctx = super(AccountStudentLedger, self)._set_context(options)
+        if options.get('family_ids'):
+            ctx['family_ids'] = self.env['res.partner'].browse([int(family) for family in options['family_ids']])
+        return ctx
+    
+    def get_report_information(self, options):
+        info = super(AccountStudentLedger, self).get_report_information(options)
+        if options.get('family'):
+            info['options']['selected_family_ids'] = [self.env['res.partner'].browse(int(family)).name for family in options['family_ids']]
+        return info
+
     ####################################################
     # QUERIES
     ####################################################
@@ -123,7 +138,10 @@ class AccountStudentLedger(models.AbstractModel):
         queries = []
 
         if expanded_partner:
-            domain = [('student_id', '=', expanded_partner.id)]
+            if expanded_partner.id == self.env.company.partner_id.id:
+                domain = [('student_id', '=', False)]
+            else:
+                domain = [('student_id', '=', expanded_partner.id)]
         else:
             domain = []
 
@@ -183,7 +201,10 @@ class AccountStudentLedger(models.AbstractModel):
         # Get sums for the account move lines.
         # period: [('date' <= options['date_to']), ('date', '>=', options['date_from'])]
         if expanded_partner:
-            domain = [('student_id', '=', expanded_partner.id)]
+            if expanded_partner.id == self.env.company.partner_id.id:
+                domain = [('student_id', '=', False)]
+            else:
+                domain = [('student_id', '=', expanded_partner.id)]
         elif unfold_all:
             domain = []
         elif options['unfolded_lines']:
@@ -289,6 +310,9 @@ class AccountStudentLedger(models.AbstractModel):
         # - the amls in the current period.
         # - the amls affecting the initial balance.
         # Note a search is done instead of a browse to preserve the table ordering.
+        if groupby_partners.get(None):
+            groupby_partners[self.env.company.partner_id.id] = groupby_partners.pop(None)
+
         if expanded_partner:
             partners = expanded_partner
         elif groupby_partners:
@@ -317,7 +341,7 @@ class AccountStudentLedger(models.AbstractModel):
 
         return {
             'id': 'partner_%s' % partner.id,
-            'name': partner.name[:128],
+            'name': 'Undefined' if partner.id == self.env.company.partner_id.id else partner.name[:128],
             'columns': columns,
             'level': 2,
             'trust': partner.trust,
@@ -541,12 +565,10 @@ class AccountStudentLedger(models.AbstractModel):
         if offset > 0:
             # Case a line is expanded using the load more.
             res = self._load_more_lines(options, line_id, offset, remaining, balance_progress)
-            # import pdb; pdb.set_trace()
             return res
         else:
             # Case the whole report is loaded or a line is expanded for the first time.
             res = self._get_partner_ledger_lines(options, line_id=line_id)
-            # import pdb; pdb.set_trace()
             return res
 
     @api.model
