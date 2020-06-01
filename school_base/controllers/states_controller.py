@@ -6,10 +6,11 @@ import json
 
 
 class StateController(http.Controller):
-    @http.route("/admission/states", auth="admin", methods=["GET"])
+    @http.route("/admission/states", auth="public", methods=["GET"])
     def get_states(self, **params):
         #Codigo para filtrar por el districtCode que llega en la URL. Solo queremos las facturas de ese districtCode
-        #crea una variable con el modelo desde donde se va a tomar la información:'res.company'          
+        #crea una variable con el modelo desde donde se va a tomar la información:'res.company'   
+        #
         compania = http.request.env['res.company']
         #filtro del modelo basados en parametros de la url.
         search_compania = [("x_district_code","=",(kw['dist']))]        
