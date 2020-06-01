@@ -108,7 +108,7 @@ class StudentController(http.Controller):
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
     @http.route("/account/getDataOdooFromFamilyID", auth="none", methods=["GET"], cors='*', csrf=False)
     # define una funcion principal##
-    def datosFact(self, **kw):         
+    def datosFact(self, **kw):          
         
         distCod = 2
         
