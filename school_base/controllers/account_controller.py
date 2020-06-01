@@ -106,15 +106,17 @@ class StudentController(http.Controller):
     
     #metodo encargado de recuperar datos de una factura y enviarla a FACTS
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
-    @http.route("/account/getDataOdooFromFamilyID", auth="none", methods=["GET"])#, cors='*', csrf=False)
+    @http.route("/account/getDataOdooFromFamilyID", auth="none", methods=["GET"], cors='*', csrf=False)
     # define una funcion principal##
     def datosFact(self, **kw):         
+        
+        distCod = 3
         
         #Codigo para filtrar por el districtCode que llega en la URL. Solo queremos las facturas de ese districtCode
         #crea una variable con el modelo desde donde se va a tomar la información:'res.company'          
         compania = http.request.env['res.company']
         #filtro del modelo basados en parametros de la url.
-        search_compania = [("x_district_code","=",(kw['dist']))]        
+        search_compania = [("x_district_code","ilike",(kw['dist']))]        
         #Buscamos informacion en el modelo con el filtro definido
         compania_record = compania.sudo().search(search_compania)
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 
@@ -145,7 +147,7 @@ class StudentController(http.Controller):
 #        search_facturas = [("company_id","=",distCod),("partner_id","=",facts)] #if "id" in kw else []
         #Si usamos el id de odoo ponemos este codigo
         #search_facturas = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []  
-        search_facturas = [("company_id","=",distCod),("state","=","posted"),("partner_id","=",int(kw['id']))] if "id" in kw else []
+        search_facturas = [("company_id","=",3),("state","=","posted"),("partner_id","=",int(kw['id']))] if "id" in kw else []
         #Buscamos informacion en el modelo con el filtro definido
         facturas_record = facturas.sudo().search(search_facturas)        
 
