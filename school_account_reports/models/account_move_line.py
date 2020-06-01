@@ -22,7 +22,7 @@ class AccountMoveLine(models.Model):
         related='student_id.homeroom',
         store=True)
     
-    @api.depends('name', 'move_id', 'move_id.student_id', 'move_id.family_id',
+    @api.depends('move_id', 'move_id.student_id', 'move_id.family_id',
                  'matched_debit_ids', 'matched_debit_ids.debit_move_id.move_id.student_id',
                  'matched_debit_ids.debit_move_id.move_id.family_id',
                  'matched_credit_ids', 'matched_credit_ids.credit_move_id.move_id.student_id',

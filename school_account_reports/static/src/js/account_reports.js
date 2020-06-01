@@ -111,8 +111,9 @@ accountReportsWidget.include({
         'value_changed': function (ev) {
             var self = this;
             self.report_options.partner_ids = ev.data.partner_ids;
-            self.report_options.partner_categories = ev.data.partner_categories;
             self.report_options.family_ids = ev.data.family_ids;
+            self.report_options.grade_level_ids = ev.data.grade_level_ids;
+            self.report_options.partner_categories = ev.data.partner_categories;
             self.report_options.analytic_accounts = ev.data.analytic_accounts;
             self.report_options.analytic_tags = ev.data.analytic_tags;
             return self.reload().then(function () {
@@ -122,7 +123,7 @@ accountReportsWidget.include({
         }
     }),
     render_searchview_buttons: function () {
-        if (this.report_options.partner) {
+        if (this.report_options.partner && this.report_options.family) {
             if (!this.M2MFilters) {
                 var fields = {};
                 if ('partner_ids' in this.report_options) {
@@ -132,18 +133,25 @@ accountReportsWidget.include({
                         value: this.report_options.partner_ids.map(Number),
                     };
                 }
+                if ('family_ids' in this.report_options) {
+                    fields['family_ids'] = {
+                        label: _t('Families'),
+                        modelName: 'res.partner',
+                        value: this.report_options.family_ids.map(Number),
+                    };
+                }
+                if ('grade_level_ids' in this.report_options) {
+                    fields['grade_level_ids'] = {
+                        label: _t('Grade Levels'),
+                        modelName: 'school_base.grade_level',
+                        value: this.report_options.grade_level_ids.map(Number),
+                    };
+                }
                 if ('partner_categories' in this.report_options) {
                     fields['partner_categories'] = {
                         label: _t('Tags'),
                         modelName: 'res.partner.category',
                         value: this.report_options.partner_categories.map(Number),
-                    };
-                }
-                if (this.report_options.family && 'family_ids' in this.report_options) {
-                    fields['family_ids'] = {
-                        label: _t('Families'),
-                        modelName: 'res.partner',
-                        value: this.report_options.family_ids.map(Number),
                     };
                 }
                 if (!_.isEmpty(fields)) {
