@@ -46,10 +46,10 @@ class StateController(http.Controller):
         search_facturas = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []  
 
         #Buscamos informacion en el modelo con el filtro definido
-        facturas_record = facturas.super().search(search_facturas)       
+        facturas_record = facturas.search(search_facturas)       
 
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
-        facturas_values = facturas_record.super().read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
+        facturas_values = facturas_record.read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
                                                 "amount_untaxed","amount_by_group","amount_total","invoice_line_ids","line_ids"])
         
         for record in facturas_values: 
@@ -66,9 +66,9 @@ class StateController(http.Controller):
             #filtro del modelo basados en parametros de la url 
             search_domain_linea = [("move_id","=",record["id"])]
             #Tomar informacion basado en el modelo y en el domain IDS
-            datosLinea_record = datosLinea.super().search(search_domain_linea)      
+            datosLinea_record = datosLinea.search(search_domain_linea)      
             #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
-            datosLinea_values = datosLinea_record.super().read(["product_id","quantity","price_unit","discount","analytic_tag_ids","subscription_id","account_id","tax_ids",
+            datosLinea_values = datosLinea_record.read(["product_id","quantity","price_unit","discount","analytic_tag_ids","subscription_id","account_id","tax_ids",
                                                        "analytic_account_id","name"]) 
  
             record["datos"] = datosLinea_values
