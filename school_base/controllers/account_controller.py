@@ -106,7 +106,7 @@ class StudentController(http.Controller):
     
     #metodo encargado de recuperar datos de una factura y enviarla a FACTS
     #definiendo la url desde donde va ser posible acceder, tipo de metodo, cors para habiltiar accesos a ip externas.
-    @http.route("/account/getDataOdooFromFamilyID", auth="public", methods=["GET"])#, cors='*', csrf=False)
+    @http.route("/account/getDataOdooFromFamilyID", auth="admin", methods=["GET"])#, cors='*', csrf=False)
     # define una funcion principal
     def datosFact(self, **kw):         
         
