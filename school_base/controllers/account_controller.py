@@ -110,7 +110,7 @@ class StudentController(http.Controller):
     # define una funcion principal##
     def datosFact(self, **kw):         
         
-        distCod = 3
+        distCod = 2
         
         #Codigo para filtrar por el districtCode que llega en la URL. Solo queremos las facturas de ese districtCode
         #crea una variable con el modelo desde donde se va a tomar la información:'res.company'          
@@ -144,13 +144,9 @@ class StudentController(http.Controller):
         
         #filtro del modelo basados en parametros de la url. Filtramos por el districtCode
         #Recogemos el parametro id de odoo o el id de facts.Este codigo es para el id de facts.
-#        search_facturas = [("company_id","=",distCod),("state","=","posted"),("partner_id","=",facts)] #if "id" in kw else []
         search_facturas = [("company_id","=",distCod),("state","=","posted"),("family_id","=",facts)] #if "id" in kw else []        
-    
-    
-        #Si usamos el id de odoo ponemos este codigo
-#        search_facturas = [("company_id","=",3),("state","=","posted"),("partner_id","=",int(kw['id']))] if "id" in kw else []
-        #Buscamos informacion en el modelo con el filtro definido
+        
+        #Buscamos informacion en el modelo con el filtro definido. Ordenamos por la fecha de la factura
         facturas_record = facturas.sudo().search(search_facturas,order='invoice_date asc')        
 
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
