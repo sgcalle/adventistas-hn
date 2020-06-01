@@ -31,9 +31,13 @@ class AccountStudentLedger(models.AbstractModel):
             return
         super(AccountStudentLedger, self)._init_filter_partner(options, previous_options)
         options['family_ids'] = previous_options and previous_options.get('family_ids') or []
-        selected_family_ids = [int(category) for category in options['family_ids']]
+        selected_family_ids = [int(family) for family in options['family_ids']]
         selected_families = selected_family_ids and self.env['res.partner'].browse(selected_family_ids) or self.env['res.partner']
         options['selected_family_ids'] = selected_families.mapped('name')
+        options['grade_level_ids'] = previous_options and previous_options.get('grade_level_ids') or []
+        selected_grade_level_ids = [int(category) for category in options['grade_level_ids']]
+        selected_grade_levels = selected_grade_level_ids and self.env['school_base.grade_level'].browse(selected_grade_level_ids) or self.env['school_base.grade_level']
+        options['selected_grade_level_ids'] = selected_grade_levels.mapped('name')
 
     @api.model
     def _get_options_account_type(self, options):
@@ -68,6 +72,9 @@ class AccountStudentLedger(models.AbstractModel):
         if options.get('family_ids'):
             family_ids = [int(family) for family in options['family_ids']]
             domain.append(('family_id', 'in', family_ids))
+        if options.get('grade_level_ids'):
+            grade_level_ids = [int(grade_level) for grade_level in options['grade_level_ids']]
+            domain.append(('student_id.grade_level_id', 'in', grade_level_ids))
         if options.get('partner_categories'):
             partner_category_ids = [int(category) for category in options['partner_categories']]
             domain.append(('student_id.category_id', 'in', partner_category_ids))
@@ -110,12 +117,16 @@ class AccountStudentLedger(models.AbstractModel):
         ctx = super(AccountStudentLedger, self)._set_context(options)
         if options.get('family_ids'):
             ctx['family_ids'] = self.env['res.partner'].browse([int(family) for family in options['family_ids']])
+        if options.get('grade_level_ids'):
+            ctx['grade_level_ids'] = self.env['school_base.grade_level'].browse([int(grade_level) for grade_level in options['grade_level_ids']])
         return ctx
     
     def get_report_information(self, options):
         info = super(AccountStudentLedger, self).get_report_information(options)
         if options.get('family'):
             info['options']['selected_family_ids'] = [self.env['res.partner'].browse(int(family)).name for family in options['family_ids']]
+        if options.get('grade_level'):
+            info['options']['selected_grade_level_ids'] = [self.env['school_base.grade_level'].browse(int(grade_level)).name for grade_level in options['grade_level_ids']]
         return info
 
     ####################################################

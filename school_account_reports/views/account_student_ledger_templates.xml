@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="filter_info_template" inherit_id="account_reports.filter_info_template">
+        <xpath expr="//t[@t-esc='res_partner_category_value']/../.." position="before">
+            <div class="col-12">
+                <t t-if="options.get('family_ids') != None">
+                    Families:
+                    <t t-set="res_partner_value" t-value="'All'"/>
+                    <t t-foreach="options['selected_family_ids']" t-as="family_name">
+                        <t t-set="res_partner_value" t-value="''"/>
+                        <t t-esc="family_name"/>
+                    </t>
+                    <t t-esc="res_partner_value"/>
+                </t>
+            </div>
+            <div class="col-12">
+                <t t-if="options.get('grade_level_ids') != None">
+                    Grade Levels:
+                    <t t-set="grade_level_value" t-value="'All'"/>
+                    <t t-foreach="options['selected_grade_level_ids']" t-as="grade_level_name">
+                        <t t-set="grade_level_value" t-value="''"/>
+                        <t t-esc="grade_level_name"/>
+                    </t>
+                    <t t-esc="grade_level_value"/>
+                </t>
+            </div>
+        </xpath>
+    </template>
+</odoo>
