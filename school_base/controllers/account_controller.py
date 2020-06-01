@@ -153,7 +153,7 @@ class StudentController(http.Controller):
 
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
         facturas_values = facturas_record.read(["state","partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
-                                                "amount_untaxed","amount_by_group","amount_total","invoice_line_ids","line_ids"])
+                                                "amount_untaxed","amount_by_group","amount_total","amount_residual","invoice_line_ids","line_ids"])
         
         for record in facturas_values: 
             if record["invoice_date"]:
