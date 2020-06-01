@@ -115,7 +115,7 @@ class StudentController(http.Controller):
         #Codigo para filtrar por el districtCode que llega en la URL. Solo queremos las facturas de ese districtCode
         #crea una variable con el modelo desde donde se va a tomar la información:'res.company'          
         compania = http.request.env['res.company']
-        #filtro del modelo basados en parametros de la url.
+        #filtro del modelo basados en parametros de la url. ilike como el like pero no diferencia mayusculas de minisculas
         search_compania = [("x_district_code","ilike",(kw['dist']))]        
         #Buscamos informacion en el modelo con el filtro definido
         compania_record = compania.sudo().search(search_compania)
@@ -145,11 +145,13 @@ class StudentController(http.Controller):
         #filtro del modelo basados en parametros de la url. Filtramos por el districtCode
         #Recogemos el parametro id de odoo o el id de facts.Este codigo es para el id de facts.
 #        search_facturas = [("company_id","=",distCod),("state","=","posted"),("partner_id","=",facts)] #if "id" in kw else []
-        search_facturas = [("company_id","=",distCod),("state","=","posted"),("family_id","=",facts)] #if "id" in kw else []
+        search_facturas = [("company_id","=",distCod),("state","=","posted"),("family_id","=",facts)] #if "id" in kw else []        
+    
+    
         #Si usamos el id de odoo ponemos este codigo
 #        search_facturas = [("company_id","=",3),("state","=","posted"),("partner_id","=",int(kw['id']))] if "id" in kw else []
         #Buscamos informacion en el modelo con el filtro definido
-        facturas_record = facturas.sudo().search(search_facturas)        
+        facturas_record = facturas.sudo().search(search_facturas,order='invoice_date asc')        
 
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
         facturas_values = facturas_record.read(["state","partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
