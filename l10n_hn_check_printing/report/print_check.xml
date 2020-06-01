@@ -20,7 +20,7 @@
             <t t-esc="page['payment_date_honduras']"/>
         </div>
         <div class="ckhn_payee_name">*** <t t-esc="page['partner_name']"/> ****</div>
-        <div class="ckhn_amount" t-esc="page['amount']"/>
+        <div class="ckhn_amount">*** <t t-esc="page['amount']"/> ***</div>
         <div class="ckhn_amount_in_word">**** <t t-esc="page['amount_in_word']"/> *****</div>
     </div>
 </template>
