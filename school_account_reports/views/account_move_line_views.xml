@@ -24,6 +24,7 @@
             </field>
             <filter name="group_by_partner" position="after">
                 <filter string="Student" name="group_by_student" domain="[]" context="{'group_by': 'student_id'}"/>
+                <filter string="Family" name="group_by_family" domain="[]" context="{'group_by': 'family_id'}"/>
                 <filter string="Grade Level" name="group_by_grade_level" domain="[]" context="{'group_by': 'grade_level_id'}"/>
                 <filter string="Homeroom" name="group_by_homeroom" domain="[]" context="{'group_by': 'homeroom'}"/>
             </filter>
