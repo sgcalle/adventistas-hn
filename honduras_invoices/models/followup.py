@@ -54,7 +54,7 @@ class AccountFollowupReport(models.AbstractModel):
             for student_invoice_id in student_invoice_ids:
                 student_invoice_id["parent_id"] = student_id
 
-                students_amount += student_invoice_id["account_move"].amount_total
+                students_amount += student_invoice_id["account_move"].amount_residual
 
                 student_lines.append(student_invoice_id)
 
