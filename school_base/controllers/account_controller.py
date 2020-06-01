@@ -147,10 +147,10 @@ class StudentController(http.Controller):
         #search_facturas = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []  
         search_facturas = [("company_id","=",3),("partner_id","=",int(kw['id']))] if "id" in kw else []
         #Buscamos informacion en el modelo con el filtro definido
-        facturas_record = facturas.sudo().search(search_facturas)       
+        facturas_record = facturas.sudo().search(search_facturas)        
 
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
-        facturas_values = facturas_record.read(["partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
+        facturas_values = facturas_record.read(["state","partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
                                                 "amount_untaxed","amount_by_group","amount_total","invoice_line_ids","line_ids"])
         
         for record in facturas_values: 
@@ -160,7 +160,8 @@ class StudentController(http.Controller):
                 record["invoice_date"] = ''  
                            
                 
-            record["datos"] = []
+            record["datos"] = [] 
+            #AAAAAAA
             
             #crea una variable con el modelo desde donde se va a tomar la información
             datosLinea = http.request.env['account.move.line']        
