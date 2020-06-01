@@ -145,7 +145,7 @@ class StudentController(http.Controller):
 #        search_facturas = [("company_id","=",distCod),("partner_id","=",facts)] #if "id" in kw else []
         #Si usamos el id de odoo ponemos este codigo
         #search_facturas = [("company_id","=",distCod),("partner_id","=",int(kw['id']))] if "id" in kw else []  
-        search_facturas = [("company_id","=",3),("partner_id","=",int(kw['id']))] if "id" in kw else []
+        search_facturas = [("company_id","=",distCod),("state","=","posted"),("partner_id","=",int(kw['id']))] if "id" in kw else []
         #Buscamos informacion en el modelo con el filtro definido
         facturas_record = facturas.sudo().search(search_facturas)        
 
@@ -161,7 +161,6 @@ class StudentController(http.Controller):
                            
                 
             record["datos"] = [] 
-            #AAAAAAA
             
             #crea una variable con el modelo desde donde se va a tomar la información
             datosLinea = http.request.env['account.move.line']        
