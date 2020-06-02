@@ -150,7 +150,7 @@ class StudentController(http.Controller):
         facturas_record = facturas.sudo().search(search_facturas,order='invoice_date asc')        
 
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
-        facturas_values = facturas_record.read(["state","partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
+        facturas_values = facturas_record.read(["state","partner_id","ref","student_id","family_id","name","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
                                                 "amount_untaxed","amount_by_group","amount_total","amount_residual","invoice_line_ids","line_ids"])
         
         for record in facturas_values: 
