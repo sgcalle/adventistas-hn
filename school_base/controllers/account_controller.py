@@ -80,28 +80,25 @@ class StudentController(http.Controller):
     def insertId(self, **kw):  
         #Convertimos el json que nos llega
         data = json.loads(kw["data"])
-        #Recorremos el data
+        #Recorremos el data, es un array de odooId y factsId
         for itemData in data: 
            
+            #crea una variable con el modelo desde donde se va a tomar la información:'adm_uni.application'          
             application = http.request.env['adm_uni.application']
             
+            #filtro del modelo basados en parametros de la url 
+            #Filtramos para recoger unicamente el id igual al odooId que llega por parametro
             search_domain = [("id","=",itemData["odooId"])]
             
-            #Tomar informacion basado en el modelo y en el domain IDS
+            #Buscamos en el modelo la fila correspondiente al id
             application_record = application.search(search_domain)      
         
-            #Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la funcion posterior
+            #Buscamos en el modelo partner_id el registro que contenga el id
             application_values = application_record.partner_id
         
+            #Escribimos en el registro del modelo partner_id el, factsId que corresponde al id que hemos buscado
             application_values.sudo().write({'x_facts_id': itemData["factsId"]})
-            #tomamos el modelo de application
-            #application = http.request.env['adm_uni.application']        
-            #obtenemos el contacto de odoo
-            #contact = http.request.env['res.partner'] 
-            #obj = contact.sudo().browse(application_values[0]["id"])
-            #actualizamos campo
-            #obj.sudo().write({'x_facts_id': itemData["factsId"]}) 
-        
+                    
         return json.dumps(data)
     
     #metodo encargado de recuperar datos de una factura y enviarla a FACTS
@@ -110,14 +107,14 @@ class StudentController(http.Controller):
     # define una funcion principal##
     def datosFact(self, **kw):          
         
-        distCod = 2
+        distCod = 0
         
         #Codigo para filtrar por el districtCode que llega en la URL. Solo queremos las facturas de ese districtCode
         #crea una variable con el modelo desde donde se va a tomar la información:'res.company'          
         compania = http.request.env['res.company']
         #filtro del modelo basados en parametros de la url. ilike como el like pero no diferencia mayusculas de minisculas
         search_compania = [("x_district_code","ilike",(kw['dist']))]        
-        #Buscamos informacion en el modelo con el filtro definido
+        #Buscamos informacion en el modelo con el filtro definido. Con sudo() entramos como administradores
         compania_record = compania.sudo().search(search_compania)
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 
         compania_values = compania_record.read(["id"])
@@ -142,15 +139,15 @@ class StudentController(http.Controller):
         #crea una variable con el modelo desde donde se va a tomar la información:'account.move'          
         facturas = http.request.env['account.move']        
         
-        #filtro del modelo basados en parametros de la url. Filtramos por el districtCode
-        #Recogemos el parametro id de odoo o el id de facts.Este codigo es para el id de facts.
+        #filtro del modelo basados en parametros de la url. Filtramos por el districtCode, y por el state
+        #Recogemos por parametro el id de facts.Este codigo es para el id de facts.
         search_facturas = [("company_id","=",distCod),("state","=","posted"),("family_id","=",facts)] #if "id" in kw else []        
         
         #Buscamos informacion en el modelo con el filtro definido. Ordenamos por la fecha de la factura
         facturas_record = facturas.sudo().search(search_facturas,order='invoice_date asc')        
 
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion
-        facturas_values = facturas_record.read(["state","partner_id","ref","student_id","family_id","name","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
+        facturas_values = facturas_record.read(["name","state","partner_id","ref","student_id","family_id","invoice_date","invoice_payment_term_id","journal_id","company_id","access_token",
                                                 "amount_untaxed","amount_by_group","amount_total","amount_residual","invoice_line_ids","line_ids"])
         
         for record in facturas_values: 
@@ -174,6 +171,5 @@ class StudentController(http.Controller):
  
             record["datos"] = datosLinea_values
                 
-#AAAA
         return json.dumps(facturas_values)
     
