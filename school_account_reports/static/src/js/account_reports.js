@@ -123,6 +123,7 @@ accountReportsWidget.include({
         }
     }),
     render_searchview_buttons: function () {
+        self = this;
         if (this.report_options.partner && this.report_options.family) {
             if (!this.M2MFilters) {
                 var fields = {};
@@ -163,6 +164,17 @@ accountReportsWidget.include({
             }
         }
         this._super.apply(this, arguments);
+        if (this.report_options.homeroom || this.report_options.homeroom == '') {
+            var filter_homeroom = this.$searchview_buttons.find('.o_account_reports_filter_homeroom')
+            filter_homeroom[0].value = this.report_options.homeroom
+            filter_homeroom.change(function (ev) {
+                self.report_options['homeroom'] = ev.target.value
+                self.reload().then(function () {
+                    self.$searchview_buttons.find('.account_partner_filter').click();
+                    self.$searchview_buttons.find('.account_analytic_filter').click();
+                });
+            });
+        }
     }
 })
 });

@@ -38,6 +38,8 @@ class AccountStudentLedger(models.AbstractModel):
         selected_grade_level_ids = [int(category) for category in options['grade_level_ids']]
         selected_grade_levels = selected_grade_level_ids and self.env['school_base.grade_level'].browse(selected_grade_level_ids) or self.env['school_base.grade_level']
         options['selected_grade_level_ids'] = selected_grade_levels.mapped('name')
+        options['homeroom'] = previous_options and previous_options.get('homeroom') or ''
+        options['selected_homeroom'] = options['homeroom']
 
     @api.model
     def _get_options_account_type(self, options):
@@ -78,6 +80,8 @@ class AccountStudentLedger(models.AbstractModel):
         if options.get('partner_categories'):
             partner_category_ids = [int(category) for category in options['partner_categories']]
             domain.append(('student_id.category_id', 'in', partner_category_ids))
+        if options.get('homeroom'):
+            domain.append(('homeroom', '=ilike', options['homeroom']))
         return domain
 
     @api.model
@@ -119,6 +123,8 @@ class AccountStudentLedger(models.AbstractModel):
             ctx['family_ids'] = self.env['res.partner'].browse([int(family) for family in options['family_ids']])
         if options.get('grade_level_ids'):
             ctx['grade_level_ids'] = self.env['school_base.grade_level'].browse([int(grade_level) for grade_level in options['grade_level_ids']])
+        if options.get('homeroom'):
+            ctx['homeroom'] = options['homeroom']
         return ctx
     
     def get_report_information(self, options):
@@ -127,6 +133,8 @@ class AccountStudentLedger(models.AbstractModel):
             info['options']['selected_family_ids'] = [self.env['res.partner'].browse(int(family)).name for family in options['family_ids']]
         if options.get('grade_level'):
             info['options']['selected_grade_level_ids'] = [self.env['school_base.grade_level'].browse(int(grade_level)).name for grade_level in options['grade_level_ids']]
+        if options.get('homeroom'):
+            info['options']['selected_grade_level_ids'] = options['homeroom']
         return info
 
     ####################################################
