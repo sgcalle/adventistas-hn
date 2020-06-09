@@ -18,42 +18,16 @@
             <field name="dpi">90</field>
         </record>
 
-        <report id="action_print_check_top"
-            string="Print check (Top)"
+        <report id="action_print_check"
+            string="Print check"
             model="account.payment"
-            name="l10n_hn_check_printing.print_check_top"
-            file="l10n_hn_check_printing.print_check_top"
+            name="l10n_hn_check_printing.print_check"
+            file="l10n_hn_check_printing.print_check"
             report_type="qweb-pdf"
             attachment_use="True"
-            attachment="'check_'+(object.partner_id.name)+'_'+(object.name)+'_top.pdf'"
+            attachment="'check_'+(object.partner_id.name)+'_'+(object.name)+'.pdf'"
             paperformat="l10n_hn_check_printing.paperformat_check_hn"
-            print_report_name="'check Top - %s' % (object.partner_id.name or '',)"
-            menu="False"
-        />
-
-        <report id="action_print_check_middle"
-            string="Print check (Middle)"
-            model="account.payment"
-            name="l10n_hn_check_printing.print_check_middle"
-            file="l10n_hn_check_printing.print_check_middle"
-            report_type="qweb-pdf"
-            attachment_use="True"
-            attachment="'check_'+(object.partner_id.name)+'_'+(object.name)+'_middle.pdf'"
-            paperformat="l10n_hn_check_printing.paperformat_check_hn"
-            print_report_name="'check Middle - %s' % (object.partner_id.name or '',)"
-            menu="False"
-        />
-
-        <report id="action_print_check_bottom"
-            string="Print check (Bottom)"
-            model="account.payment"
-            name="l10n_hn_check_printing.print_check_bottom"
-            file="l10n_hn_check_printing.print_check_bottom"
-            report_type="qweb-pdf"
-            attachment_use="True"
-            attachment="'check_'+(object.partner_id.name)+'_'+(object.name)+'_bottom.pdf'"
-            paperformat="l10n_hn_check_printing.paperformat_check_hn"
-            print_report_name="'check Bottom - %s' % (object.partner_id.name or '',)"
+            print_report_name="'check - %s' % (object.partner_id.name or '',)"
             menu="False"
         />
 
