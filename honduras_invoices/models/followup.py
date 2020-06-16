@@ -17,7 +17,7 @@ class AccountFollowupReport(models.AbstractModel):
         """
         headers = super()._get_columns_name(options)
         headers.append(
-            {'name': _('Student'), 'style': 'text-align:right; white-space:nowrap;'})
+            {'name': _('Student'), "class": "", 'style': 'text-align:right; white-space:nowrap;'})
         #            {'name': _('Date2'), 'class': 'date', 'style': 'text-align:center; white-space:nowrap;'},
         #            {'name': _('Due Date2'), 'class': 'date', 'style': 'text-align:center; white-space:nowrap;'},
         #            {'name': _('Source Document2'), 'style': 'text-align:center; white-space:nowrap;'},
