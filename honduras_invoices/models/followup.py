@@ -53,12 +53,11 @@ class AccountFollowupReport(models.AbstractModel):
             student_lines = []
             for student_invoice_id in student_invoice_ids:
                 student_invoice_id["parent_id"] = student_id
-
-                students_amount += student_invoice_id["account_move"].amount_residual
+                students_amount += student_invoice_id["account_move"].amount_residual_signed
 
                 student_lines.append(student_invoice_id)
 
-            new_lines.append({
+            new_line = {
                 "name": student_id.name,
                 "level": 2,
                 "unfoldable": True,
@@ -72,7 +71,10 @@ class AccountFollowupReport(models.AbstractModel):
                     {"name": ""},
                     {"name": AccountMoveEnv._formatLang(students_amount)},
                 ]
-            })
+            }
+            if self._context.get("print_mode"):
+                new_line["columns"] = new_line["columns"][:4] + new_line["columns"][6:]
+            new_lines.append(new_line)
 
             new_lines.extend(student_lines)
 
@@ -81,10 +83,10 @@ class AccountFollowupReport(models.AbstractModel):
         no_students_amount = 0
         for no_student_line in no_students_lines:
             if "account_move" in no_student_line:
-                no_students_amount += no_student_line["account_move"].amount_total
+                no_students_amount += no_student_line["account_move"].amount_total_signed
             no_student_line["parent_id"] = 0
 
-        new_lines.append({
+        new_line = {
             "name": _("Invoices without student"),
             "level": 2,
             "unfoldable": True,
@@ -98,7 +100,10 @@ class AccountFollowupReport(models.AbstractModel):
                 {"name": ""},
                 {"name": AccountMoveEnv._formatLang(no_students_amount)},
             ]
-        })
+        }
+        if self._context.get("print_mode"):
+            new_line["columns"] = new_line["columns"][:4] + new_line["columns"][6:]
+        new_lines.append(new_line)
         new_lines.extend(no_students_lines)
 
         return new_lines
