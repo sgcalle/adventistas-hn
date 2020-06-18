@@ -5,23 +5,23 @@ from odoo import models, fields, api
 class HrContract(models.Model):
     _inherit = "hr.contract"
 
-    allowance_ids = fields.One2many(string="Allowances",
+    allowance_ids = fields.One2many(string="Allowance Concepts",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
         domain=[("type","=","allowance"),("date","=",False)])
-    other_allowance_ids = fields.One2many(string="Other Allowances",
+    other_allowance_ids = fields.One2many(string="Other Allowance Concepts",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
         domain=[("type","=","allowance"),("date","!=",False)])
-    deduction_ids = fields.One2many(string="Deductions",
+    deduction_ids = fields.One2many(string="Deduction Concepts",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
         domain=[("type","=","deduction"),("date","=",False)])
-    other_deduction_ids = fields.One2many(string="Other Deductions",
+    other_deduction_ids = fields.One2many(string="Other Deduction Concepts",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
         domain=[("type","=","deduction"),("date","!=",False)])
-    contribution_ids = fields.One2many(string="Contributions",
+    contribution_ids = fields.One2many(string="Contribution Concepts",
         comodel_name="hr.contract.contribution",
         inverse_name="contract_id")
     

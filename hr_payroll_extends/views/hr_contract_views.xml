@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <page name="information" position="after">
                 <page string="Allowances">
-                    <group string="Regular Allowances">
+                    <group string="Allowance Concepts">
                         <field name="allowance_ids" nolabel="1" context="{'default_type': 'allowance'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
@@ -15,7 +15,7 @@
                             </tree>
                         </field>
                     </group>
-                    <group string="Other Allowances">
+                    <group string="Other Allowance Concepts">
                         <field name="other_allowance_ids" nolabel="1" context="{'default_type': 'allowance'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
@@ -27,7 +27,7 @@
                     </group>
                 </page>
                 <page string="Deductions">
-                    <group string="Regular Deductions">
+                    <group string="Deduction Concepts">
                         <field name="deduction_ids" nolabel="1" context="{'default_type': 'deduction'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
@@ -35,7 +35,7 @@
                             </tree>
                         </field>
                     </group>
-                    <group string="Other Deductions">
+                    <group string="Other Deduction Concepts">
                         <field name="other_deduction_ids" nolabel="1" context="{'default_type': 'deduction'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
@@ -47,15 +47,17 @@
                     </group>
                 </page>
                 <page string="Contributions">
-                    <field name="contribution_ids">
-                        <tree editable="bottom">
-                            <field name="amount"/>
-                            <field name="employee_percent"/>
-                            <field name="employee_amount" optional="hide"/>
-                            <field name="company_percent"/>
-                            <field name="company_amount" optional="hide"/>
-                        </tree>
-                    </field>
+                    <group string="Contribution Concepts">
+                        <field name="contribution_ids" nolabel="1">
+                            <tree editable="bottom">
+                                <field name="amount"/>
+                                <field name="employee_percent"/>
+                                <field name="employee_amount" optional="hide"/>
+                                <field name="company_percent"/>
+                                <field name="company_amount" optional="hide"/>
+                            </tree>
+                        </field>
+                    </group>
                 </page>
             </page>
         </field>
