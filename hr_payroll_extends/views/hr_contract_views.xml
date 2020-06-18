@@ -7,18 +7,20 @@
         <field name="arch" type="xml">
             <page name="information" position="after">
                 <page string="Allowances">
-                    <group string="Allowance Concepts">
+                    <group string="Regular Allowances">
                         <field name="allowance_ids" nolabel="1" context="{'default_type': 'allowance'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
+                                <field name="name"/>
                                 <field name="amount"/>
                             </tree>
                         </field>
                     </group>
-                    <group string="Other Allowance Concepts">
+                    <group string="Other Allowances">
                         <field name="other_allowance_ids" nolabel="1" context="{'default_type': 'allowance'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
+                                <field name="name"/>
                                 <field name="date" required="1" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="amount" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="is_locked"/>
@@ -27,18 +29,20 @@
                     </group>
                 </page>
                 <page string="Deductions">
-                    <group string="Deduction Concepts">
+                    <group string="Regular Deductions">
                         <field name="deduction_ids" nolabel="1" context="{'default_type': 'deduction'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
+                                <field name="name"/>
                                 <field name="amount"/>
                             </tree>
                         </field>
                     </group>
-                    <group string="Other Deduction Concepts">
+                    <group string="Other Deductions">
                         <field name="other_deduction_ids" nolabel="1" context="{'default_type': 'deduction'}">
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
+                                <field name="name"/>
                                 <field name="date" required="1" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="amount" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="is_locked"/>
@@ -47,17 +51,16 @@
                     </group>
                 </page>
                 <page string="Contributions">
-                    <group string="Contribution Concepts">
-                        <field name="contribution_ids" nolabel="1">
-                            <tree editable="bottom">
-                                <field name="amount"/>
-                                <field name="employee_percent"/>
-                                <field name="employee_amount" optional="hide"/>
-                                <field name="company_percent"/>
-                                <field name="company_amount" optional="hide"/>
-                            </tree>
-                        </field>
-                    </group>
+                    <field name="contribution_ids">
+                        <tree editable="bottom">
+                            <field name="name"/>
+                            <field name="amount"/>
+                            <field name="employee_percent"/>
+                            <field name="employee_amount" optional="hide"/>
+                            <field name="company_percent"/>
+                            <field name="company_amount" optional="hide"/>
+                        </tree>
+                    </field>
                 </page>
             </page>
         </field>

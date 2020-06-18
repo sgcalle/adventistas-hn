@@ -29,8 +29,9 @@ class HrPayslip(models.Model):
             if matched:
                 adjustments["Other Contract Deductions"] = matched
 
-            for label, adjs in adjustments.items():
+            for label_base, adjs in adjustments.items():
                 for adj in adjs:
+                    label = label_base + ": " + adj.name
                     data.setdefault(label, {})
                     data[label].setdefault(adj.debit_account_id.id, {})
                     data[label].setdefault(adj.credit_account_id.id, {})
@@ -43,8 +44,9 @@ class HrPayslip(models.Model):
             # CONTRIBUTIONS
             contribs = payslip.contract_id.contribution_ids.filtered(
                 lambda c: all([c.emp_debit_account_id, c.emp_credit_account_id]))
-            label = "Employee Contributions"
+            label_base = "Employee Contributions"
             for contrib in contribs:
+                label = label_base + ": " + contrib.name
                 data.setdefault(label, {})
                 data[label].setdefault(contrib.emp_debit_account_id.id, {})
                 data[label].setdefault(contrib.emp_credit_account_id.id, {})
@@ -55,8 +57,9 @@ class HrPayslip(models.Model):
                 data[label][contrib.emp_credit_account_id.id][analytic_account_id]["credit"] += contrib.employee_amount
             contribs = payslip.contract_id.contribution_ids.filtered(
                 lambda c: all([c.comp_debit_account_id, c.comp_credit_account_id]))
-            label = "Company Contributions"
+            label_base = "Company Contributions"
             for contrib in contribs:
+                label = label_base + ": " + contrib.name
                 data.setdefault(label, {})
                 data[label].setdefault(contrib.comp_debit_account_id.id, {})
                 data[label].setdefault(contrib.comp_credit_account_id.id, {})
