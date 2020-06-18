@@ -7,6 +7,8 @@ class HrContractContribution(models.Model):
     _name = "hr.contract.contribution"
     _description = "Contract Pay Contribution"
 
+    name = fields.Char(string="Reference",
+        required=True)
     contract_id = fields.Many2one(string="Contract",
         comodel_name="hr.contract",
         required=True)

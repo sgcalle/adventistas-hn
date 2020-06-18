@@ -8,6 +8,8 @@ class HrContractAdjustment(models.Model):
     _description = "Contract Pay Adjustment"
     _order = "date desc, id"
 
+    name = fields.Char(string="Reference",
+        required=True)
     contract_id = fields.Many2one(string="Contract",
         comodel_name="hr.contract",
         required=True)
