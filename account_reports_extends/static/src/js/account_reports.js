@@ -1,7 +1,6 @@
-odoo.define('school_account_reports.account_report', function (require) {
+odoo.define('account_reports_extends.account_report', function (require) {
 'use strict';
 
-var account_report = require('account_reports_extends.account_report');
 var Widget = require('web.Widget');
 var RelationalFields = require('web.relational_fields');
 var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
@@ -112,8 +111,6 @@ accountReportsWidget.include({
         'value_changed': function (ev) {
             var self = this;
             self.report_options.partner_ids = ev.data.partner_ids;
-            self.report_options.family_ids = ev.data.family_ids;
-            self.report_options.grade_level_ids = ev.data.grade_level_ids;
             self.report_options.partner_categories = ev.data.partner_categories;
             self.report_options.accounts = ev.data.accounts;
             self.report_options.analytic_accounts = ev.data.analytic_accounts;
@@ -126,57 +123,39 @@ accountReportsWidget.include({
     }),
     render_searchview_buttons: function () {
         self = this;
-        if (this.report_options.partner && this.report_options.family) {
+        if (this.report_options.analytic) {
             if (!this.M2MFilters) {
                 var fields = {};
-                if ('partner_ids' in this.report_options) {
-                    fields['partner_ids'] = {
-                        label: _t('Partners'),
-                        modelName: 'res.partner',
-                        value: this.report_options.partner_ids.map(Number),
+                if (this.report_options.accounts) {
+                    fields['accounts'] = {
+                        label: _t('Accounts'),
+                        modelName: 'account.account',
+                        value: this.report_options.accounts.map(Number),
                     };
                 }
-                if ('family_ids' in this.report_options) {
-                    fields['family_ids'] = {
-                        label: _t('Families'),
-                        modelName: 'res.partner',
-                        value: this.report_options.family_ids.map(Number),
+                if (this.report_options.analytic_accounts) {
+                    fields['analytic_accounts'] = {
+                        label: _t('Analytic Accounts'),
+                        modelName: 'account.analytic.account',
+                        value: this.report_options.analytic_accounts.map(Number),
                     };
                 }
-                if ('grade_level_ids' in this.report_options) {
-                    fields['grade_level_ids'] = {
-                        label: _t('Grade Levels'),
-                        modelName: 'school_base.grade_level',
-                        value: this.report_options.grade_level_ids.map(Number),
-                    };
-                }
-                if ('partner_categories' in this.report_options) {
-                    fields['partner_categories'] = {
+                if (this.report_options.analytic_tags) {
+                    fields['analytic_tags'] = {
                         label: _t('Tags'),
-                        modelName: 'res.partner.category',
-                        value: this.report_options.partner_categories.map(Number),
+                        modelName: 'account.analytic.tag',
+                        value: this.report_options.analytic_tags.map(Number),
                     };
                 }
                 if (!_.isEmpty(fields)) {
                     this.M2MFilters = new M2MFilters(this, fields);
-                    this.M2MFilters.appendTo(this.$searchview_buttons.find('.js_account_partner_m2m'));
+                    this.M2MFilters.appendTo(this.$searchview_buttons.find('.js_account_analytic_m2m'));
                 }
             } else {
-                this.$searchview_buttons.find('.js_account_partner_m2m').append(this.M2MFilters.$el);
+                this.$searchview_buttons.find('.js_account_analytic_m2m').append(this.M2MFilters.$el);
             }
         }
         this._super.apply(this, arguments);
-        if (this.report_options.homeroom || this.report_options.homeroom == '') {
-            var filter_homeroom = this.$searchview_buttons.find('.o_account_reports_filter_homeroom')
-            filter_homeroom[0].value = this.report_options.homeroom
-            filter_homeroom.change(function (ev) {
-                self.report_options['homeroom'] = ev.target.value
-                self.reload().then(function () {
-                    self.$searchview_buttons.find('.account_partner_filter').click();
-                    self.$searchview_buttons.find('.account_analytic_filter').click();
-                });
-            });
-        }
     }
 })
 });

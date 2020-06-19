@@ -14,6 +14,7 @@
 
     'depends': [
         'account_reports',
+        'account_reports_extends',
         'school_finance',
     ],
 
