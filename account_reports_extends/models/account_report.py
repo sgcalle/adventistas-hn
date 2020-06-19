@@ -34,6 +34,7 @@ class AccountReport(models.AbstractModel):
     
     def get_report_informations(self, options):
         info = super(AccountReport, self).get_report_informations(options)
+        options = options or self._get_options(options)
         if options.get("accounts") is not None:
             info["options"]["selected_account_names"] = [self.env["account.account"].browse(int(account)).name for account in options["accounts"]]
         return info
