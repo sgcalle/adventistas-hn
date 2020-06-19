@@ -127,8 +127,8 @@ class AccountStudentLedger(models.AbstractModel):
             ctx['homeroom'] = options['homeroom']
         return ctx
     
-    def get_report_information(self, options):
-        info = super(AccountStudentLedger, self).get_report_information(options)
+    def get_report_informations(self, options):
+        info = super(AccountStudentLedger, self).get_report_informations(options)
         if options.get('family'):
             info['options']['selected_family_ids'] = [self.env['res.partner'].browse(int(family)).name for family in options['family_ids']]
         if options.get('grade_level'):
