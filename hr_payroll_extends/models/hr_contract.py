@@ -45,9 +45,13 @@ class HrContract(models.Model):
             lambda l: l.date >= date_from and l.date <= date_to)
         return sum(covered_deductions.mapped("amount"))
     
-    def get_contributions_amount(self, company=False):
+    def get_contributions_amount(self, company=False, partner_id=None):
         self.ensure_one()
-        if company:
-            return sum(self.contribution_ids.mapped("company_amount"))
-        else:
-            return sum(self.contribution_ids.mapped("employee_amount"))
+        total_amount = 0
+        for contrib in self.contribution_ids:
+            amount = contrib.company_amount if company else contrib.employee_amount
+            if not partner_id:
+                total_amount += amount
+            elif partner_id and partner_id == contrib.partner_id.id:
+                total_amount += amount
+        return total_amount

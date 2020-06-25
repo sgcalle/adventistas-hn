@@ -83,7 +83,7 @@
                 <group expand="0" string="Group By">
                     <filter string="Employee" name="group_by_employee" domain="[]" context="{'group_by':'employee_id'}"/>
                     <filter string="Partner" name="group_by_partner" domain="[]" context="{'group_by':'partner_id'}"/>
-                    <filter string="State" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
+                    <filter string="Status" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
                 </group>
             </search>
         </field>

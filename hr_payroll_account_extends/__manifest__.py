@@ -23,5 +23,7 @@
         'views/hr_contract_views.xml',
         'views/hr_loan_views.xml',
         'views/hr_savings_views.xml',
+        'views/hr_payslip_views.xml',
+        'views/hr_employee_views.xml',
     ],
 }

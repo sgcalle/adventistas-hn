@@ -79,7 +79,7 @@ class HrPayslip(models.Model):
                 res.append(attendance_line)
         return res
 
-    @api.onchange("employee_id", "date_to")
+    @api.onchange("employee_id", "date_to", "contract_id")
     def _compute_loan_and_savings_payments(self):
         if not self.employee_id or not self.date_to:
             return
@@ -132,7 +132,7 @@ class HrPayslip(models.Model):
         for saving in savings:
             payment_vals = {
                 "savings_id": saving.id,
-                "amount": saving.payslip_deduction,
+                "amount": self.contract_id.wage * saving.payslip_deduction / 100 if saving.percentage_of_wage else saving.payslip_deduction,
             }
             res.append(payment_vals)
         return res
