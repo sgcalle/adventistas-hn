@@ -22,6 +22,15 @@
     </div>
 </template>
 
+<template id="ckhn_check_bo">
+    <div class="ckhn_check">
+        <div class="ckhn_date"><t t-esc="page['payment_date_honduras']"/></div>
+        <div class="ckhn_payee_name">*** <t t-esc="page['partner_name']"/> ****</div>
+        <div class="ckhn_amount">*** <t t-esc="page['amount']"/> ***</div>
+        <div class="ckhn_amount_in_word">**** <t t-esc="page['amount_in_word']"/> *****</div>
+    </div>
+</template>
+
 <template id="ckhn_stub_1_preprinted">
     <div class="ckhn_stub_1">
         <div class="ckhn_date">
@@ -231,7 +240,8 @@
 <template id="honduras_check_layout_not_preprinted" name="Honduras Check Layout (Not Preprinted)">
     <style>
         .ckhn_check {
-            top: 0in;
+            top: -0.32in;
+            left: -0.48in;
         }
         .ckhn_stub_1 {
             top: 3.85in;
@@ -242,6 +252,29 @@
     </style>
     <div class="page ckhn_page" t-attf-style="top: {{ o.company_id.account_check_printing_margin_top }}in; left: {{ o.company_id.account_check_printing_margin_left }}in; right: {{ o.company_id.account_check_printing_margin_right }}in;">
         <t t-call="l10n_hn_check_printing.ckhn_check"/>
+        <t t-call="l10n_hn_check_printing.ckhn_stub_1_not_preprinted"/>
+        <t t-call="l10n_hn_check_printing.ckhn_stub_2_not_preprinted"/>
+    </div>
+</template>
+
+<template id="honduras_check_layout_not_preprinted_bo" name="Honduras Check Layout for BO (Not Preprinted)">
+    <style>
+        .ckhn_check {
+            top: -0.5in;
+            left: -0.48in;
+        }
+        .ckhn_stub_1 {
+            top: 3.85in;
+        }
+        .ckhn_stub_2 {
+            top: 5.85in;
+        }
+        .ckhn_check .ckhn_date {
+            left: 5.8in;
+        }
+    </style>
+    <div class="page ckhn_page" t-attf-style="top: {{ o.company_id.account_check_printing_margin_top }}in; left: {{ o.company_id.account_check_printing_margin_left }}in; right: {{ o.company_id.account_check_printing_margin_right }}in;">
+        <t t-call="l10n_hn_check_printing.ckhn_check_bo"/>
         <t t-call="l10n_hn_check_printing.ckhn_stub_1_not_preprinted"/>
         <t t-call="l10n_hn_check_printing.ckhn_stub_2_not_preprinted"/>
     </div>
