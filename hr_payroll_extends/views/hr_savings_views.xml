@@ -30,12 +30,17 @@
                         <h1><field name="name" placeholder="e.g. SS Savings"/></h1>
                     </div>
                     <group>
-                        <group name="details">
+                        <group name="details" col="2">
                             <field name="active" invisible="1"/>
                             <field name="employee_id"/>
                             <field name="partner_id"/>
                             <field name="initial_balance"/>
-                            <field name="payslip_deduction"/>
+                            <field name="percentage_of_wage"/>
+                            <label for="payslip_deduction"/>
+                            <div>
+                                <field name="payslip_deduction" nolabel="1" class="oe_inline"/>
+                                <span attrs="{'invisible': [('percentage_of_wage','=',False)]}" class="oe_inline">%</span>
+                            </div>
                         </group>
                         <group name="dates">
                             <field name="date_deduction"/>

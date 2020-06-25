@@ -9,11 +9,17 @@ class HrContractContribution(models.Model):
 
     name = fields.Char(string="Reference",
         required=True)
+    partner_id = fields.Many2one(string="Partner",
+        comodel_name="res.partner",
+        required=True)
     contract_id = fields.Many2one(string="Contract",
         comodel_name="hr.contract",
         required=True)
     amount = fields.Float(string="Amount",
-        required=True)
+        required=True,
+        help="If % of Wage is checked, this is the ratio of the contribution based on the wage in the contract. Otherwise, this is a fixed amount.")
+    percentage_of_wage = fields.Boolean(string="% of Wage",
+        help="Check if the contribution amount is a percentage of the wage in the contract.")
     employee_percent = fields.Float(string="Emp. %")
     company_percent = fields.Float(string="Comp. %")
     employee_amount = fields.Float(string="Emp. Amount",
@@ -29,8 +35,9 @@ class HrContractContribution(models.Model):
             if (contrib.employee_percent + contrib.company_percent) != 100.0:
                 raise ValidationError("Employee and Company percentage must total to 100.")
     
-    @api.depends("amount", "employee_percent", "company_percent")
+    @api.depends("amount", "employee_percent", "company_percent", "percentage_of_wage", "contract_id.wage")
     def _compute_amount(self):
         for contrib in self:
-            contrib.employee_amount = contrib.amount * contrib.employee_percent / 100.0
-            contrib.company_amount = contrib.amount * contrib.company_percent / 100.0
+            amount = (contrib.contract_id.wage * contrib.amount / 100.0) if contrib.percentage_of_wage else contrib.amount
+            contrib.employee_amount = amount * contrib.employee_percent / 100.0
+            contrib.company_amount = amount * contrib.company_percent / 100.0

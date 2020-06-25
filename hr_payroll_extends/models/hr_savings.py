@@ -39,10 +39,15 @@ class HrSavings(models.Model):
         comodel_name="res.currency",
         related="company_id.currency_id",
         readonly=True)
+    percentage_of_wage = fields.Boolean(string="% of Wage",
+        help="Check if the payslip deduction is a percentage of the wage in the contract.",
+        readonly=True,
+        states={"draft": [("readonly", False)]})
     payslip_deduction = fields.Monetary(string="Payslip Deduction",
         required=True,
         readonly=True,
-        states={"draft": [("readonly", False)]})
+        states={"draft": [("readonly", False)]},
+        help="If % of Wage is checked, this is the ratio of the deduction based on the wage in the contract. Otherwise, this is a fixed amount.")
     date_deduction = fields.Date(string="Deduction Start Date",
         required=True,
         readonly=True,
