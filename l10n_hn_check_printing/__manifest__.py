@@ -21,8 +21,6 @@
     'data': [
         'data/hn_check_printing.xml',
         'report/print_check.xml',
-        'report/print_check_top.xml',
-        'report/print_check_middle.xml',
-        'report/print_check_bottom.xml',
+        'views/account_journal_views.xml',
     ],
 }
