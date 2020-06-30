@@ -27,6 +27,7 @@ class HrPayslip(models.Model):
         move_obj = self.env["account.move"]
         move_line_obj = self.env["account.move.line"]
         move_data = {}
+        to_repost = {}
         for payslip in self.filtered(lambda p: p.move_id and p.move_id.state == 'draft'):
             data = {}
             
@@ -49,6 +50,13 @@ class HrPayslip(models.Model):
                     line_amount = min(invoice.amount_residual_signed, remaining_wage)
                     move_data.setdefault(invoice.id, {})
                     accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=invoice.fiscal_position_id)
+                    if invoice.state == "posted":
+                        to_repost.setdefault(invoice.id, [])
+                        if invoice.has_reconciled_entries:
+                            reconciled_info = invoice._get_reconciled_info_JSON_values()
+                            for item in reconciled_info:
+                                to_repost[invoice.id].append(item["payment_id"])
+                        invoice.button_draft()
                     created_line = move_line_obj.create({
                         "move_id": invoice.id,
                         "product_id": product.id,
@@ -57,12 +65,7 @@ class HrPayslip(models.Model):
                         "quantity": 1,
                         "payslip_id": payslip.id,
                     })
-                    if invoice.state == "posted":
-                        created_line.name = created_line._get_computed_name()
-                        created_line.account_id = created_line._get_computed_account()
-                        created_line.product_uom_id = created_line._get_computed_uom()
-                    else:
-                        created_line._onchange_product_id()
+                    created_line._onchange_product_id()
                     move_data[invoice.id][created_line.id] = {
                         "name": created_line.name + "\n" + payslip.number + " (" + payslip.name + ")",
                         "price_unit": -line_amount,
@@ -269,5 +272,12 @@ class HrPayslip(models.Model):
                         "account_id": line.account_id.id,
                     }))
             move.write({"invoice_line_ids": invoice_line_ids})
+        
+        # REPOST INVOICES
+        for invoice_id, reconciled_ids in to_repost.items():
+            invoice = move_obj.browse(invoice_id)
+            invoice.action_post()
+            for reconciled_id in reconciled_ids:
+                invoice.js_assign_outstanding_line(reconciled_id)
 
         return res
