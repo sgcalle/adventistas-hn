@@ -1,5 +1,7 @@
 #-*- coding:utf-8 -*-
 
+import json
+
 from odoo import models, fields, api
 from odoo.exceptions import MissingError
 
@@ -27,53 +29,68 @@ class HrPayslip(models.Model):
         move_obj = self.env["account.move"]
         move_line_obj = self.env["account.move.line"]
         move_data = {}
-        to_repost = {}
         for payslip in self.filtered(lambda p: p.move_id and p.move_id.state == 'draft'):
             data = {}
             
             # CREATE INVOICE DEDUCTION OR BILL FOR EMPLOYEE PAY
             remaining_wage = payslip.net_wage
             product = payslip.employee_id.payroll_invoice_product_id
-
             if not payslip.credit_note:
+                credit_note_data = {}
                 matched_invoices = move_obj.search([
                     ('type','=','out_invoice'),
                     ('partner_id','=',payslip.employee_id.address_home_id.id),
                     ('state','=','posted'),
                     ('amount_residual_signed','>',0.0)]).sorted(key=lambda r: r.invoice_date_due)
-                matched_invoices += move_obj.search([
-                    ('type','=','out_invoice'),
-                    ('partner_id','=',payslip.employee_id.address_home_id.id),
-                    ('state','=','draft'),
-                    ('amount_residual_signed','>',0.0)]).sorted(key=lambda r: r.invoice_date_due)
                 for invoice in matched_invoices:
-                    line_amount = min(invoice.amount_residual_signed, remaining_wage)
-                    move_data.setdefault(invoice.id, {})
-                    accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=invoice.fiscal_position_id)
-                    if invoice.state == "posted":
-                        to_repost.setdefault(invoice.id, [])
-                        if invoice.has_reconciled_entries:
-                            reconciled_info = invoice._get_reconciled_info_JSON_values()
-                            for item in reconciled_info:
-                                to_repost[invoice.id].append(item["payment_id"])
-                        invoice.button_draft()
-                    created_line = move_line_obj.create({
-                        "move_id": invoice.id,
-                        "product_id": product.id,
-                        "account_id": accounts["income"].id,
-                        "analytic_account_id": payslip.contract_id.analytic_account_id.id,
-                        "quantity": 1,
-                        "payslip_id": payslip.id,
+                    residual_amount = min(invoice.amount_residual_signed, remaining_wage)
+                    credit_note_data.setdefault(invoice.partner_id.id, {})
+                    credit_note_data[invoice.partner_id.id].setdefault(invoice.family_id.id, {})
+                    credit_note_data[invoice.partner_id.id][invoice.family_id.id].setdefault(invoice.student_id.id, {
+                        "amount": 0,
+                        "reconcile_ids": []
                     })
-                    created_line._onchange_product_id()
-                    move_data[invoice.id][created_line.id] = {
-                        "name": created_line.name + "\n" + payslip.number + " (" + payslip.name + ")",
-                        "price_unit": -line_amount,
-                    }
-                    remaining_wage -= line_amount
+                    credit_note_data[invoice.partner_id.id][invoice.family_id.id][invoice.student_id.id]["amount"] += residual_amount
+                    credit_note_data[invoice.partner_id.id][invoice.family_id.id][invoice.student_id.id]["reconcile_ids"] += invoice.line_ids.ids
+                    remaining_wage -= residual_amount
                     if not remaining_wage:
                         break
-            
+                
+                # CREATE CREDIT NOTES
+                for partner_id, family_ids in credit_note_data.items():
+                    for family_id, student_ids in family_ids.items():
+                        for student_id, details in student_ids.items():
+                            credit_note = move_obj.create({
+                                "type": "out_refund",
+                                "partner_id": partner_id,
+                                "family_id": family_id,
+                                "student_id": student_id,
+                                "journal_id": payslip.employee_id.payroll_journal_id.id
+                            })
+                            credit_note._onchange_partner_id()
+                            accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=credit_note.fiscal_position_id)
+                            created_line = move_line_obj.create({
+                                "move_id": credit_note.id,
+                                "product_id": product.id,
+                                "account_id": accounts["income"].id,
+                                "analytic_account_id": payslip.contract_id.analytic_account_id.id,
+                                "quantity": 1,
+                                "payslip_id": payslip.id,
+                            })
+                            created_line._onchange_product_id()
+                            credit_note.write({
+                                "invoice_line_ids": [(1, created_line.id, {
+                                    "name": created_line.name + "\n" + payslip.number + " (" + payslip.name + ")",
+                                    "price_unit": details["amount"],
+                                })]
+                            })
+                            credit_note.action_post()
+                            reconcile_info = json.loads(credit_note.invoice_outstanding_credits_debits_widget)
+                            if details["reconcile_ids"] and reconcile_info:
+                                for line in reconcile_info["content"]:
+                                    if line["id"] in details["reconcile_ids"]:
+                                        credit_note.js_assign_outstanding_line(line["id"])
+
             if remaining_wage:
                 product = payslip.employee_id.payroll_bill_product_id
                 payslip_bill = move_obj.create({
@@ -272,12 +289,5 @@ class HrPayslip(models.Model):
                         "account_id": line.account_id.id,
                     }))
             move.write({"invoice_line_ids": invoice_line_ids})
-        
-        # REPOST INVOICES
-        for invoice_id, reconciled_ids in to_repost.items():
-            invoice = move_obj.browse(invoice_id)
-            invoice.action_post()
-            for reconciled_id in reconciled_ids:
-                invoice.js_assign_outstanding_line(reconciled_id)
 
         return res
