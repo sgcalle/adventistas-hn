@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <field name="worked_days_line_ids" position="after">
                 <separator string="Loan Payments"/>
-                <field name="loan_payment_ids" attrs="{'readonly': [('state', 'not in', ['draft'])]}">
+                <field name="loan_payment_ids" attrs="{'readonly': [('state', 'not in', ['draft','verify'])]}">
                     <tree string="Loan Payments" editable="bottom">
                         <field name="loan_id" domain="[('employee_id', '=', parent.employee_id), ('state', '=', 'open')]"/>
                         <field name="partner_id"/>
@@ -15,7 +15,7 @@
                     </tree>
                 </field>
                 <separator string="Savings Payments"/>
-                <field name="savings_payment_ids" attrs="{'readonly': [('state', 'not in', ['draft'])]}">
+                <field name="savings_payment_ids" attrs="{'readonly': [('state', 'not in', ['draft','verify'])]}">
                     <tree string="Savings Payments" editable="bottom">
                         <field name="savings_id" domain="[('employee_id', '=', parent.employee_id), ('state', '=', 'open')]"/>
                         <field name="partner_id"/>
