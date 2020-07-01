@@ -23,6 +23,20 @@ class SaleOrderForStudents(models.Model):
     student_id = fields.Many2one("res.partner", string="Student", domain=[('person_type', '=', 'student')])
     family_id = fields.Many2one("res.partner", string="Family", domain=[('is_family', '=', True)])
 
+    def _prepare_invoice(self):
+        self.ensure_one()
+        invoice_vals = super(SaleOrderForStudents, self)._prepare_invoice()
+        if self.invoice_date:
+            invoice_vals["invoice_date"] = self.invoice_date
+        if self.invoice_date_due:
+            invoice_vals["invoice_date_due"] = self.invoice_date_due
+        if self.student_id:
+            invoice_vals["student_id"] = self.student_id.id
+        if self.family_id:
+            invoice_vals["family_id"] = self.family_id.id
+        if self.journal_id:
+            invoice_vals["journal_id"] = self.journal_id.id
+        return invoice_vals
 
     def _create_invoices(self, grouped=False, final=False):
 
@@ -36,27 +50,6 @@ class SaleOrderForStudents(models.Model):
                 receivable_lines.sudo().write({
                     "account_id": order.partner_id.property_account_receivable_id.id
                 })
-
-            # Update values
-            write_variables = dict()
-
-            if order.journal_id:
-                write_variables["journal_id"] = order.journal_id.id
-            
-            if order.invoice_date:
-                write_variables["invoice_date"] = order.invoice_date
-
-            if order.invoice_date:
-                write_variables["invoice_date_due"] = order.invoice_date_due
-
-            if order.student_id:
-                write_variables["student_id"] = order.student_id.id
-
-            if order.family_id:
-                write_variables["family_id"] = order.family_id.id
-
-            if write_variables:
-                order.invoice_ids.write(write_variables)
         
         return all_moves
         
