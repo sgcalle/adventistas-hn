@@ -7,3 +7,5 @@ from . import hr_savings
 from . import account_move_line
 from . import hr_contract
 from . import hr_employee
+from . import hr_payslip_deduction
+from . import browseable_object

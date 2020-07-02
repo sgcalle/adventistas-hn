@@ -10,6 +10,7 @@ class HrContractAdjustment(models.Model):
 
     name = fields.Char(string="Reference",
         required=True)
+    code = fields.Char(string="Code")
     contract_id = fields.Many2one(string="Contract",
         comodel_name="hr.contract",
         required=True)

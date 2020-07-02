@@ -25,4 +25,21 @@
             </xpath>
         </field>
     </record>
+
+    <record id="hr_payslip_view_form_inherit_deductions" model="ir.ui.view">
+        <field name="name">hr.payslip.view.form.inherit</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="hr_payroll_extends.hr_payslip_view_form_inherit"/>
+        <field name="arch" type="xml">
+            <field name="savings_payment_ids" position="after">
+                <separator string="Invoice Payments"/>
+                <field name="deduction_ids" attrs="{'readonly': [('state', 'not in', ['draft','verify'])]}">
+                    <tree string="Invoice Payments" editable="bottom" create="false" edit="false">
+                        <field name="move_id"/>
+                        <field name="amount"/>
+                    </tree>
+                </field>
+            </field>
+        </field>
+    </record>
 </odoo>
