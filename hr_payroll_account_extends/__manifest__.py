@@ -20,6 +20,8 @@
     ],
 
     'data': [
+        'security/ir.model.access.csv',
+        'security/hr_payslip_deduction_security.xml',
         'views/hr_contract_views.xml',
         'views/hr_loan_views.xml',
         'views/hr_savings_views.xml',
