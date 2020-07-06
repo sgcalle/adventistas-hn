@@ -130,7 +130,7 @@ class HrPayslip(models.Model):
             if payslip.net_wage:
                 product = payslip.employee_id.payroll_bill_product_id
                 payslip_bill = move_obj.create({
-                    "type": "in_refund" if payslip.credit_note else "in_invoice",
+                    "type": "in_refund" if (payslip.credit_note or payslip.net_wage < 0) else "in_invoice",
                     "partner_id": payslip.employee_id.address_home_id.id,
                     "journal_id": payslip.employee_id.payroll_journal_id.id,
                 })
@@ -148,7 +148,7 @@ class HrPayslip(models.Model):
                 created_line._onchange_product_id()
                 move_data[payslip_bill.id][created_line.id] = {
                     "name": created_line.name + "\n" + payslip.number + " (" + payslip.name + ")",
-                    "price_unit": payslip.net_wage,
+                    "price_unit": abs(payslip.net_wage),
                 }
 
             # ALLOWANCES AND DEDUCTIONS
