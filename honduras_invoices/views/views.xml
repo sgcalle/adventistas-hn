@@ -17,6 +17,10 @@
                         <field name="cai" />
                         <field name="issue_limit_date" />
                     </group>
+                    <group string="Warnings">
+                        <field name="authorized_range_warning" />
+                        <field name="issue_limit_date_warning" />
+                    </group>
                 </page>
             </notebook>
         </field>
