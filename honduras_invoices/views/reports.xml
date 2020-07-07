@@ -20,6 +20,7 @@
         </record>
         <record id="account.account_invoices" model="ir.actions.report">
             <field name="paperformat_id" ref="honduras_invoices.honduras_paper_format"/>
+            <field name="attachment_use">1</field>
         </record>
 
         <record id="invoice_payments_report" model="ir.actions.report">

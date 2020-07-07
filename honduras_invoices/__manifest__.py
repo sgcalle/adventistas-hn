@@ -25,7 +25,8 @@
         'sale',
         'product',
         'account_reports',
-        'school_finance'
+        'school_finance',
+        'base_automation',
     ],
 
     # always loaded
@@ -35,6 +36,9 @@
         'views/templates.xml',
         'views/template_nota_interna.xml',
         'views/res_partner_views.xml',
+        'views/account_move_views.xml',
         'views/reports.xml',
+        'data/mail_template_data.xml',
+        'data/base_automation_data.xml',
     ]
 }
