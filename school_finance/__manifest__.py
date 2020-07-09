@@ -20,6 +20,7 @@
         'base',
         'school_base',
         'sale',
+        'base_automation',
     ],
 
     # always loaded
@@ -28,6 +29,7 @@
 
         # Actions
         'data/sale_order_actions.xml',
+        'data/base_automation_data.xml',
 
         # Views
         'views/views.xml',
