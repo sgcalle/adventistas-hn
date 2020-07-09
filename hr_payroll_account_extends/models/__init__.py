@@ -9,3 +9,4 @@ from . import hr_contract
 from . import hr_employee
 from . import hr_payslip_deduction
 from . import browseable_object
+from . import hr_payroll_structure_type

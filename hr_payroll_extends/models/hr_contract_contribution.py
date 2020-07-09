@@ -14,7 +14,8 @@ class HrContractContribution(models.Model):
         required=True)
     contract_id = fields.Many2one(string="Contract",
         comodel_name="hr.contract",
-        required=True)
+        required=True,
+        ondelete="cascade")
     amount = fields.Float(string="Amount",
         required=True,
         help="If % of Wage is checked, this is the ratio of the contribution based on the wage in the contract. Otherwise, this is a fixed amount.")

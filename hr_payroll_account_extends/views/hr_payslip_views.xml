@@ -36,6 +36,8 @@
                 <field name="deduction_ids" attrs="{'readonly': [('state', 'not in', ['draft','verify'])]}">
                     <tree string="Invoice Payments" editable="bottom" create="false" edit="false">
                         <field name="move_id"/>
+                        <field name="move_line_id"/>
+                        <field name="due_date"/>
                         <field name="amount"/>
                     </tree>
                 </field>

@@ -24,7 +24,7 @@ class HrPayslip(models.Model):
     
     def _compute_deductions(self):
         for payslip in self:
-            if not payslip.employee_id or payslip.credit_note:
+            if not payslip.employee_id or payslip.credit_note or not payslip.struct_id.type_id.invoice_payment_scope:
                 continue
             deduction_vals = payslip._get_deduction_lines()
             deductions = self.env["hr.payslip.deduction"]
@@ -38,19 +38,23 @@ class HrPayslip(models.Model):
         res = []
         if not self.employee_id.address_home_id:
             raise MissingError("Private address of {} is not set. Set the private address in the employee form.".format(employee.name))
-        invoices = self.env["account.move"].search([
-            ('type','=','out_invoice'),
-            ('partner_id','=',self.employee_id.address_home_id.id),
-            ('state','=','posted'),
-            ('amount_residual_signed','>',0.0)]).sorted(key=lambda r: r.invoice_date_due)
+        partner = self.employee_id.address_home_id
+        results, total, amls = self.env["report.account.report_agedpartnerbalance"].with_context(
+            partner_ids=partner)._get_partner_move_lines(
+                    ["receivable"], fields.Date.context_today(self), "posted", 30)
         remaining_wage = self.net_wage
-        for invoice in invoices:
-            residual_amount = min(invoice.amount_residual_signed, remaining_wage)
+        for aml in amls.get(partner.id, []):
+            if self.struct_id.type_id.invoice_payment_scope == "overdue" and aml["period"] >= 6:
+                continue
+            residual_amount = min(aml["amount"], remaining_wage)
             deduction_vals = {
-                "move_id": invoice.id,
+                "move_line_id": aml["line"].id,
                 "amount": residual_amount,
             }
             res.append(deduction_vals)
+            remaining_wage -= residual_amount
+            if not remaining_wage:
+                break
         return res
     
     def get_deductions_amount(self):
@@ -90,7 +94,7 @@ class HrPayslip(models.Model):
                         "reconcile_ids": []
                     })
                     credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id]["amount"] += deduction.amount
-                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id]["reconcile_ids"] += deduction.move_id.line_ids.ids
+                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id]["reconcile_ids"] += [deduction.move_line_id.id]
                 
                 # CREATE CREDIT NOTES
                 for partner_id, family_ids in credit_note_data.items():
@@ -121,11 +125,8 @@ class HrPayslip(models.Model):
                                 })]
                             })
                             credit_note.action_post()
-                            reconcile_info = json.loads(credit_note.invoice_outstanding_credits_debits_widget)
-                            if details["reconcile_ids"] and reconcile_info:
-                                for line in reconcile_info["content"]:
-                                    if line["id"] in details["reconcile_ids"]:
-                                        credit_note.js_assign_outstanding_line(line["id"])
+                            for line_id in details["reconcile_ids"]:
+                                credit_note.js_assign_outstanding_line(line_id)
 
             if payslip.net_wage:
                 product = payslip.employee_id.payroll_bill_product_id

@@ -27,5 +27,6 @@
         'views/hr_savings_views.xml',
         'views/hr_payslip_views.xml',
         'views/hr_employee_views.xml',
+        'views/hr_payroll_structure_type_views.xml',
     ],
 }
