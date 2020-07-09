@@ -8,22 +8,27 @@ class HrContract(models.Model):
     allowance_ids = fields.One2many(string="Allowances",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","allowance"),("date","=",False)])
+        domain=[("type","=","allowance"),("date","=",False)],
+        copy=True)
     other_allowance_ids = fields.One2many(string="Other Allowances",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","allowance"),("date","!=",False)])
+        domain=[("type","=","allowance"),("date","!=",False)],
+        copy=True)
     deduction_ids = fields.One2many(string="Deductions",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","deduction"),("date","=",False)])
+        domain=[("type","=","deduction"),("date","=",False)],
+        copy=True)
     other_deduction_ids = fields.One2many(string="Other Deductions",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","deduction"),("date","!=",False)])
+        domain=[("type","=","deduction"),("date","!=",False)],
+        copy=True)
     contribution_ids = fields.One2many(string="Contributions",
         comodel_name="hr.contract.contribution",
-        inverse_name="contract_id")
+        inverse_name="contract_id",
+        copy=True)
     
     def get_allowances_amount(self, code=False):
         self.ensure_one()

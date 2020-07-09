@@ -13,7 +13,8 @@ class HrContractAdjustment(models.Model):
     code = fields.Char(string="Code")
     contract_id = fields.Many2one(string="Contract",
         comodel_name="hr.contract",
-        required=True)
+        required=True,
+        ondelete="cascade")
     type = fields.Selection(string="Type",
         required=True,
         selection=[
