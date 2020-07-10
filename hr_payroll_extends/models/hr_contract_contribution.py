@@ -9,6 +9,7 @@ class HrContractContribution(models.Model):
 
     name = fields.Char(string="Reference",
         required=True)
+    code = fields.Char(string="Code")
     partner_id = fields.Many2one(string="Partner",
         comodel_name="res.partner",
         required=True)

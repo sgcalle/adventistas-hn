@@ -15,6 +15,8 @@ class HrLoanPayment(models.Model):
     loan_id = fields.Many2one(string="Loan",
         comodel_name="hr.loan",
         required=True)
+    code = fields.Char(string="Code",
+        related="loan_id.code")
     partner_id = fields.Many2one(string="Partner",
         related="loan_id.partner_id",
         readonly=True)
