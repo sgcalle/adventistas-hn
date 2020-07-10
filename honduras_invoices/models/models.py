@@ -3,7 +3,7 @@
 from ..tools import tools
 
 from odoo import models, fields, api, _
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError, MissingError
 
 # raise UserError(_('There is no responsible family for %s') % (line.product_id.categ_id.name))
 class Invoice(models.Model):
@@ -23,11 +23,12 @@ class Invoice(models.Model):
 class Invoice(models.Model):
     _inherit = "account.move"
 
-
-
     amount_total_letters = fields.Char("Amount total in letters", compute="_compute_amount_total_letters")
-    
-    surcharge_invoice_id = fields.Many2one("Surcharge Invoice")
+    surcharge_invoice_id = fields.Many2one("Surcharge Invoice", readonly=True)
+    authorized_range_from = fields.Char("Authorized range from", readonly=True)
+    authorized_range_to = fields.Char("Authorized range to", readonly=True)
+    cai = fields.Char("CAI", readonly=True)
+    issue_limit_date = fields.Date("Issue limit date", readonly=True)
 
     def _formatLang(self, value):
         lang = self.partner_id.lang
@@ -53,21 +54,44 @@ class Invoice(models.Model):
             amount_total_letters = number_converter.numero_a_letra(amount_total)
 
             record.amount_total_letters = amount_total_letters
-    
+            
+    @api.constrains("name")
+    def _check_name_within_range(self):
+        for move in self.filtered(lambda m: m.journal_id.is_honduras_invoice and m.state == "posted" and m.type == "out_invoice"):
+            if not all([move.journal_id.cai, move.journal_id.prefix, move.journal_id.authorized_range_from,
+                        move.journal_id.authorized_range_to, move.journal_id.issue_limit_date]):
+                raise MissingError("CAI, Prefix, Issue Limit Date, or Authorized Range fields are not set in Journal")
 
+            if fields.Date.context_today(self) > move.journal_id.issue_limit_date:
+                raise ValidationError("Invoice issue limit date of %s is exceeded!" % move.journal_id.issue_limit_date)
+
+            prefix = move.journal_id.prefix
+            padding = move.journal_id.sequence_id.padding
+            lower_limit = prefix + str(move.journal_id.authorized_range_from).zfill(padding)
+            upper_limit = prefix + str(move.journal_id.authorized_range_to).zfill(padding)
+            if lower_limit > move.name or move.name > upper_limit:
+                raise ValidationError("Invoice number %s is outside of range (%s, %s)" % (
+                    move.name, lower_limit, upper_limit))
+            move.cai = move.journal_id.cai
+            move.authorized_range_from = lower_limit
+            move.authorized_range_to = upper_limit
+            move.issue_limit_date = move.journal_id.issue_limit_date
+
+            warning_limit = prefix + str(move.journal_id.authorized_range_warning).zfill(padding)
+            if move.name == warning_limit:
+                self.env.ref("honduras_invoices.account_journal_mail_template_authorized_range_warn").send_mail(move.journal_id.id)
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
     prefix = fields.Char("Prefix")
-
     is_honduras_invoice = fields.Boolean()
-
-    authorized_range_from = fields.Integer("Authorized range from")
-    authorized_range_to = fields.Integer("Authorized range to")
-
+    authorized_range_from = fields.Integer("Authorized Range From")
+    authorized_range_to = fields.Integer("Authorized Range To")
     cai = fields.Char("CAI")
-    issue_limit_date = fields.Date("Issue limit date")
+    issue_limit_date = fields.Date("Issue Limit Date")
+    authorized_range_warning = fields.Integer("Authorized Range Warning")
+    issue_limit_date_warning = fields.Date("Issue Limit Warning Date")
 
     def write(self, values):
         for record in self:

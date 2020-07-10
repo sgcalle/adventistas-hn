@@ -12,6 +12,7 @@
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
                                 <field name="name"/>
+                                <field name="code"/>
                                 <field name="amount"/>
                             </tree>
                         </field>
@@ -21,6 +22,7 @@
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
                                 <field name="name"/>
+                                <field name="code"/>
                                 <field name="date" required="1" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="amount" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="is_locked"/>
@@ -34,6 +36,7 @@
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
                                 <field name="name"/>
+                                <field name="code"/>
                                 <field name="amount"/>
                             </tree>
                         </field>
@@ -43,6 +46,7 @@
                             <tree editable="bottom">
                                 <field name="type" invisible="1"/>
                                 <field name="name"/>
+                                <field name="code"/>
                                 <field name="date" required="1" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="amount" attrs="{'readonly': [('is_locked','=',True)]}"/>
                                 <field name="is_locked"/>

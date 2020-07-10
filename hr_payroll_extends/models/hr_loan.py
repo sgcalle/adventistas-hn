@@ -8,6 +8,7 @@ class HrLoan(models.Model):
     # Private attributes #
     ######################
     _name = "hr.loan"
+    _description = "Employee Loan"
 
     ###################
     # Default methods #

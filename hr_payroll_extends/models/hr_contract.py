@@ -8,41 +8,46 @@ class HrContract(models.Model):
     allowance_ids = fields.One2many(string="Allowances",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","allowance"),("date","=",False)])
+        domain=[("type","=","allowance"),("date","=",False)],
+        copy=True)
     other_allowance_ids = fields.One2many(string="Other Allowances",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","allowance"),("date","!=",False)])
+        domain=[("type","=","allowance"),("date","!=",False)],
+        copy=True)
     deduction_ids = fields.One2many(string="Deductions",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","deduction"),("date","=",False)])
+        domain=[("type","=","deduction"),("date","=",False)],
+        copy=True)
     other_deduction_ids = fields.One2many(string="Other Deductions",
         comodel_name="hr.contract.adjustment",
         inverse_name="contract_id",
-        domain=[("type","=","deduction"),("date","!=",False)])
+        domain=[("type","=","deduction"),("date","!=",False)],
+        copy=True)
     contribution_ids = fields.One2many(string="Contributions",
         comodel_name="hr.contract.contribution",
-        inverse_name="contract_id")
+        inverse_name="contract_id",
+        copy=True)
     
-    def get_allowances_amount(self):
+    def get_allowances_amount(self, code=False):
         self.ensure_one()
-        return sum(self.allowance_ids.mapped("amount"))
+        return sum(self.allowance_ids.filtered(lambda l: l.code == code).mapped("amount"))
 
-    def get_other_allowances_amount(self, date_from, date_to):
+    def get_other_allowances_amount(self, date_from, date_to, code=False):
         self.ensure_one()
         covered_allowances = self.other_allowance_ids.filtered(
-            lambda l: l.date >= date_from and l.date <= date_to)
+            lambda l: l.date >= date_from and l.date <= date_to and l.code == code)
         return sum(covered_allowances.mapped("amount"))
     
-    def get_deductions_amount(self):
+    def get_deductions_amount(self, code=False):
         self.ensure_one()
-        return sum(self.deduction_ids.mapped("amount"))
+        return sum(self.deduction_ids.filtered(lambda l: l.code == code).mapped("amount"))
 
-    def get_other_deductions_amount(self, date_from, date_to):
+    def get_other_deductions_amount(self, date_from, date_to, code=False):
         self.ensure_one()
         covered_deductions = self.other_deduction_ids.filtered(
-            lambda l: l.date >= date_from and l.date <= date_to)
+            lambda l: l.date >= date_from and l.date <= date_to and l.code == code)
         return sum(covered_deductions.mapped("amount"))
     
     def get_contributions_amount(self, company=False, partner_id=None):

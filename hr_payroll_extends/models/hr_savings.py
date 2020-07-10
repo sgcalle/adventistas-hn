@@ -8,6 +8,7 @@ class HrSavings(models.Model):
     # Private attributes #
     ######################
     _name = "hr.savings"
+    _description = "Employee Savings"
 
     ###################
     # Default methods #
