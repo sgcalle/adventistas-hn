@@ -15,6 +15,8 @@ class HrSavingsPayment(models.Model):
     savings_id = fields.Many2one(string="Savings",
         comodel_name="hr.savings",
         required=True)
+    code = fields.Char(string="Code",
+        related="savings_id.code")
     partner_id = fields.Many2one(string="Partner",
         related="savings_id.partner_id",
         readonly=True)
