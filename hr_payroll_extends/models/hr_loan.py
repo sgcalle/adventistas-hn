@@ -23,6 +23,9 @@ class HrLoan(models.Model):
         required=True,
         readonly=True,
         states={"draft": [("readonly", False)]})
+    code = fields.Char(string="Code",
+        readonly=True,
+        states={"draft": [("readonly", False)]})
     company_id = fields.Many2one(string="Company",
         comodel_name="res.company",
         default=lambda self: self.env["res.company"]._company_default_get())

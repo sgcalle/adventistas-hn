@@ -112,10 +112,10 @@ class HrPayslip(models.Model):
             res.append(payment_vals)
         return res
     
-    def get_loans_amount(self, partner_id=None):
+    def get_loans_amount(self, partner_id=None, code=False):
         self.ensure_one()
         amount = 0
-        for payment in self.loan_payment_ids:
+        for payment in self.loan_payment_ids.filtered(lambda l: l.code == code):
             if not partner_id:
                 amount += payment.amount
             elif partner_id and partner_id == payment.partner_id.id:
@@ -137,10 +137,10 @@ class HrPayslip(models.Model):
             res.append(payment_vals)
         return res
     
-    def get_savings_amount(self, partner_id=None):
+    def get_savings_amount(self, partner_id=None, code=False):
         self.ensure_one()
         amount = 0
-        for payment in self.savings_payment_ids:
+        for payment in self.savings_payment_ids.filtered(lambda l: l.code == code):
             if not partner_id:
                 amount += payment.amount
             elif partner_id and partner_id == payment.partner_id.id:

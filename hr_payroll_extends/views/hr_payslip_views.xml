@@ -10,6 +10,7 @@
                 <field name="loan_payment_ids" attrs="{'readonly': [('state', 'not in', ['draft','verify'])]}">
                     <tree string="Loan Payments" editable="bottom">
                         <field name="loan_id" domain="[('employee_id', '=', parent.employee_id), ('state', '=', 'open')]"/>
+                        <field name="code"/>
                         <field name="partner_id"/>
                         <field name="amount"/>
                     </tree>
@@ -18,6 +19,7 @@
                 <field name="savings_payment_ids" attrs="{'readonly': [('state', 'not in', ['draft','verify'])]}">
                     <tree string="Savings Payments" editable="bottom">
                         <field name="savings_id" domain="[('employee_id', '=', parent.employee_id), ('state', '=', 'open')]"/>
+                        <field name="code"/>
                         <field name="partner_id"/>
                         <field name="amount"/>
                     </tree>
