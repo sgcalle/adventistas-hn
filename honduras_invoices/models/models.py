@@ -69,9 +69,9 @@ class Invoice(models.Model):
             padding = move.journal_id.sequence_id.padding
             lower_limit = prefix + str(move.journal_id.authorized_range_from).zfill(padding)
             upper_limit = prefix + str(move.journal_id.authorized_range_to).zfill(padding)
-            #if lower_limit > move.name or move.name > upper_limit:
-            #    raise ValidationError("Invoice number %s is outside of range (%s, %s)" % (
-            #        move.name, lower_limit, upper_limit))
+            current_number = int(move.name.replace(prefix, ""))
+            if move.journal_id.authorized_range_from > current_number or current_number > move.journal_id.authorized_range_to:
+               raise ValidationError("Invoice number %s is outside of range (%s, %s)" % (move.name, lower_limit, upper_limit))
             move.cai = move.journal_id.cai
             move.authorized_range_from = lower_limit
             move.authorized_range_to = upper_limit
