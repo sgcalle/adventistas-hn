@@ -391,7 +391,7 @@
                             RANGO AUTORIZADO DEL
                             <t t-esc="o.authorized_range_from or '{}{}'.format(o.journal_id.prefix, str(o.journal_id.authorized_range_from).zfill(o.journal_id.sequence_id.padding))" />
                             AL
-                            <t t-esc="o.authorized_range_from or '{}{}'.format(o.journal_id.prefix, str(o.journal_id.authorized_range_to).zfill(o.journal_id.sequence_id.padding))" />
+                            <t t-esc="o.authorized_range_to or '{}{}'.format(o.journal_id.prefix, str(o.journal_id.authorized_range_to).zfill(o.journal_id.sequence_id.padding))" />
                         </td>
                     </tr>
                 </table>
