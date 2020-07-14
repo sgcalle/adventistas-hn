@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="account_move_report_matrix" name="Journal Entry Matrix">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <t t-if="journals">
+                        <t t-foreach="journals" t-as="journal">
+                            <h3 t-esc="journal.name"/>
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Move</th>
+                                        <th>Account</th>
+                                        <th>Partner</th>
+                                        <th>Debit</th>
+                                        <th>Credit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="total_debit" t-value="0"/>
+                                    <t t-set="total_credit" t-value="0"/>
+                                    <t t-foreach="docs.filtered(lambda d: d.journal_id.id == journal.id)" t-as="o">
+                                        <tr t-foreach="o.line_ids" t-as="line">
+                                            <td><span t-field="line.move_id.name"/></td>
+                                            <td><span t-field="line.account_id"/></td>
+                                            <td><span t-field="line.partner_id"/></td>
+                                            <td class="text-right"><span t-field="line.debit"/></td>
+                                            <td class="text-right"><span t-field="line.credit"/></td>
+                                            <t t-set="total_debit" t-value="total_debit + line.debit"/>
+                                            <t t-set="total_credit" t-value="total_credit + line.credit"/>
+                                        </tr>
+                                    </t>
+                                    <tr>
+                                        <td colspan="3" class="text-right"><strong>TOTAL</strong></td>
+                                        <td class="text-right"><strong><span t-esc="total_debit"/></strong></td>
+                                        <td class="text-right"><strong><span t-esc="total_credit"/></strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Move</th>
+                                    <th>Account</th>
+                                    <th>Partner</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="total_debit" t-value="0"/>
+                                <t t-set="total_credit" t-value="0"/>
+                                <t t-foreach="docs" t-as="o">
+                                    <tr t-foreach="o.line_ids" t-as="line">
+                                        <td><span t-field="line.move_id.name"/></td>
+                                        <td><span t-field="line.account_id"/></td>
+                                        <td><span t-field="line.partner_id"/></td>
+                                        <td class="text-right"><span t-field="line.debit"/></td>
+                                        <td class="text-right"><span t-field="line.credit"/></td>
+                                        <t t-set="total_debit" t-value="total_debit + line.debit"/>
+                                        <t t-set="total_credit" t-value="total_credit + line.credit"/>
+                                    </tr>
+                                </t>
+                                <tr>
+                                    <td colspan="3" class="text-right"><strong>TOTAL</strong></td>
+                                    <td class="text-right"><strong><span t-esc="total_debit"/></strong></td>
+                                    <td class="text-right"><strong><span t-esc="total_credit"/></strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
