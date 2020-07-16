@@ -9,6 +9,15 @@
                 <group>
                     <field name="group_by_journal"/>
                 </group>
+                <group string="Fields">
+                    <field name="field_ids" nolabel="1">
+                        <tree editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="field_id" domain="[('model_id','in',[%(account.model_account_move)d,%(account.model_account_move)d])]" options="{'no_create_edit': 1}"/>
+                            <field name="name"/>
+                        </tree>
+                    </field>
+                </group>
                 <footer>
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
