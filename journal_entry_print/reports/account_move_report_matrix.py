@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from dateutil import parser
-from pytz import timezone, utc
-
 from odoo import models, fields, api
 
 class AccountMoveReportMatrix(models.AbstractModel):
@@ -12,7 +9,8 @@ class AccountMoveReportMatrix(models.AbstractModel):
     def _get_report_values(self, docids, data=None):
         move_ids = self.env.context.get("active_ids", [])
         moves = self.env["account.move"].browse(move_ids)
-        
+
+        fields = self.env["account.move.report.matrix.wizard.field"].browse(data["form"]["field_ids"])
         journals = self.env["account.journal"]
         if data["form"]["group_by_journal"]:
             for move in moves:
@@ -23,5 +21,7 @@ class AccountMoveReportMatrix(models.AbstractModel):
             "doc_model": "account.move",
             "docs": moves,
             "data": data,
+            "fields": fields,
             "journals": journals,
+            "getattr": getattr,
         }
