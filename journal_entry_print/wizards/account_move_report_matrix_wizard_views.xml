@@ -13,7 +13,7 @@
                     <field name="field_ids" nolabel="1">
                         <tree editable="bottom">
                             <field name="sequence" widget="handle"/>
-                            <field name="field_id" domain="[('model_id','in',[%(account.model_account_move)d,%(account.model_account_move)d])]" options="{'no_create_edit': 1}"/>
+                            <field name="field_id" domain="[('model_id','in',[%(account.model_account_move)d,%(account.model_account_move_line)d])]" options="{'no_create_edit': 1, 'no_create': 1}"/>
                             <field name="name"/>
                         </tree>
                     </field>
