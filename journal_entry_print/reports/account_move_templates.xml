@@ -30,10 +30,10 @@
                                                     <t t-set="rec" t-value="line"/>
                                                 </t>
                                                 <t t-if="field.field_id.ttype == 'many2one'">
-                                                    <span t-esc="getattr(rec, field.field_id.name).name"/>
+                                                    <span t-esc="getattr(rec, field.field_id.name).display_name"/>
                                                 </t>
                                                 <t t-if="field.field_id.ttype in ['many2many','one2many']">
-                                                    <span t-esc="', '.join(getattr(rec, field.field_id.name).mapped('name'))"/>
+                                                    <span t-esc="', '.join(getattr(rec, field.field_id.name).mapped('display_name'))"/>
                                                 </t>
                                                 <t t-if="field.field_id.ttype not in ['many2one','many2many','one2many']">
                                                     <t t-set="value" t-value="getattr(rec, field.field_id.name)"/>
@@ -93,10 +93,10 @@
                                                 <t t-set="rec" t-value="line"/>
                                             </t>
                                             <t t-if="field.field_id.ttype == 'many2one'">
-                                                <span t-esc="getattr(rec, field.field_id.name).name"/>
+                                                <span t-esc="getattr(rec, field.field_id.name).display_name"/>
                                             </t>
                                             <t t-if="field.field_id.ttype in ['many2many','one2many']">
-                                                <span t-esc="', '.join(getattr(rec, field.field_id.name).mapped('name'))"/>
+                                                <span t-esc="', '.join(getattr(rec, field.field_id.name).mapped('display_name'))"/>
                                             </t>
                                             <t t-if="field.field_id.ttype not in ['many2one','many2many','one2many']">
                                                 <t t-set="value" t-value="getattr(rec, field.field_id.name)"/>
