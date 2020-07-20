@@ -33,6 +33,7 @@
                             <field name="student_status"/>
                         </group>
                         <group>
+                            <field name="birthday"/>
                             <field name="comment_facts"/>
                             <field name="facts_id"/>
                             <field name="facts_id_int"/>

@@ -44,6 +44,7 @@ class Contact(models.Model):
 
     # We need this field as readonly
     name = fields.Char(index=True, compute="_compute_name", store=True, readonly=False)
+    birthday = fields.Date(string="Birthday")
 
     @api.depends("first_name", "middle_name", "last_name")
     def _compute_name(self):
