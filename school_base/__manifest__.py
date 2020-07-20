@@ -30,7 +30,7 @@
         'data/menudata.xml',
         'views/res_partner_view.xml',
         'views/res_company.xml',
-        'views/status_views.xml.xml',
+        'views/status_views.xml',
 
         'views/portal_views.xml',
         'views/views.xml'
