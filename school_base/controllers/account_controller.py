@@ -113,7 +113,7 @@ class StudentController(http.Controller):
         #crea una variable con el modelo desde donde se va a tomar la información:'res.company'          
         compania = http.request.env['res.company']
         #filtro del modelo basados en parametros de la url. ilike como el like pero no diferencia mayusculas de minisculas
-        search_compania = [("x_district_code","ilike",(kw['dist']))]        
+        search_compania = [("district_code_name","ilike",(kw['dist']))]
         #Buscamos informacion en el modelo con el filtro definido. Con sudo() entramos como administradores
         compania_record = compania.sudo().search(search_compania)
         #Obtenemos los registros con los datos que buscamos. Solo recogemos los campos definidos a continuacion 

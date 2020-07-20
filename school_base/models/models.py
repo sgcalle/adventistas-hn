@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api, _
 
+
 class SchoolCode(models.Model):
     _name = "school_base.school_code"
     _order = "sequence"
@@ -20,7 +21,7 @@ class SchoolYear(models.Model):
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
     school_code_id = fields.Many2one("school_base.school_code", string="School code")
-    district_code_id = fields.Many2one("school_base.district_code", string="District code")
+    district_code_id = fields.Many2one(related="school_code_id.district_code_id")
 
     @api.onchange('school_code_id')
     def _get_school_code_id_domain(self):
@@ -37,7 +38,8 @@ class GradeLevel(models.Model):
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
     school_code_id = fields.Many2one("school_base.school_code", string="School code")
-    district_code_id = fields.Many2one("school_base.district_code", string="District code")
+    district_code_id = fields.Many2one(related="school_code_id.district_code_id")
+    capacity = fields.Integer()
 
     @api.onchange('school_code_id')
     def _get_school_code_id_domain(self):
@@ -53,5 +55,5 @@ class DistrictCode(models.Model):
 
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
-    school_code_ids = fields.One2many("school_base.school_code", "district_code_id", string="District code")
+    school_code_ids = fields.One2many("school_base.school_code", "district_code_id", string="School code")
 

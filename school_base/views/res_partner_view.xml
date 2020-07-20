@@ -30,11 +30,14 @@
                             <field name="person_type"/>
                             <field name="grade_level_id"/>
                             <field name="homeroom"/>
-                            <field name="student_status"/>
+                            <field name="student_status" string="School status (deprecated)"/>
+                            <field name="student_status_id"/>
+                            <field name="student_next_status_id"/>
                         </group>
                         <group>
-                            <field name="birthday"/>
+                            <field name="date_of_birth"/>
                             <field name="comment_facts"/>
+                            <field name="facts_approved"/>
                             <field name="facts_id"/>
                             <field name="facts_id_int"/>
                         </group>
