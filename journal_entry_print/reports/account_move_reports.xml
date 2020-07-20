@@ -12,7 +12,7 @@
             <field name="margin_right">7</field>
             <field name="header_line" eval="False"/>
             <field name="header_spacing">20</field>
-            <field name="dpi">90</field>
+            <field name="dpi">120</field>
         </record>
     </data>
 

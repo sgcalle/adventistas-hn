@@ -6,69 +6,127 @@
                 <div class="page">
                     <t t-if="journals">
                         <t t-foreach="journals" t-as="journal">
+                            <t t-set="total_debit" t-value="0"/>
+                            <t t-set="total_credit" t-value="0"/>
                             <h3 t-esc="journal.name"/>
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Move</th>
-                                        <th>Account</th>
-                                        <th>Partner</th>
-                                        <th>Debit</th>
-                                        <th>Credit</th>
+                                        <tr>
+                                            <th t-foreach="fields" t-as="field">
+                                                <span t-esc="field.name or field.field_id.field_description"/>
+                                            </th>
+                                        </tr>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <t t-set="total_debit" t-value="0"/>
-                                    <t t-set="total_credit" t-value="0"/>
                                     <t t-foreach="docs.filtered(lambda d: d.journal_id.id == journal.id)" t-as="o">
                                         <tr t-foreach="o.line_ids" t-as="line">
-                                            <td><span t-field="line.move_id.name"/></td>
-                                            <td><span t-field="line.account_id"/></td>
-                                            <td><span t-field="line.partner_id"/></td>
-                                            <td class="text-right"><span t-field="line.debit"/></td>
-                                            <td class="text-right"><span t-field="line.credit"/></td>
-                                            <t t-set="total_debit" t-value="total_debit + line.debit"/>
-                                            <t t-set="total_credit" t-value="total_credit + line.credit"/>
+                                            <td t-foreach="fields" t-as="field">
+                                                <t t-if="field.field_id.model_id.model == 'account.move'">
+                                                    <t t-set="rec" t-value="line.move_id"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-set="rec" t-value="line"/>
+                                                </t>
+                                                <t t-if="field.field_id.ttype == 'many2one'">
+                                                    <span t-esc="getattr(rec, field.field_id.name).display_name"/>
+                                                </t>
+                                                <t t-if="field.field_id.ttype in ['many2many','one2many']">
+                                                    <span t-esc="', '.join(getattr(rec, field.field_id.name).mapped('display_name'))"/>
+                                                </t>
+                                                <t t-if="field.field_id.ttype not in ['many2one','many2many','one2many']">
+                                                    <t t-set="value" t-value="getattr(rec, field.field_id.name)"/>
+                                                    <t t-if="field.field_id.ttype in ['integer','float','monetary']">
+                                                        <span style="display:block;" class="text-right" t-esc="value if field.field_id.ttype == 'integer' else '%.2f' % value"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span t-esc="value"/>
+                                                    </t>
+                                                    <t t-if="field.field_id.name == 'debit'">
+                                                        <t t-set="total_debit" t-value="total_debit + value"/>
+                                                    </t>
+                                                    <t t-if="field.field_id.name == 'credit'">
+                                                        <t t-set="total_credit" t-value="total_credit + value"/>
+                                                    </t>
+                                                </t>
+                                            </td>
                                         </tr>
                                     </t>
                                     <tr>
-                                        <td colspan="3" class="text-right"><strong>TOTAL</strong></td>
-                                        <td class="text-right"><strong><span t-esc="total_debit"/></strong></td>
-                                        <td class="text-right"><strong><span t-esc="total_credit"/></strong></td>
+                                        <td t-foreach="fields" t-as="field">
+                                            <strong>
+                                                <t t-if="field.field_id.name == 'debit'">
+                                                    <span style="display:block;" class="text-right" t-esc="total_debit"/>
+                                                </t>
+                                                <t t-if="field.field_id.name == 'credit'">
+                                                    <span style="display:block;" class="text-right" t-esc="total_credit"/>
+                                                </t>
+                                            </strong>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </t>
                     </t>
                     <t t-else="">
+                        <t t-set="total_debit" t-value="0"/>
+                        <t t-set="total_credit" t-value="0"/>
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Move</th>
-                                    <th>Account</th>
-                                    <th>Partner</th>
-                                    <th>Debit</th>
-                                    <th>Credit</th>
+                                    <tr>
+                                        <th t-foreach="fields" t-as="field">
+                                            <span t-esc="field.name or field.field_id.field_description"/>
+                                        </th>
+                                    </tr>
                                 </tr>
                             </thead>
                             <tbody>
-                                <t t-set="total_debit" t-value="0"/>
-                                <t t-set="total_credit" t-value="0"/>
                                 <t t-foreach="docs" t-as="o">
                                     <tr t-foreach="o.line_ids" t-as="line">
-                                        <td><span t-field="line.move_id.name"/></td>
-                                        <td><span t-field="line.account_id"/></td>
-                                        <td><span t-field="line.partner_id"/></td>
-                                        <td class="text-right"><span t-field="line.debit"/></td>
-                                        <td class="text-right"><span t-field="line.credit"/></td>
-                                        <t t-set="total_debit" t-value="total_debit + line.debit"/>
-                                        <t t-set="total_credit" t-value="total_credit + line.credit"/>
+                                        <td t-foreach="fields" t-as="field">
+                                            <t t-if="field.field_id.model_id.model == 'account.move'">
+                                                <t t-set="rec" t-value="line.move_id"/>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-set="rec" t-value="line"/>
+                                            </t>
+                                            <t t-if="field.field_id.ttype == 'many2one'">
+                                                <span t-esc="getattr(rec, field.field_id.name).display_name"/>
+                                            </t>
+                                            <t t-if="field.field_id.ttype in ['many2many','one2many']">
+                                                <span t-esc="', '.join(getattr(rec, field.field_id.name).mapped('display_name'))"/>
+                                            </t>
+                                            <t t-if="field.field_id.ttype not in ['many2one','many2many','one2many']">
+                                                <t t-set="value" t-value="getattr(rec, field.field_id.name)"/>
+                                                <t t-if="field.field_id.ttype in ['integer','float','monetary']">
+                                                    <span style="display:block;" class="text-right" t-esc="value if field.field_id.ttype == 'integer' else '%.2f' % value"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-esc="value"/>
+                                                </t>
+                                                <t t-if="field.field_id.name == 'debit'">
+                                                    <t t-set="total_debit" t-value="total_debit + value"/>
+                                                </t>
+                                                <t t-if="field.field_id.name == 'credit'">
+                                                    <t t-set="total_credit" t-value="total_credit + value"/>
+                                                </t>
+                                            </t>
+                                        </td>
                                     </tr>
                                 </t>
                                 <tr>
-                                    <td colspan="3" class="text-right"><strong>TOTAL</strong></td>
-                                    <td class="text-right"><strong><span t-esc="total_debit"/></strong></td>
-                                    <td class="text-right"><strong><span t-esc="total_credit"/></strong></td>
+                                    <td t-foreach="fields" t-as="field">
+                                        <strong>
+                                            <t t-if="field.field_id.name == 'debit'">
+                                                <span style="display:block;" class="text-right" t-esc="total_debit"/>
+                                            </t>
+                                            <t t-if="field.field_id.name == 'credit'">
+                                                <span style="display:block;" class="text-right" t-esc="total_credit"/>
+                                            </t>
+                                        </strong>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
