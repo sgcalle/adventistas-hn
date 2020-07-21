@@ -24,4 +24,5 @@ class AccountMoveReportMatrix(models.AbstractModel):
             "fields": fields,
             "journals": journals,
             "getattr": getattr,
+            "self": self,
         }
