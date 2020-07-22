@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models, api
+from odoo import fields, models
 
 class AccountMove(models.Model):
     _inherit = "account.move"
@@ -10,23 +10,12 @@ class AccountMove(models.Model):
 
     family_members_ids = fields.Many2many(related="family_id.member_ids")
 
+    receivable_account_id = fields.Many2one("account.account", string="Receivable account", domain=[("user_type_id.type", "=", "receivable")])
 
-    @api.onchange("student_id")
-    def _onchange_student_id(self):
-        return self._onchange_partner_id()
-    
-    def _recompute_payment_terms_lines(self):
-        res = super(AccountMove, self)._recompute_payment_terms_lines()
-        if self.student_id:
-            for line in self.line_ids.filtered(lambda l: l.account_id.internal_type == "receivable"):
-                line.account_id = self.student_id.property_account_receivable_id.id
-        return res
+    def set_receivable_account(self):
+        for record in self:
+            receivable_line_id = record.line_ids.filtered(lambda record: record.account_id.user_type_id.type == 'receivable')
+            receivable_line_id.ensure_one()
+            if (receivable_line_id and record.receivable_account_id):
+                receivable_line_id.account_id = record.receivable_account_id.id
 
-class AccountJournal(models.Model):
-    _inherit = "account.journal"
-
-    facts_accounting_system_id = fields.Integer("Accounting System")
-    template_with_payment_id = fields.Many2one("ir.ui.view", string="Template with payment",
-                                                 domain=[("type", "=", "qweb")], default=lambda self: self.env.ref('account.report_invoice_document_with_payments'))
-    template_id = fields.Many2one("ir.ui.view", string="Template without payment",
-                                   domain=[("type", "=", "qweb")], default=lambda self: self.env.ref('account.report_invoice_document'))

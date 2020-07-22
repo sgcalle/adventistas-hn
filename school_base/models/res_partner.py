@@ -15,21 +15,32 @@ SELECT_COMPANY_TYPES = [
     ("company", "Company/Family")
 ]
 
+SELECT_STATUS_TYPES = [
+    ("admissions", "Admissions"),
+    ("enrolled", "Enrolled"),
+    ("graduate", "Graduate"),
+    ("inactive", "Inactive"),
+    ("pre-enrolled", "Pre-Enrolled"),
+    ("withdrawn", "Withdrawn"),
+]
+
 
 class Contact(models.Model):
     """ We inherit to enable School features for contacts """
 
     _inherit = "res.partner"
 
+    # Overwritten fields
+    # Name should be readonly
+    name = fields.Char(index=True, compute="_compute_name", store=True, readonly=True)
+
     company_type = fields.Selection(SELECT_COMPANY_TYPES, string="Company Type")
     person_type = fields.Selection(SELECT_PERSON_TYPES, string="Person Type")
 
     grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level")
     homeroom = fields.Char("Homeroom")
-    student_status = fields.Char("Student status")
 
-    student_status_id = fields.Many2one("school_base.status", "Student status")
-    student_next_status_id = fields.Many2one("school_base.status", "Student next status")
+    student_status = fields.Char("Student status", help="(This field is deprecated)")
 
     comment_facts = fields.Text("Facts Comment")
     family_ids = fields.Many2many("res.partner", string="Families", relation="partner_families", column1="partner_id",
@@ -48,16 +59,15 @@ class Contact(models.Model):
                                          relation="partner_financial_res", column1="partner_id",
                                          column2="partner_financial_id")
 
+    first_name = fields.Char("First Name")
+    middle_name = fields.Char("Middle Name")
+    last_name = fields.Char("Last Name")
 
-
-    # Added 3/30/2020
-    first_name = fields.Char("First Name")  # , store=True, related="uni_application_id.first_name")
-    middle_name = fields.Char("Middle Name")  # , store=True, related="uni_application_id.first_name")
-    last_name = fields.Char("Last Name")  # , store=True, related="uni_application_id.first_name")
-
-    # Name should't be readonly
-    name = fields.Char(index=True, compute="_compute_name", store=True, readonly=False)
     date_of_birth = fields.Date()
+    student_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student status")
+    student_next_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student next status")
+    allergy_ids = fields.One2many("school_base.allergy", "partner_id", string="Allergies")
+    condition_ids = fields.One2many("school_base.condition", "partner_id", string="Conditions")
 
     @api.depends("first_name", "middle_name", "last_name")
     def _compute_name(self):
