@@ -49,7 +49,7 @@ class TuitionPlan(models.Model):
     discount_ids = fields.One2many(string="Multi-child Discounts",
         comodel_name="tuition.plan.discount",
         inverse_name="plan_id",
-        help="Discounts to apply based on the number of enrolled students in a family. Only enrolled students with the birthday set is included.")
+        help="Discounts to apply based on the number of enrolled students in a family. Only enrolled students with the date of birth set is included.")
     installment_ids = fields.One2many(string="Installments",
         comodel_name="tuition.plan.installment",
         inverse_name="plan_id",

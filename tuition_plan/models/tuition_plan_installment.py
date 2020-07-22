@@ -54,8 +54,8 @@ class TuitionPlanInstallment(models.Model):
                     sale.payment_term_id = plan.payment_term_id.id
                 if plan.discount_ids:
                     children = sale.family_id.member_ids\
-                        .filtered(lambda m: m.person_type == "student" and m.student_status == "Enrolled" and m.birthday)\
-                        .sorted(key="birthday").ids
+                        .filtered(lambda m: m.person_type == "student" and m.student_status == "Enrolled" and m.date_of_birth)\
+                        .sorted(key="date_of_birth").ids
                     if sale.student_id.id in children:
                         index = children.index(sale.student_id.id)
                     categories = set()
