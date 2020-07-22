@@ -30,8 +30,8 @@ class TuitionPlan(models.Model):
     @api.constrains("tuition_plan_ids")
     def _check_tuition_plan_ids(self):
         for partner in self:
-            if not partner.birthday:
-                raise MissingError("Student %s does not have a birthday set." % partner.name)
+            if not partner.date_of_birth:
+                raise MissingError("Student %s does not have a date of birth set." % partner.name)
             for plan in partner.tuition_plan_ids:
                 overlapping = plan.get_overlapping_plans()
                 intersection = overlapping & (partner.tuition_plan_ids - plan)
