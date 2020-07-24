@@ -27,11 +27,16 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+
         'data/menudata.xml',
+        'data/name_sorting.xml',
+        'data/add_static.xml',
+
         'views/res_partner_view.xml',
         'views/res_company.xml',
 
         'views/portal_views.xml',
+        'views/config_views.xml',
         'views/views.xml'
     ],
 }
