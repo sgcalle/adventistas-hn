@@ -1,2 +1,5 @@
-*.pyc
-school_base/.ipynb_checkpoints/__init__-checkpoint.py
+**/__pycache__
+**/.git
+**/
+**/_*
+**/*.pyc
