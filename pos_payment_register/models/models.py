@@ -6,19 +6,6 @@ from odoo import _, api, fields, models
 
 _logger = logging.getLogger(__name__)
 
-
-class AccountJournal(models.Model):
-    _inherit = "res.company"
-
-    surcharge_amount = fields.Monetary()
-
-
-class AccountJournal(models.Model):
-    _inherit = "account.journal"
-
-    surcharge_amount = fields.Monetary()
-
-
 class PaymentGroup(models.Model):
     _name = "pos_payment_register.payment_group"
 

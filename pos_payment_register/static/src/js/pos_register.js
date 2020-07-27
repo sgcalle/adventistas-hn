@@ -131,7 +131,8 @@ odoo.define('register_payments.pos_view', function(require) {
                 method: "search_read",
                 args: [
                     [
-                        ["type", "in", ["bank", "cash"]]
+                        ["type", "in", ["bank", "cash"]],
+                        ["inbound_payment_method_ids", "!=", false]
                     ],
                     [
                         "display_name",
