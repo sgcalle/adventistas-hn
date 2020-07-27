@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="surcharge_product" model="product.product">
+        <field name="name">Surcharge</field>
+        <field name="list_price" eval="0.0"/>
+        <field name="taxes_id" eval="False" />
+        <field name="type">service</field>
+    </record>
+
+</odoo>
