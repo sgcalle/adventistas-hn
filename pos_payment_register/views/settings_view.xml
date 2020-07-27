@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record model="ir.ui.view" id="pos_payment_register.res_config_settings_view_form">
+        <field name="name">pos.payment.register.res.config.settings.view.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@data-key='point_of_sale']" position="inside">
+                <h2>POS Payment Register</h2>
+                <div class="row mt16 o_settings_container" id="pos_payment_register_settings">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="surcharge_product_id"/>
+                            <div class="text-muted">
+                                Set default product for surcharge invoices.
+                            </div>
+                            <div class="content-group m16">
+                                <field name="surcharge_product_id" nolabel="1" colspan="4"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
