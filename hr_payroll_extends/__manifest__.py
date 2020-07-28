@@ -31,5 +31,6 @@
         'views/hr_loan_views.xml',
         'views/hr_savings_views.xml',
         'views/hr_employee_views.xml',
+        'views/hr_salary_rule_views.xml',
     ],
 }
