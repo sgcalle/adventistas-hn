@@ -11,3 +11,4 @@ from . import hr_loan
 from . import browsable_object
 from . import hr_savings
 from . import hr_savings_payment
+from . import hr_salary_rule
