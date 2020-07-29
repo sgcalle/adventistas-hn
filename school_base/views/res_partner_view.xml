@@ -5,6 +5,7 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+
             <xpath expr="//field[@name='name']/parent::h1" position="after">
                 <group attrs="{'invisible': [('is_company', '=', True)]}">
                     <field name="first_name"/>
@@ -20,6 +21,7 @@
                        color: #875a7b;
                        font-weight: bold; "/>
             </div>
+
             <notebook position="inside">
                 <page string="School data">
                     <group>
@@ -30,16 +32,36 @@
                             <field name="person_type"/>
                             <field name="grade_level_id"/>
                             <field name="homeroom"/>
-                            <field name="student_status"/>
+                            <field name="student_status" string="School status (deprecated)"/>
+                            <field name="student_status_id"/>
+                            <field name="student_next_status_id"/>
                         </group>
                         <group>
+                            <field name="date_of_birth"/>
                             <field name="comment_facts"/>
+                            <field name="facts_approved"/>
                             <field name="facts_id"/>
                             <field name="facts_id_int"/>
                         </group>
                     </group>
                 </page>
+                <page string="School healthcare">
+                    <group>
+                        <field name="allergy_ids">
+                            <tree editable="bottom">
+                                <field name="name"/>
+                            </tree>
+                        </field>
+                        <field name="condition_ids">
+                            <tree editable="bottom">
+                                <field name="name"/>
+                            </tree>
+                        </field>
+                    </group>
+                </page>
             </notebook>
+
+
             <xpath expr="//field[@name='child_ids']/parent::page" position="attributes">
                 <attribute name="attrs">
                     {'invisible': [('is_family', '=', True)]}

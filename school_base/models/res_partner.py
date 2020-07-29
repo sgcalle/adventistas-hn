@@ -5,67 +5,134 @@ from ..utils import formatting
 from odoo import fields, models, api, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 
-SELEC_PERSON_TYPES = [
+SELECT_PERSON_TYPES = [
     ("student", "Student"),
     ("parent", "Parent")
 ]
 
-SELEC_COMPANY_TYPES = [
+SELECT_COMPANY_TYPES = [
     ("person", "Person"),
     ("company", "Company/Family")
 ]
 
+SELECT_STATUS_TYPES = [
+    ("admissions", "Admissions"),
+    ("enrolled", "Enrolled"),
+    ("graduate", "Graduate"),
+    ("inactive", "Inactive"),
+    ("pre-enrolled", "Pre-Enrolled"),
+    ("withdrawn", "Withdrawn"),
+]
+
+
 class Contact(models.Model):
+    """ We inherit to enable School features for contacts """
+
     _inherit = "res.partner"
 
-    company_type = fields.Selection(SELEC_COMPANY_TYPES, string="Company Type")
-    person_type = fields.Selection(SELEC_PERSON_TYPES, string="Person Type")
+    # Overwritten fields
+    # Name should be readonly
+    name = fields.Char(index=True, compute="_compute_name", store=True, readonly=True)
+
+    company_type = fields.Selection(SELECT_COMPANY_TYPES, string="Company Type")
+    person_type = fields.Selection(SELECT_PERSON_TYPES, string="Person Type")
 
     grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level")
-    homeroom = fields.Char("Homeroom")    
-    student_status = fields.Char("Student status")
+    homeroom = fields.Char("Homeroom")
+
+    student_status = fields.Char("Student status", help="(This field is deprecated)")
 
     comment_facts = fields.Text("Facts Comment")
-    family_ids = fields.Many2many("res.partner", string="Families", relation="partner_families", column1="partner_id", column2="partner_family_id")
-    member_ids = fields.Many2many("res.partner", string="Members", relation="partner_members", column1="partner_id", column2="partner_member_id")
+    family_ids = fields.Many2many("res.partner", string="Families", relation="partner_families", column1="partner_id",
+                                  column2="partner_family_id")
+    member_ids = fields.Many2many("res.partner", string="Members", relation="partner_members", column1="partner_id",
+                                  column2="partner_member_id")
 
     facts_id_int = fields.Integer("Fact id (Integer)")
     facts_id = fields.Char("Fact id")
+    facts_approved = fields.Boolean()
 
     is_family = fields.Boolean("Is a family?")
-    
+
     # For Families
-    financial_res_ids = fields.Many2many("res.partner", string="Financial responsability", relation="partner_financial_res", column1="partner_id", column2="partner_financial_id")
+    financial_res_ids = fields.Many2many("res.partner", string="Financial responsability",
+                                         relation="partner_financial_res", column1="partner_id",
+                                         column2="partner_financial_id")
 
-    # Added 3/30/2020
-    first_name  = fields.Char("First Name")#, store=True, related="uni_application_id.first_name")
-    middle_name = fields.Char("Middle Name")#, store=True, related="uni_application_id.first_name")
-    last_name   = fields.Char("Last Name") #, store=True, related="uni_application_id.first_name")
+    first_name = fields.Char("First Name")
+    middle_name = fields.Char("Middle Name")
+    last_name = fields.Char("Last Name")
 
-    # We need this field as readonly
-    name = fields.Char(index=True, compute="_compute_name", store=True, readonly=False)
+    date_of_birth = fields.Date()
+    student_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student status")
+    student_next_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student next status")
+    allergy_ids = fields.One2many("school_base.allergy", "partner_id", string="Allergies")
+    condition_ids = fields.One2many("school_base.condition", "partner_id", string="Conditions")
+
+    # old_name = fields.Char()
+
+    @api.model
+    def format_name(self, first_name, middle_name, last_name):
+        """
+        This will format everything depending of school base settings
+        :return: A String with the formatted version
+        """
+
+        name_order_relation = {self.env.ref("school_base.name_sorting_first_name"): first_name or "",
+                               self.env.ref("school_base.name_sorting_middle_name"): middle_name or "",
+                               self.env.ref("school_base.name_sorting_last_name"): last_name or ""}
+
+        name_sorting_ids = self.env.ref("school_base.name_sorting_first_name") + \
+                           self.env.ref("school_base.name_sorting_middle_name") + \
+                           self.env.ref("school_base.name_sorting_last_name")
+
+        name = ""
+        sorted_name_sorting_ids = name_sorting_ids.sorted("sequence")
+        for sorted_name_id in sorted_name_sorting_ids:
+            name += (sorted_name_id.prefix or "") + \
+                    name_order_relation.get(sorted_name_id, "") + \
+                    (sorted_name_id.sufix or "")
+
+        return name
+
+    def auto_format_name(self):
+        """ Use format_name method to create that """
+        # partner_ids = self.filtered(lambda partner: partner_id)
+        for partner_id in self:
+            first = partner_id.first_name
+            middle = partner_id.middle_name
+            last = partner_id.last_name
+
+            if not partner_id.is_company and not partner_id.is_family and any([first, middle, last]):
+                # old_name = partner_id.name
+                partner_id.name = partner_id.format_name(first, middle, last)
+            else:
+                partner_id.name = partner_id.name
+
+    @api.onchange("first_name", "middle_name", "last_name")
+    def _onchange_name_fields(self):
+        self.auto_format_name()
 
     @api.depends("first_name", "middle_name", "last_name")
     def _compute_name(self):
-        for record in self:
-            record.name = formatting.format_name(record.first_name, record.middle_name, record.last_name)
-    
+        self.auto_format_name()
+
     @api.model
     def create(self, values):
-        PartnerEnv = self.env["res.partner"]
+        """ Student custom creation for family relations and other stuffs """
 
         # Some constant for making more readeable the code
-        ACTION_TYPE = 0
-        TYPE_REPLACE = 6
+        # ACTION_TYPE = 0
+        # TYPE_REPLACE = 6
         TYPE_ADD_EXISTING = 4
-        TYPE_REMOVE_NO_DELETE = 3
+        # TYPE_REMOVE_NO_DELETE = 3
 
         if "name" not in values:
             first_name = values["first_name"] if "first_name" in values else ""
             middle_name = values["first_name"] if "middle_name" in values else ""
             last_name = values["last_name"] if "last_name" in values else ""
 
-            values["name"] = formatting.format_name(first_name, middle_name, last_name)
+            values["name"] = self.format_name(first_name, middle_name, last_name)
         partners = super().create(values)
 
         ctx = self._context
@@ -76,12 +143,12 @@ class Contact(models.Model):
                         "member_ids": [[TYPE_ADD_EXISTING, ctx.get("member_id"), False]]
                     })
                 else:
-                    raise UserError( _("Contact should be save before adding families"))
+                    raise UserError(_("Contact should be save before adding families"))
 
-        return partners 
+        return partners
 
     def write(self, values):
-        PartnerEnv = self.env["res.partner"]
+        """ Student custom creation for family relations and other stuffs """
 
         # Some constant for making more readeable the code
         ACTION_TYPE = 0
@@ -93,20 +160,20 @@ class Contact(models.Model):
             if "family_ids" in values:
                 for m2m_action in values["family_ids"]:
                     if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
-                        partner_ids = PartnerEnv.browse(m2m_action[2])
-                        removed_parter_ids = PartnerEnv.browse(set(record.family_ids.ids) - set(m2m_action[2]))
+                        partner_ids = self.browse(m2m_action[2])
+                        removed_parter_ids = self.browse(set(record.family_ids.ids) - set(m2m_action[2]))
                         partner_ids.write({
                             "member_ids": [[TYPE_ADD_EXISTING, record.id, False]],
                         })
                         removed_parter_ids.write({
                             "member_ids": [[TYPE_REMOVE_NO_DELETE, record.id, False]],
                         })
-                    
+
             if "member_ids" in values:
                 for m2m_action in values["member_ids"]:
                     if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
-                        partner_ids = PartnerEnv.browse(m2m_action[2])
-                        removed_parter_ids = PartnerEnv.browse(set(record.family_ids.ids) - set(m2m_action[2]))
+                        partner_ids = self.browse(m2m_action[2])
+                        removed_parter_ids = self.browse(set(record.family_ids.ids) - set(m2m_action[2]))
                         partner_ids.write({
                             "family_ids": [[TYPE_ADD_EXISTING, record.id, False]],
                         })

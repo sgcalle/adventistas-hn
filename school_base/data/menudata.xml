@@ -8,14 +8,20 @@
     </record>
 
     <record model="ir.actions.act_window" id="action_school_configuration_grades">
-        <field name="name">School grades</field>
+        <field name="name">School grade levels</field>
         <field name="res_model">school_base.grade_level</field>
         <field name="view_mode">tree,form</field>
     </record>
 
     <record model="ir.actions.act_window" id="action_school_configuration_codes">
-        <field name="name">School grades</field>
+        <field name="name">School code</field>
         <field name="res_model">school_base.school_code</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_school_configuration_district_codes">
+        <field name="name">District codes</field>
+        <field name="res_model">school_base.district_code</field>
         <field name="view_mode">tree,form</field>
     </record>
 
@@ -29,4 +35,9 @@
 
     <menuitem id="school_configuration_menu_codes" action="action_school_configuration_codes"
               name="School code" parent="school_configuration_menu"/>
+
+    <menuitem id="school_configuration_menu_district_code" action="action_school_configuration_district_codes"
+              name="District code" parent="school_configuration_menu"/>
+
+
 </odoo>

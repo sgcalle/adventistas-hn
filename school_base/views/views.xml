@@ -8,6 +8,7 @@
                 <field name="sequence" widget='handle'/>
                 <field name="name"/>
                 <field name="school_code_id"/>
+                <field name="district_code_id" readonly="1"/>
             </tree>
         </field>
     </record>
@@ -19,6 +20,7 @@
             <tree editable="bottom">
                 <field name="sequence" widget='handle'/>
                 <field name="name"/>
+                <field name="district_code_id"/>
             </tree>
         </field>
     </record>
@@ -30,20 +32,24 @@
             <tree editable="bottom">
                 <field name="sequence" widget='handle'/>
                 <field name="name"/>
+                <field name="capacity"/>
                 <field name="school_code_id"/>
+                <field name="district_code_id" readonly="1"/>
             </tree>
         </field>
     </record>
 
-    <record model="ir.ui.view" id="view_grade_level_tree">
-        <field name="name">School level</field>
+    <record model="ir.ui.view" id="view_district_level_tree">
+        <field name="name">District Code</field>
         <field name="model">school_base.district_code</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="sequence" widget='handle'/>
                 <field name="name"/>
-                <field name="school_code_ids"/>
             </tree>
         </field>
     </record>
+
+
+
 </odoo>
