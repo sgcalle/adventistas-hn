@@ -75,7 +75,7 @@ class FactsAccountController(http.Controller):
             # Obtienes la información basada en los ids anteriores y tomando en cuenta los campos definifos en la
             # funcion posterior
             datosLinea_values = datosLinea_record.read(
-                ["product_id", "quantity", "price_unit", "discount", "analytic_tag_ids", "subscription_id",
+                ["product_id", "quantity", "price_unit", "discount", "analytic_tag_ids",
                  "account_id", "tax_ids",
                  "analytic_account_id", "name"])
 

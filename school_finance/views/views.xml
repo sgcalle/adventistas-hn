@@ -26,6 +26,10 @@
                 <field name="student_id" domain="['&amp;', ('id', 'in', family_members_ids), ('person_type', '=', 'student')]" />
                 <field name="family_id" />
             </group>
+            <group id="header_right_group">
+                <field name="student_grade_level"/>
+                <field name="student_homeroom"/>
+            </group>
         </field>
     </record>
 
