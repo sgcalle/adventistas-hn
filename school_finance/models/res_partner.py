@@ -25,13 +25,16 @@ class SchoolFinance(models.Model):
                 percent_sum = sum([category.percent for category in record.family_res_finance_ids if
                                    category.category_id == category_id])
                 if percent_sum != 100:
-                    raise UserError(_("Category: {} doesn't sum 100!".format(category_id.complete_name)))
+                    raise UserError(_("Partner[%s]: %s Category: %s doesn't sum 100!") % (
+                    record.id, record.name, category_id.complete_name))
 
     @api.model
     def create(self, vals):
         try:
             partners = super().create(vals)
-            partners._check_category_sum()
+
+            if "family_res_finance_ids" in vals:
+                partners._check_category_sum()
             return partners
         except:
             self._cr.rollback()
@@ -39,9 +42,12 @@ class SchoolFinance(models.Model):
 
     def write(self, vals):
         try:
-            partners = super().write(vals)
-            self._check_category_sum()
-            return partners
+            partner_ids = super().write(vals)
+
+            if "family_res_finance_ids" in vals:
+                partner_ids._check_category_sum()
+
+            return partner_ids
         except:
             self._cr.rollback()
             raise
