@@ -10,31 +10,37 @@ from odoo.tools.misc import formatLang, get_lang
 from odoo.osv import expression
 from odoo.tools import float_is_zero, float_compare
 
+
 class SaleOrderForStudents(models.Model):
+    """ This modify the default sale order behaviour """
     _inherit = "sale.order"
 
     journal_id = fields.Many2one("account.journal", string="Journal", domain="[('type', '=', 'sale')]")
     
     # Invoice Date
     invoice_date_due = fields.Datetime(string='Due Date')
-    invoice_date     = fields.Datetime(string='Invoice Date')
+    invoice_date = fields.Datetime(string='Invoice Date')
 
-    #School fields
+    # School fields
     student_id = fields.Many2one("res.partner", string="Student", domain=[('person_type', '=', 'student')])
     family_id = fields.Many2one("res.partner", string="Family", domain=[('is_family', '=', True)])
 
-
     def _create_invoices(self, grouped=False, final=False):
-
         all_moves = super()._create_invoices(grouped, final)
 
         receivable_behaviour = self.env["ir.config_parameter"].get_param('school_finance.receivable_behaviour')
 
         for order in self:
-            if receivable_behaviour == 'student' and order.partner_id.person_type == 'student':
-                receivable_lines = order.invoice_ids.line_ids.filtered(lambda line: line.account_id.internal_type == 'receivable')
+            # Basically, we change the move_ids receivable account to student if the settings allow it
+            if receivable_behaviour == 'student' and order.student_id.person_type == 'student':
+
+                # We find the line with receivable
+                receivable_lines = order.invoice_ids.line_ids.filtered(
+                    lambda line: line.account_id.internal_type == 'receivable')
+
+                # And force them to change :P
                 receivable_lines.sudo().write({
-                    "account_id": order.partner_id.property_account_receivable_id.id
+                    "account_id": order.student_id.property_account_receivable_id.id
                 })
 
             # Update values
@@ -62,7 +68,9 @@ class SaleOrderForStudents(models.Model):
         
         
 class SaleOrderLine(models.Model):
+    """ Sale Order Line """
     _inherit = 'sale.order.line'
+
     @api.onchange('product_uom', 'product_uom_qty')
     def product_uom_change(self):
         super().product_uom_change()

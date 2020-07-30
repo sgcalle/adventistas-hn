@@ -70,12 +70,12 @@ class ResPartnerMakeSale(models.TransientModel):
 
                         while parent_category_id:
                             if parent_category_id in partner_responsible_categ:
-                                break;
+                                break
                             parent_category_id = parent_category_id.parent_id
 
                         if not parent_category_id:
-                            raise UserError(
-                                _('There is no responsible family for %s') % (line.product_id.categ_id.name))
+                            raise UserError(_("%s doesn't have a responsible family for %s")
+                                            % (partner_id.name, product_id.categ_id.name))
 
                 if partner_id.person_type == 'student' and values["separate_by_financial_responsability"]:
 
