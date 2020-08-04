@@ -31,6 +31,7 @@
         'data/menudata.xml',
         'data/name_sorting.xml',
         'data/add_static.xml',
+        'data/settings_default.xml',
 
         'views/res_partner_view.xml',
         'views/res_company.xml',
