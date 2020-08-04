@@ -24,7 +24,7 @@ class TuitionPlanDiscount(models.Model):
     def _compute_name(self):
         for discount in self:
             plan_discounts = discount.plan_id.discount_ids.filtered(lambda d: d.category_id == discount.category_id).ids
-            index = plan_discounts.index(discount.id) + 1
+            index = (plan_discounts.index(discount.id) + 1) if discount.id in plan_discounts else -1
             name = str(index)
             if index == len(plan_discounts):
                 name += " and up"
