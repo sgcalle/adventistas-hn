@@ -15,7 +15,7 @@ class NameSorting(models.Model):
     sequence = fields.Integer(default=1)
 
 
-class SchoolFinanceSettings(models.TransientModel):
+class SchoolBaseSettings(models.TransientModel):
     """  Settings for school base module """
     _inherit = "res.config.settings"
 
@@ -30,6 +30,16 @@ class SchoolFinanceSettings(models.TransientModel):
     name_sorting_setting_ids = fields.Many2many("school_base.name_sorting", string="Name Sorting",
                                                 default=_get_name_sorting_setting_ids, store=True)
     name_sorting_example = fields.Char(string=_("Name Sorting Example"), trim=False, compute="_get_name_sorting_example")
+
+    allow_edit_student_name = fields.Boolean(string=_("Allow edit student name"),
+                                             config_parameter='school_base.allow_edit_student_name',
+                                             default=False)
+    allow_edit_parent_name = fields.Boolean(string=_("Allow edit parent name"),
+                                            config_parameter='school_base.allow_edit_parent_name',
+                                            default=False)
+    allow_edit_person_name = fields.Boolean(string=_("Allow edit person name"),
+                                            config_parameter='school_base.allow_edit_person_name',
+                                            default=False)
 
     @api.onchange("name_sorting_setting_ids")
     def _onchange_name_sorting_setting_ids(self):

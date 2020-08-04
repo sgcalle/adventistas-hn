@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+def switch_statement(cases, value):
+    """ Simulate a swithc statement """
+    return cases[value] if value in cases else cases["default"] if "default" in cases else False
 
-def extractValueFromDict(parameter: str, values: dict):
+
+def extract_value_from_dict(parameter: str, values: dict):
     """ Extract a value from values dict
     Args:
         parameter (str): What we want to extract
