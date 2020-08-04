@@ -7,8 +7,8 @@
             <tree string="Tuition Plans">
                 <field name="name"/>
                 <field name="default"/>
-                <field name="fiscal_year_date_from"/>
-                <field name="fiscal_year_date_to"/>
+                <field name="period_date_from"/>
+                <field name="period_date_to"/>
                 <field name="grade_level_ids" widget="many2many_tags"/>
                 <field name="category_id"/>
                 <field name="company_id" groups="base.group_multi_company"/>
@@ -37,10 +37,11 @@
                             <field name="id" invisible="1"/>
                             <field name="active" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="accounting_date"/>
-                            <label for="fiscal_year_date_from" string="Fiscal Year Period"/>
+                            <field name="period_type"/>
+                            <field name="reference_date"/>
+                            <label for="period_date_from" string="Period"/>
                             <div>
-                                <field name="fiscal_year_date_from" class="oe_inline"/> - <field name="fiscal_year_date_to" class="oe_inline"/>
+                                <field name="period_date_from" class="oe_inline"/> - <field name="period_date_to" class="oe_inline"/>
                             </div>
                             <field name="first_charge_date"/>
                             <label for="payment_term_id" options="{'no_create_edit': 1, 'no_create':1}"/>
@@ -49,6 +50,7 @@
                                 <span class="o_form_label mx-3 oe_edit_only" attrs="{'invisible': [('payment_term_id','!=',False)]}"> or </span>
                                 <field name="first_due_date" placeholder="Date" attrs="{'required': [('payment_term_id','=',False)], 'invisible': [('payment_term_id','!=',False)]}"/>
                             </div>
+                            <field name="use_student_payment_term"/>
                         </group>
                         <group>
                             <field name="grade_level_ids" widget="many2many_tags" options="{'no_create_edit': 1, 'no_create':1}"/>

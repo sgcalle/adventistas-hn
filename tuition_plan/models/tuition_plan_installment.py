@@ -52,10 +52,15 @@ class TuitionPlanInstallment(models.Model):
             for sale in make_sale.sales_ids:
                 if plan.payment_term_id:
                     sale.payment_term_id = plan.payment_term_id.id
+                if plan.use_student_payment_term and sale.student_id.property_payment_term_id:
+                    sale.payment_term_id = sale.student_id.property_payment_term_id
+                    sale.invoice_date_due = False
                 if plan.discount_ids:
                     children = sale.family_id.member_ids\
-                        .filtered(lambda m: m.person_type == "student" and m.student_status == "Enrolled" and m.date_of_birth)\
-                        .sorted(key="date_of_birth").ids
+                        .filtered(lambda m: m.person_type == "student" and m.student_status == "Enrolled")\
+                        .sorted(lambda m: m.name)\
+                        .sorted(lambda m: (m.grade_level_id.sequence or 0, m.grade_level_id.id or 0,
+                            m.date_of_birth or fields.Date.context_today(self)), reverse=True).ids
                     if sale.student_id.id in children:
                         index = children.index(sale.student_id.id)
                     categories = set()
@@ -76,13 +81,14 @@ class TuitionPlanInstallment(models.Model):
                                 })]
                             })
             if plan.automation in ["sales_order", "draft_invoice", "posted_invoice"]:
-                make_sale.sales_ids.action_confirm()
-                if plan.automation in ["draft_invoice", "posted_invoice"]:
-                    invoices = make_sale.sales_ids._create_invoices(grouped=True)
-                    invoice_lines = invoices.invoice_line_ids
-                    for product in installment.product_ids:
-                        for line in invoice_lines:
-                            if line.price_unit >= 0 and product.product_id == line.product_id and product.analytic_account_id:
-                                line.analytic_account_id = product.analytic_account_id.id
-                    if plan.automation == "posted_invoice":
-                        invoices.action_post()
+                for sale in make_sale.sales_ids:
+                    sale.action_confirm()
+                    if plan.automation in ["draft_invoice", "posted_invoice"]:
+                        invoices = sale._create_invoices(grouped=True)
+                        invoice_lines = invoices.invoice_line_ids
+                        for product in installment.product_ids:
+                            for line in invoice_lines:
+                                if line.price_unit >= 0 and product.product_id == line.product_id and product.analytic_account_id:
+                                    line.analytic_account_id = product.analytic_account_id.id
+                        if plan.automation == "posted_invoice":
+                            invoices.action_post()

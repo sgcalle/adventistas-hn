@@ -13,17 +13,23 @@ class TuitionPlan(models.Model):
         required=True)
     active = fields.Boolean(string="Active",
         default=True)
-    accounting_date = fields.Date(string="Accounting Date",
+    period_type = fields.Selection(string="Period Type",
+        selection=[
+            ("fiscal_year","Fiscal Year"),
+            ("year_after","Year After")],
+        default="fiscal_year",
+        required=True)
+    reference_date = fields.Date(string="Reference Date",
         required=True,
-        help="Used to identify what fiscal year this tuition plan belongs to")
-    fiscal_year_date_from = fields.Date(string="Fiscal Year Start",
-        compute="_compute_fiscal_year_dates",
+        help="Used to identify the period based on the selected period type")
+    period_date_from = fields.Date(string="Period Start",
+        compute="_compute_period_dates",
         store=True,
-        help="Autocomputed based on the selected accounting date")
-    fiscal_year_date_to = fields.Date(string="Fiscal Year End",
-        compute="_compute_fiscal_year_dates",
+        help="Autocomputed based on the selected reference date and period type")
+    period_date_to = fields.Date(string="Period End",
+        compute="_compute_period_dates",
         store=True,
-        help="Autocomputed based on the selected accounting date")
+        help="Autocomputed based on the selected reference date and period type")
     category_id = fields.Many2one(string="Category",
         comodel_name="product.category",
         required=True,
@@ -82,8 +88,10 @@ class TuitionPlan(models.Model):
     default_partner_ids = fields.Many2many(string="Default Students",
         comodel_name="res.partner",
         compute="_compute_default_partner_ids")
+    use_student_payment_term = fields.Boolean(string="Use Student Payment Terms",
+        help="If checked, the invoice payment terms is taken from the student if any")
 
-    @api.constrains("default", "grade_level_ids", "fiscal_year_date_from", "fiscal_year_date_to", "category_id", "active")
+    @api.constrains("default", "grade_level_ids", "period_date_from", "period_date_to", "category_id", "active")
     def _check_default(self):
         for plan in self.filtered(lambda p: p.default):
             matched = self.search([
@@ -91,28 +99,32 @@ class TuitionPlan(models.Model):
                 "&", ("default","=",True),
                 "&", ("category_id","=",plan.category_id.id),
                 "&", ("grade_level_ids","in",plan.grade_level_ids.ids),
-                "|", ("fiscal_year_date_from","=",plan.fiscal_year_date_from),
-                     ("fiscal_year_date_to","=",plan.fiscal_year_date_to)], limit=1)
+                "|", ("period_date_from","=",plan.period_date_from),
+                     ("period_date_to","=",plan.period_date_to)], limit=1)
             if matched:
                 raise ValidationError(
                     "Unable to set as default. This tuition plan overlaps with %s (ID %d)." % (matched.name, matched.id))
     
-    @api.constrains("partner_ids", "grade_level_ids", "fiscal_year_date_from", "fiscal_year_date_to", "category_id", "active")
+    @api.constrains("partner_ids", "grade_level_ids", "period_date_from", "period_date_to", "category_id", "active")
     def _check_partner_ids(self):
         for plan in self:
             plan.partner_ids._check_tuition_plan_ids()
 
-    @api.depends("accounting_date")
-    def _compute_fiscal_year_dates(self):
+    @api.depends("reference_date", "period_type")
+    def _compute_period_dates(self):
         for plan in self:
             date_from = False
             date_to = False
-            if plan.accounting_date:
-                dates = plan.company_id.compute_fiscalyear_dates(plan.accounting_date)
-                date_from = dates["date_from"]
-                date_to = dates["date_to"]
-            plan.fiscal_year_date_from = date_from
-            plan.fiscal_year_date_to = date_to
+            if plan.reference_date:
+                if plan.period_type == "fiscal_year":
+                    dates = plan.company_id.compute_fiscalyear_dates(plan.reference_date)
+                    date_from = dates["date_from"]
+                    date_to = dates["date_to"]
+                if plan.period_type == "year_after":
+                    date_from = plan.reference_date
+                    date_to = date_from + relativedelta(years=1, days=-1)
+            plan.period_date_from = date_from
+            plan.period_date_to = date_to
 
     @api.constrains("first_charge_date")
     def _compute_installment_ids(self):
@@ -132,8 +144,8 @@ class TuitionPlan(models.Model):
         return self.search([
             "&", ("category_id","=",self.category_id.id),
             "&", ("grade_level_ids","in",self.grade_level_ids.ids),
-            "|", ("fiscal_year_date_from","=",self.fiscal_year_date_from),
-                 ("fiscal_year_date_to","=",self.fiscal_year_date_to)
+            "|", ("period_date_from","=",self.period_date_from),
+                 ("period_date_to","=",self.period_date_to)
         ])
     
     def _compute_default_partner_ids(self):

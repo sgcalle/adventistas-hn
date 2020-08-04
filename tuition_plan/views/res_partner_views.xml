@@ -11,8 +11,8 @@
                     <field name="tuition_plan_ids">
                         <tree>
                             <field name="name"/>
-                            <field name="fiscal_year_date_from"/>
-                            <field name="fiscal_year_date_to"/>
+                            <field name="period_date_from"/>
+                            <field name="period_date_to"/>
                             <field name="first_charge_date"/>
                             <field name="grade_level_ids" widget="many2many_tags"/>
                             <field name="category_id"/>
@@ -22,8 +22,8 @@
                     <field name="default_tuition_plan_ids">
                         <tree>
                             <field name="name"/>
-                            <field name="fiscal_year_date_from"/>
-                            <field name="fiscal_year_date_to"/>
+                            <field name="period_date_from"/>
+                            <field name="period_date_to"/>
                             <field name="first_charge_date"/>
                             <field name="grade_level_ids" widget="many2many_tags"/>
                             <field name="category_id"/>
