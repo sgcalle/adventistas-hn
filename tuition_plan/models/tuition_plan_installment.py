@@ -47,14 +47,11 @@ class TuitionPlanInstallment(models.Model):
                 "analytic_account_id": plan.analytic_account_id.id,
                 "journal_id": False,
                 "order_line_ids": order_line_ids,
+                "payment_term_id": plan.payment_term_id.id,
+                "use_student_payment_term": plan.use_student_payment_term,
             }
             make_sale = make_sale_obj.with_context(active_ids=students.ids).create(vals)
             for sale in make_sale.sales_ids:
-                if plan.payment_term_id:
-                    sale.payment_term_id = plan.payment_term_id.id
-                if plan.use_student_payment_term and sale.student_id.property_payment_term_id:
-                    sale.payment_term_id = sale.student_id.property_payment_term_id
-                    sale.invoice_date_due = False
                 if plan.discount_ids:
                     children = sale.family_id.member_ids\
                         .filtered(lambda m: m.person_type == "student" and m.student_status == "Enrolled")\
