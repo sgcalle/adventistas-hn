@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, _, api
+from odoo.exceptions import MissingError
 
+import logging
+_logger = logging.getLogger(__name__)
 
 def get_parent_category(category_id):
     single_list = [category_id]
@@ -20,9 +23,13 @@ class SaleOrder(models.Model):
 
         for order_id in self:
             write_lines = []
-            discount_ids = order_id.partner_id.discount_ids
+            partner_id = order_id.student_id if order_id.student_id else order_id.partner_id
+            discount_ids = partner_id.discount_ids
 
             for order_line_id in order_id.order_line:
+
+                # If there is a student, our priority is the student
+
                 invoice_line_categories = get_parent_category(order_line_id.product_id.categ_id)
                 discount_applicable = discount_ids.filtered(
                     lambda discount: discount.category_id in invoice_line_categories)
@@ -30,6 +37,9 @@ class SaleOrder(models.Model):
                 for discount in discount_applicable:
                     percent = discount.percent
                     discount_count = -order_line_id.price_subtotal * (percent/100)
+
+                    if not discount.product_id:
+                        raise MissingError("There is no product set for the discount %s" % discount.name)
 
                     order_line_create = {
                         "product_id": discount.product_id.get_single_product_variant().get("product_id", False),
@@ -39,7 +49,6 @@ class SaleOrder(models.Model):
 
                     if order_line_id.tax_id:
                         order_line_create.update({"tax_id": [(6, 0, order_line_id.tax_id.ids)]})
-
 
                     write_lines.append((0, 0, order_line_create))
 
@@ -53,10 +62,6 @@ class SaleOrder(models.Model):
         order_ids = super().create(vals)
 
         # We add the discounts here if context's apply_discounts variable is set True
-        for order_id in order_ids:
-
-            # 2020/06/12: We don't do it due we want to be applied every time
-            #  if self._context.get("apply_discounts", False):
-            order_id.apply_discount()
+        order_ids.apply_discount()
 
         return order_ids
