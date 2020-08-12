@@ -50,7 +50,7 @@ class HrContractAdjustment(models.Model):
         for adj in self:
             adj.is_locked = False
             if adj.date:
-                payslip = self.env["hr.payslip"].search([
+                payslip = self.env["hr.payslip"].sudo().search([
                     ("contract_id","=",adj.contract_id.id),
                     ("date_from","<=",adj.date),
                     ("date_to",">=",adj.date),
