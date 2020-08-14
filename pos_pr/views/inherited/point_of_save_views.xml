@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--<button name="%(wallet.action_pay_with_wallet_wizard)d" id="account_invoice_payment_btn" type="action" class="oe_highlight"
+                        attrs="{'invisible': ['|', '|', ('state', '!=', 'posted'),
+                                                        ('invoice_payment_state', '!=', 'not_paid'),
+                                                        ('type', 'not in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt'))
+                                              ]}"
+                        context="{'default_partner_id': partner_id}"
+                        string="Pay with wallet"
+                        groups="account.group_account_invoice"/> -->
+
+    <record id="view_pos_session_form" model="ir.ui.view">
+        <field name="name">pos.payment.register.view.pos.session.form.inherit</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+        <field name="arch" type="xml">
+
+            <button name='action_show_payments_list' position="before">
+                <field name="id" invisible="1"/>
+                <field name="invoice_payment_move_id" invisible="1"/>
+                <button name='%(action_invoice_payment)d' type="action" class="oe_stat_button" icon="fa-dollar"
+                        context="{'search_default_pos_session_id': id, 'search_default_group_by_payment_method_id': 1}">
+                    <field name="invoice_payment_amount" widget="statinfo" string="Inv. Payments"/>
+                </button>
+            </button>
+
+            <button name="show_journal_items" position="attributes">
+                <attribute name="attrs">{'invisible':['|', ('move_id', '=', False), ('invoice_payment_move_id', "=", False)]}</attribute>
+            </button>
+
+<!--            <xpath expr="//field[@name='cash_register_balance_end']/parent::group" position="before">-->
+<!--                <group style="margin:0;padding:0;" attrs="{'invisible' : [('state', 'in', ['new_session', 'opening_control'])]}">-->
+<!--                    <field style="text-align:right;margin:0;padding:0;" name="cash_invoice_payment_amount" widget="monetary" options="{'currency_field': 'currency_id'}" string="+ Invoice payments"/>-->
+<!--                </group>-->
+<!--            </xpath>-->
+        </field>
+    </record>
+
+    <record id="view_pos_session_form" model="ir.ui.view">
+        <field name="name">pos.payment.register.view.pos.session.form.inherit</field>
+        <field name="model">pos.session</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+        <field name="arch" type="xml">
+            <button name='action_show_payments_list' position="before">
+                <field name="id" invisible="1"/>
+                <button name='%(action_invoice_payment)d' type="action" class="oe_stat_button" icon="fa-dollar"
+                        context="{'search_default_pos_session_id': id, 'search_default_group_by_payment_method_id': 1}">
+                    <field name="invoice_payment_amount" widget="statinfo" string="Inv. Payments"/>
+                </button>
+            </button>
+        </field>
+    </record>
+</odoo>

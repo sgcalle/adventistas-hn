@@ -1,0 +1,13 @@
+@import "../abstract/placeholders";
+
+.screen {
+    &-right {
+        @extend %screen-half-width;
+        float: right;
+    }
+
+    &-left {
+        @extend %screen-half-width;
+        float: left;
+    }
+}
