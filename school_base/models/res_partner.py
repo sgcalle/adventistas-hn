@@ -79,7 +79,7 @@ class Contact(models.Model):
     member_ids = fields.Many2many("res.partner", string="Members", relation="partner_members", column1="partner_id",
                                   column2="partner_member_id")
 
-    facts_id_int = fields.Integer("Facts id (Integer)")
+    facts_id_int = fields.Integer("Facts id (Integer)", compute="_converts_facts_id_to_int", store=True, readonly=True)
     facts_id = fields.Char("Facts id")
     facts_approved = fields.Boolean()
 
@@ -100,11 +100,22 @@ class Contact(models.Model):
     allergy_ids = fields.One2many("school_base.allergy", "partner_id", string="Allergies")
     condition_ids = fields.One2many("school_base.condition", "partner_id", string="Conditions")
 
-    # old_name = fields.Char()
-    _sql_constraints = [
-        ('facts_id_unique', 'unique(facts_id)', 'Another contact has the same facts id!'),
-        ('facts_id_int_unique', 'unique(facts_id_int)', 'Another contact has the same facts id!'),
-    ]
+    @api.depends("facts_id")
+    def _converts_facts_id_to_int(self):
+        for partner_id in self:
+            partner_id.facts_id_int = int(partner_id.facts_id) if partner_id.facts_id and partner_id.facts_id.isdigit() else 0
+
+    @api.constrains("facts_id")
+    def _check_facts_id(self):
+        for partner_id in self:
+            if partner_id.facts_id:
+
+                if not partner_id.facts_id.isdigit():
+                    raise ValidationError("Facts id needs to be an number")
+
+                should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_id)])
+                if should_be_unique > 1:
+                    raise ValidationError("Another contact has the same facts id!")
 
     @api.model
     def format_name(self, first_name, middle_name, last_name):

@@ -58,7 +58,7 @@
                                 <!--                                <div class="o_setting_left_pane">-->
                                 <!--                                </div>-->
                                 <div class="o_setting_right_pane">
-                                    <label for="name_sorting_example"/>
+                                    <div class="o_form_label">Allow editing contact name</div>
                                     <div class="content-group">
                                         <div class="mt16">
                                             <div class="row">
