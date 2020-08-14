@@ -14,6 +14,12 @@ class AccountMove(models.Model):
 
     receivable_account_id = fields.Many2one("account.account", string="Receivable account", domain=[("user_type_id.type", "=", "receivable")])
 
+    def get_receivable_account_ids(self):
+        return self.get_receivable_line_ids().mapped("account_id")
+
+    def get_receivable_line_ids(self):
+        return self.mapped("line_ids").filtered(lambda line_id: line_id.account_id.user_type_id.type == 'receivable')
+
     def _compute_grade_level(self):
         for move_id in self:
             move_id.student_grade_level = move_id.student_id.grade_level_id
