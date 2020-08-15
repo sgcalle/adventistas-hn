@@ -20,6 +20,8 @@
     ],
 
     'data': [
+        'views/hr_payroll_reports_menus.xml',
+        'views/hr_payslip_report_summary_xlsx_template_views.xml',
         'reports/hr_payslip_reports.xml',
         'wizards/hr_payslip_report_summary_xlsx_wizard_views.xml',
     ],

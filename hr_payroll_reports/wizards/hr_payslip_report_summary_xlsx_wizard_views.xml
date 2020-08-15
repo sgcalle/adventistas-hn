@@ -5,8 +5,9 @@
         <field name="model">hr.payslip.report.summary.xlsx.wizard</field>
         <field name="type">form</field>
         <field name="arch" type="xml">
-            <form string="Payroll Report Summary (xlsx) Wizard Form">
+            <form string="Payroll Summary Report (xlsx) Wizard Form">
                 <group>
+                    <field name="template_id"/>
                     <field name="grouping"/>
                     <field name="struct_ids" widget="many2many_tags" force_save="1"/>
                 </group>
@@ -19,7 +20,7 @@
                                 domain="[('model_id','in',[%(hr.model_hr_employee)d,%(hr_contract.model_hr_contract)d,%(hr_payroll.model_hr_payslip)d])]"
                                 options="{'no_create_edit': 1, 'no_create': 1}"/>
                             <field name="rule_id" attrs="{'readonly': [('type','!=','rule')], 'required': [('type','=','rule')]}"
-                                domain="[('struct_id','in',parent.struct_ids)]"/>
+                                domain="[('struct_id','in',parent.struct_ids)]" options="{'no_create_edit': 1, 'no_create': 1}"/>
                             <field name="code"/>
                             <field name="name"/>
                         </tree>
@@ -28,13 +29,15 @@
                 <footer>
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    <button name="action_save_as_template" string="Save as Template" type="object" class="btn-secondary float-right"/>
+                    <field name="template_name" placeholder="Name" class="float-right w-auto"/>
                 </footer>
             </form>
         </field>
     </record>
 
     <record id="hr_payslip_report_summary_xlsx_wizard_action" model="ir.actions.act_window">
-        <field name="name">Payroll Report Summary (xlsx)</field>
+        <field name="name">Payroll Summary Report (xlsx)</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">hr.payslip.report.summary.xlsx.wizard</field>
         <field name="view_mode">form</field>
