@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api
 
-class HrPayslipXlsxReportSummaryXlsxTemplateLine(models.TransientModel):
+class HrPayslipXlsxReportSummaryXlsxTemplateLine(models.Model):
     _name = "hr.payslip.report.summary.xlsx.template.line"
     _description = "Payslip Summary Report template Line"
     _order = "sequence, id"
@@ -23,7 +23,8 @@ class HrPayslipXlsxReportSummaryXlsxTemplateLine(models.TransientModel):
     rule_id = fields.Many2one(string="Rule",
         comodel_name="hr.salary.rule")
     struct_id = fields.Many2one(string="Structure",
-        comodel_name="hr.payroll.structure")
+        comodel_name="hr.payroll.structure",
+        related="rule_id.struct_id")
     code = fields.Char(string="Code",
         related="rule_id.code")
     sequence = fields.Integer(string="Sequence",

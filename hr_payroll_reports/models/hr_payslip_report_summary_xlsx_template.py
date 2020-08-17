@@ -3,7 +3,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
-class HrPayslipXlsxReportSummaryXlsxTemplate(models.TransientModel):
+class HrPayslipXlsxReportSummaryXlsxTemplate(models.Model):
     _name = "hr.payslip.report.summary.xlsx.template"
     _description = "Payslip Summary Report Template"
 

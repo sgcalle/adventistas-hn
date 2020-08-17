@@ -20,6 +20,7 @@
     ],
 
     'data': [
+        'security/ir.model.access.csv',
         'views/hr_payroll_reports_menus.xml',
         'views/hr_payslip_report_summary_xlsx_template_views.xml',
         'reports/hr_payslip_reports.xml',
