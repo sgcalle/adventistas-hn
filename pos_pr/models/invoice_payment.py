@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 # noinspection PyProtectedMember
@@ -76,39 +76,22 @@ class InvoicePaymentRegister(models.Model):
         return journal_items
 
     def _build_invoice_partner_receivable_journal_items(self, move_id):
-        # Do literally nothing
-        a = 0
-        payment_method_amounts = self._get_payment_method_amounts()
         journal_items = []
 
-        for payment_method_id in payment_method_amounts.keys():
-            payment_method_id = self.env["pos.payment.method"].browse([payment_method_id])
+        for payment_id in self:
 
-            invoice_payment_filtered_by_payment_method = self.filtered(lambda invoice_payment: invoice_payment.payment_method_id == payment_method_id)
-            partner_ids = invoice_payment_filtered_by_payment_method.mapped("move_id.partner_id")
+            payment_move_id = payment_id.move_id
 
-            for partner_id in partner_ids:
+            journal_items.append({
+                "partner_id": payment_move_id.partner_id.id,
+                "account_id": payment_move_id.get_receivable_account_ids()[0].id,
+                "credit": payment_id.payment_amount,
+                "name": _('%s to %s') % (payment_id.payment_method_id.name, payment_id.move_id.name),
+                "move_id": move_id.id,
+                "pos_payment_method_id": payment_id.payment_method_id.id,
+                "pos_payment_id": payment_id.id,
+            })
 
-                move_ids = invoice_payment_filtered_by_payment_method.mapped("move_id")
-                receivable_account_ids = invoice_payment_filtered_by_payment_method.mapped("move_id").get_receivable_account_ids()
-                for receivable_account_id in receivable_account_ids:
-
-                    move_ids_with_receivable = move_ids.filtered(lambda move: move.get_receivable_account_ids()[0] == receivable_account_id)
-
-                    amount = sum(invoice_payment_filtered_by_payment_method
-                                 .filtered(lambda invoice_payment:
-                                           invoice_payment.move_id.partner_id == partner_id
-                                           and invoice_payment.move_id.id in move_ids_with_receivable.ids)
-                                 .mapped("payment_amount"))
-
-                    journal_items.append({
-                        "partner_id": partner_id.id,
-                        "account_id": receivable_account_id.id,
-                        "credit": amount,
-                        "name": payment_method_id.name,
-                        "move_id": move_id.id,
-                        "pos_payment_method_id": payment_method_id.id
-                    })
         return journal_items
 
     def _create_statements_and_reconcile_with_cash_line_ids(self, cash_line_ids):
@@ -157,13 +140,17 @@ class InvoicePaymentRegister(models.Model):
 
     def _reconcile_miscellaneous_move_with_invocies(self, move_id):
         # pos_session_id = self.pos_session_id.ensure_one()
-        invoice_ids = self.mapped("move_id")
-        invoice_receivable_lines = invoice_ids.get_receivable_line_ids()
-        payment_lines = move_id.line_ids.filtered(lambda line_id: line_id.account_id in invoice_receivable_lines.mapped("account_id") and line_id.partner_id)
+        # invoice_ids = self.mapped("move_id")
+        # invoice_receivable_lines = invoice_ids.get_receivable_line_ids()
+        # payment_lines = move_id.line_ids.filtered(lambda line_id: line_id.account_id in invoice_receivable_lines.mapped("account_id") and line_id.partner_id)
 
-        lines_by_account = invoice_receivable_lines + payment_lines
+        for payment_id in self:
+            invoice_receivable_lines = payment_id.move_id.get_receivable_line_ids()
+            payment_lines = move_id.line_ids.filtered(lambda line_id: line_id.pos_payment_id == payment_id)
 
-        accounts = lines_by_account.mapped('account_id')
-        lines_by_account = [lines_by_account.filtered(lambda l: l.account_id == account) for account in accounts]
-        for lines in lines_by_account:
-            lines.reconcile()
+            lines_by_account = invoice_receivable_lines + payment_lines
+
+            accounts = lines_by_account.mapped('account_id')
+            lines_by_account = [lines_by_account.filtered(lambda l: l.account_id == account) for account in accounts]
+            for lines in lines_by_account:
+                lines.reconcile()

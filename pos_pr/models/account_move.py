@@ -60,3 +60,4 @@ class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     pos_payment_method_id = fields.Many2one("pos.payment.method", 'POS Payment method')
+    pos_payment_id = fields.Many2one("pos_pr.invoice.payment", 'POS Invoice Payment')
