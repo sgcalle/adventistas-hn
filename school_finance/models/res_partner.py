@@ -29,7 +29,7 @@ class SchoolFinance(models.Model):
         compute="_compute_invoice_totals")
     student_invoice_amount_total_signed = fields.Monetary(string="Student Total Total",
         compute="_compute_invoice_totals")
-    student_invoice_amount_residual_signed = fields.Monetary(string="Family Total Amount Due",
+    student_invoice_amount_residual_signed = fields.Monetary(string="Student Total Amount Due",
         compute="_compute_invoice_totals")
     family_invoice_amount_untaxed_signed = fields.Monetary(string="Family Total Tax Ecluded",
         compute="_compute_invoice_totals")

@@ -152,10 +152,9 @@ class TuitionPlan(models.Model):
         for plan in self:
             result = []
             if plan.default:
-                overlapping_plans = plan.get_overlapping_plans()
                 students = self.env["res.partner"].search([
                     ("person_type","=","student"),
-                    ("tuition_plan_ids","not in",overlapping_plans.ids),
+                    ("tuition_plan_ids","=",False),
                     ("grade_level_id","in",plan.grade_level_ids.ids)
                 ])
                 result = students.ids
