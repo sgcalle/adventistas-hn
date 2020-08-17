@@ -70,6 +70,7 @@ class HrPayslipXlsxReportSummaryXlsxWizard(models.TransientModel):
                     "rule_id": line.rule_id.id,
                     "code": line.code,
                     "struct_id": line.rule_id.struct_id.id,
+                    "name": line.name,
                 }))
         self.line_ids = result or self._default_line_ids()
     
@@ -89,6 +90,7 @@ class HrPayslipXlsxReportSummaryXlsxWizard(models.TransientModel):
                 "rule_id": line.rule_id.id,
                 "code": line.code,
                 "struct_id": line.rule_id.struct_id.id,
+                "name": line.name,
             }))
         template = self.env["hr.payslip.report.summary.xlsx.template"].create({
             "name": self.template_name,
