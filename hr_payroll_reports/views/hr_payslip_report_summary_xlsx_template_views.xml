@@ -35,6 +35,7 @@
                                 <field name="rule_id" attrs="{'readonly': [('type','!=','rule')], 'required': [('type','=','rule')]}"
                                     options="{'no_create_edit': 1, 'no_create': 1}"/>
                                 <field name="code"/>
+                                <field name="struct_id"/>
                                 <field name="name"/>
                             </tree>
                         </field>

@@ -12,3 +12,5 @@ from . import browsable_object
 from . import hr_savings
 from . import hr_savings_payment
 from . import hr_salary_rule
+from . import hr_contribution_bracket
+from . import hr_contribution_table
