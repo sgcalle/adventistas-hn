@@ -4,6 +4,7 @@ from odoo import models, fields, api
 
 class AccountMoveReportMatrix(models.AbstractModel):
     _name = "report.journal_entry_print.account_move_report_matrix"
+    _description = "Journal Entry Matrix Report"
 
     @api.model
     def _get_report_values(self, docids, data=None):
