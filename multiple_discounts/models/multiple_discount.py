@@ -14,7 +14,7 @@ class MultipleDiscounts(models.Model):
     account_id = fields.Many2one('account.account', required=True, string='Account', index=True, ondelete="cascade", domain=[('deprecated', '=', False)])
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True)
 
-    product_id = fields.Many2one('product.template', string='Product')
+    product_id = fields.Many2one('product.template', string='Product', required=True)
 
     @api.model
     def create(self, vals):

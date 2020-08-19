@@ -4,6 +4,7 @@ from odoo import models, fields, api
 
 class HrPayslipReportSummaryXlsx(models.AbstractModel):
     _name = "report.hr_payroll_reports.hr_payslip_report_summary_xlsx"
+    _description = "Payslip Summary Report"
     _inherit = "report.report_xlsx.abstract"
 
     def _get_column_header(self, column):
