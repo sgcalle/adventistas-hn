@@ -1,9 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_tuition_plan_account,access.tuition.plan_account,model_tuition_plan,account.group_account_invoice,1,1,1,1
-access_tuition_plan_sale,access.tuition.plan_sale,model_tuition_plan,sales_team.group_sale_salesman_all_leads,1,1,1,1
-access_tuition_plan_discount_account,access.tuition.plan.discount.account,model_tuition_plan_discount,account.group_account_invoice,1,1,1,1
-access_tuition_plan_discount_sale,access.tuition.plan.discount.sale,model_tuition_plan_discount,sales_team.group_sale_salesman_all_leads,1,1,1,1
-access_tuition_plan_installment_account,access.tuition.plan.installment.account,model_tuition_plan_installment,account.group_account_invoice,1,1,1,1
-access_tuition_plan_installment_sale,access.tuition.plan.installment.sale,model_tuition_plan_installment,sales_team.group_sale_salesman_all_leads,1,1,1,1
-access_tuition_plan_product_account,access.tuition.plan.product.account,model_tuition_plan_product,account.group_account_invoice,1,1,1,1
-access_tuition_plan_product_sale,access.tuition.plan.product.sale,model_tuition_plan_product,sales_team.group_sale_salesman_all_leads,1,1,1,1
+access_tuition_plan_user,access.tuition.plan.user,model_tuition_plan,base.group_user,1,0,0,0
+access_tuition_plan_sale,access.tuition.plan.sale,model_tuition_plan,sales_team.group_sale_manager,1,1,1,1
+access_tuition_plan_discount_user,access.tuition.plan.discount.user,model_tuition_plan_discount,base.group_user,1,0,0,0
+access_tuition_plan_discount_sale,access.tuition.plan.discount.sale,model_tuition_plan_discount,sales_team.group_sale_manager,1,1,1,1
+access_tuition_plan_installment_user,access.tuition.plan.installment.user,model_tuition_plan_installment,base.group_user,1,0,0,0
+access_tuition_plan_installment_sale,access.tuition.plan.installment.sale,model_tuition_plan_installment,sales_team.group_sale_manager,1,1,1,1
+access_tuition_plan_product_user,access.tuition.plan.product.user,model_tuition_plan_product,base.group_user,1,0,0,0
+access_tuition_plan_product_sale,access.tuition.plan.product.sale,model_tuition_plan_product,sales_team.group_sale_manager,1,1,1,1

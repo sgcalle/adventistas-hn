@@ -19,6 +19,8 @@
     'data': [
         'security/ir.model.access.csv',
         'data/decimal_precision.xml',
+        'data/mail_template_data.xml',
+        'data/ir_cron_data.xml',
         'views/views.xml',
         'views/templates.xml',
     ],

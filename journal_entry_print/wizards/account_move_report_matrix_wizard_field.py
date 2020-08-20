@@ -4,6 +4,7 @@ from odoo import models, fields, api
 
 class AccountMoveReportMatrixWizard(models.TransientModel):
     _name = "account.move.report.matrix.wizard.field"
+    _description = "Journal Entry Matrix Report Wizard Field"
     _order = "sequence, id"
 
     sequence = fields.Integer(string="Sequence",

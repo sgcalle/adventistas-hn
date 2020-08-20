@@ -1,0 +1,27 @@
+<odoo>
+    <data>
+        <template id="pos_pr.pos_assets" inherit_id="point_of_sale.assets">
+            <xpath expr="." position="inside">
+
+                <script type="text/javascript" src="/pos_pr/static/src/js/custom_libraries/input_number.js" />
+
+                <link rel="stylesheet" href="/pos_pr/static/src/css/pos_invoices.css" />
+
+                <script type="text/javascript" src="/pos_pr/static/src/js/util/tools.js" />
+
+                <script type="text/javascript" src="/pos_pr/static/src/js/models/model.js" />
+
+                <script type="text/javascript" src="/pos_pr/static/src/js/save_data/save_invoice_payments.js" />
+
+                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_invoices.js" />
+                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_account_payment_methods.js" />
+                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_journals.js" />
+
+                <script type="text/javascript" src="/pos_pr/static/src/js/screens/pos_pr_screen.js" />
+<!--                <script type="text/javascript" src="/pos_pr/static/src/js/screens/infrastructure/pos_pr_screen_behaviour.js" />-->
+                <script type="text/javascript" src="/pos_pr/static/src/js/pos_button_widgets.js" />
+
+            </xpath>
+        </template>
+    </data>
+</odoo>

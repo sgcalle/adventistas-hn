@@ -64,8 +64,9 @@
                             <field name="name"/>
                             <field name="code"/>
                             <field name="partner_id"/>
-                            <field name="percentage_of_wage"/>
-                            <field name="amount"/>
+                            <field name="table_id"/>
+                            <field name="percentage_of_wage" force_save="1" attrs="{'readonly': [('table_id','!=',False)]}"/>
+                            <field name="amount" force_save="1" attrs="{'readonly': [('table_id','!=',False)]}"/>
                             <field name="employee_percent"/>
                             <field name="employee_amount" optional="hide"/>
                             <field name="company_percent"/>

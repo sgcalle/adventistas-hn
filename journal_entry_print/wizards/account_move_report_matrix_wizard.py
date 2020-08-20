@@ -20,6 +20,7 @@ DEFAULT_FIELDS = [
 
 class AccountMoveReportMatrixWizard(models.TransientModel):
     _name = "account.move.report.matrix.wizard"
+    _description = "Journal Entry Matrix Report Wizard"
 
     def _default_field_ids(self):
         res = []

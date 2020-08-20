@@ -1,0 +1,22 @@
+@mixin breakpoint($point) {
+    @if $point == phone {
+        @media (max-width: 767px) {
+            @content
+        }
+    }
+}
+
+@mixin diplay-flex {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+@mixin align-items($align) {
+    -webkit-box-align: $align;
+    -webkit-align-items: $align;
+    -moz-box-align: $align;
+    -ms-flex-align: $align;
+    -ms-grid-row-align: $align;
+    align-items: $align;
+};

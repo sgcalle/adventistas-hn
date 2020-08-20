@@ -1,0 +1,10 @@
+.pos .pos-register-payment {
+    @import "components/texts";
+    @import "components/forms";
+
+    @import "layout/header";
+    @import "layout/screen";
+    @import "layout/invoice-list";
+    @import "layout/payment-dashboard";
+
+}
