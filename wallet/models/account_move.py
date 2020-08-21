@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models, api
+from odoo import fields, models, api, exceptions, _
 from collections import defaultdict
 
 import logging
@@ -106,6 +106,7 @@ class AccountMove(models.Model):
         TODO: Be able to do move_ids.pay_with_wallet(wallet_payment_dict) where those move_ids has different customers
         """
         if wallet_payment_dict:
+
             move_ids = self.sorted("invoice_date_due")
             accountMoveEnv = self.env["account.move"]
             journal_ids = set(map(lambda wallet_id: wallet_id.journal_category_id, wallet_payment_dict.keys()))
@@ -114,6 +115,7 @@ class AccountMove(models.Model):
             for move_id in move_ids:
                 total_to_pay = move_id.calculate_wallet_distribution(move_id.get_wallet_due_amounts(),
                                                                      wallet_payment_dict)
+
                 if total_to_pay:
                     for journal_id in journal_ids:
                         filtered_wallet_line_ids = {wallet_id: amount
@@ -121,14 +123,22 @@ class AccountMove(models.Model):
                                                     if wallet_id.journal_category_id == journal_id}
 
                         if filtered_wallet_line_ids:
+
                             invoice_line_ids = []
                             for wallet_id, amount in filtered_wallet_line_ids.items():
-                                invoice_line_ids.append((0, 0, {
-                                    "product_id": wallet_id.product_id.id,
-                                    "price_unit": amount,
-                                    "quantity": 1,
-                                })
-                                                        )
+
+                                # We check if there is available wallet
+                                wallet_amount = wallet_id.get_wallet_amount(partner_id)
+                                if wallet_amount > -abs(wallet_id.credit_limit):
+
+                                    invoice_line_ids.append((0, 0, {
+                                        "product_id": wallet_id.product_id.id,
+                                        # "account_id": wallet_id.account_id.id,
+                                        "price_unit": amount,
+                                        "quantity": 1,
+                                    }))
+                                else:
+                                    raise exceptions.ValidationError(_("Your are trying to pay %s in %s when there is only %s available") % (amount, wallet_id.name, wallet_amount))
 
                             credit_note_id = accountMoveEnv.create({
                                 "type": "out_refund",
