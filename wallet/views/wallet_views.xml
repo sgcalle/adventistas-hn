@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record model="ir.ui.view" id="wallet_category_tree">
+        <field name="name">wallet.category.tree</field>
+        <field name="model">wallet.category</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="journal_category_id"/>
+                <field name="category_id"/>
+                <field name="account_id"/>
+                <field name="credit_limit"/>
+            </tree>
+        </field>
+    </record>
+
+</odoo>
