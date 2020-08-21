@@ -163,7 +163,7 @@ class AccountMove(models.Model):
                                           credit_note_id.id, credit_note_id.name, credit_note_id.amount_total))
                             move_id.js_assign_outstanding_line(receivable_line_id.id)
 
-            wallet_ids = wallet_payment_dict.keys()
+            wallet_ids = self.env["wallet.category"].browse(set(map(lambda wallet_id: wallet_id.id, wallet_payment_dict.keys())))
             wallet_ids.sorted("parent_count", reverse=True)
             for wallet_id in wallet_ids:
                 wallet_amount = wallet_id.get_wallet_amount(partner_id)
