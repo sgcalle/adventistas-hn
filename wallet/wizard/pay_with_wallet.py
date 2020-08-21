@@ -52,9 +52,16 @@ class PayWithWallet(models.TransientModel):
         active_move_ids = self._context.get('active_ids', [])
         if active_move_ids:
             move_ids = self.env["account.move"].browse(active_move_ids)
+            move_ids.partner_id.ensure_one()
+
             wallet_to_apply = move_ids.get_wallet_due_amounts()
+            wallet_partner_amounts = {wallet_id: wallet_id.get_wallet_amount(move_ids.partner_id) for wallet_id in
+                                      self.env["wallet.category"].search([])}
             wallet_payment_line_ids = self.env["wallet.payment.line"]
-            for wallet_id, amount in wallet_to_apply.items():
+
+            wallet_suggestion_amounts = move_ids.calculate_wallet_distribution(wallet_to_apply, wallet_partner_amounts)
+
+            for wallet_id, amount in wallet_suggestion_amounts.items():
                 wallet_payment_line_id = self.wallet_payment_line_ids.create({
                     "wallet_id": wallet_id.id,
                     "amount": amount
