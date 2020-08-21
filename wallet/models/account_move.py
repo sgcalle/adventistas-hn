@@ -164,7 +164,7 @@ class AccountMove(models.Model):
                             move_id.js_assign_outstanding_line(receivable_line_id.id)
 
             wallet_ids = self.env["wallet.category"].browse(set(map(lambda wallet_id: wallet_id.id, wallet_payment_dict.keys())))
-            wallet_ids.sorted("parent_count", reverse=True)
+            wallet_ids.sorted("category_id.parent_count", reverse=True)
             for wallet_id in wallet_ids:
                 wallet_amount = wallet_id.get_wallet_amount(partner_id)
                 if wallet_amount < wallet_id.credit_limit:
