@@ -10,6 +10,20 @@ class PayWithWallet(models.TransientModel):
     _name = 'pay.with.wallet'
     _description = 'Pay with wallet...'
 
+    @api.depends("wallet_payment_line_ids")
+    def _compute_used_wallet_ids(self):
+        for record in self:
+            # record.wallet_payment_line_ids = record.wallet_payment_line_ids.filtered(
+            #     lambda payment_line_id: payment_line_id.wallet_id)
+            record.used_wallet_ids = record.wallet_payment_line_ids.mapped("wallet_id")
+
+
+    # @api.onchange("wallet_payment_line_ids")
+    # def _onchange_wallet_payment_line_ids(self):
+    #     for record in self:
+
+
+
     @api.depends("partner_id")
     def _compute_wallet_ids(self):
         self.ensure_one()
@@ -71,12 +85,12 @@ class PayWithWallet(models.TransientModel):
 
     partner_id = fields.Many2one("res.partner", required=True)
     wallet_ids = fields.Many2many("wallet.category", compute="_compute_wallet_ids")
+    used_wallet_ids = fields.Many2many("wallet.category", compute="_compute_used_wallet_ids")
     wallet_payment_line_ids = fields.Many2many("wallet.payment.line", string="Wallets", default=_get_default_lines)
 
 
 class WalletPaymentLine(models.TransientModel):
     _name = "wallet.payment.line"
 
-    wallet_id = fields.Many2one("wallet.category")
+    wallet_id = fields.Many2one("wallet.category", required=True)
     amount = fields.Float()
-    # max_amount = fields.Float()
