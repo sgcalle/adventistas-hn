@@ -39,11 +39,11 @@ class Contact(models.Model):
     is_name_edit_allowed = fields.Boolean(compute="_compute_allow_name_edition")
 
     def _retrieve_allow_name_edit_from_config(self):
-        self.allow_edit_student_name = self.env["ir.config_parameter"].get_param(
+        self.allow_edit_student_name = self.env["ir.config_parameter"].sudo().get_param(
             "school_base.allow_edit_student_name") != False
-        self.allow_edit_parent_name = self.env["ir.config_parameter"].get_param(
+        self.allow_edit_parent_name = self.env["ir.config_parameter"].sudo().get_param(
             "school_base.allow_edit_parent_name") != False
-        self.allow_edit_person_name = self.env["ir.config_parameter"].get_param(
+        self.allow_edit_person_name = self.env["ir.config_parameter"].sudo().get_param(
             "school_base.allow_edit_person_name") != False
 
     @api.depends("allow_edit_student_name",
