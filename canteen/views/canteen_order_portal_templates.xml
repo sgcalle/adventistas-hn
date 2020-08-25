@@ -158,7 +158,7 @@
                                                         </t>
                                                     </select>
                                                 </div>
-                                                <div class="col-12 col-md-3 o_canteen_order_portal_form_name" t-att-id="'name_' + str(line_index)"><t t-raw="plaintext2html(line.product_id.description_sale)"/></div>
+                                                <div class="col-12 col-md-3 o_canteen_order_portal_form_name" t-att-id="'name_' + str(line_index)"><t t-raw="plaintext2html(line.product_id.description_sale or '-')"/></div>
                                                 <div class="col-4 col-md-2">
                                                     <input type="number" step="0.01" t-att-name="'product_uom_qty_' + str(line_index)" t-att-id="'product_uom_qty_' + str(line_index)"
                                                         class="form-control o_canteen_order_portal_form_product_uom_qty" required="true" t-att-disabled="readonly" t-att-value="line.product_uom_qty"/>
