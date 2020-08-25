@@ -28,7 +28,7 @@ class SaleOrderForStudents(models.Model):
     def _create_invoices(self, grouped=False, final=False):
         all_moves = super()._create_invoices(grouped, final)
 
-        receivable_behaviour = self.env["ir.config_parameter"].get_param('school_finance.receivable_behaviour')
+        receivable_behaviour = self.env["ir.config_parameter"].sudo().get_param('school_finance.receivable_behaviour')
 
         for order in self:
             # Basically, we change the move_ids receivable account to student if the settings allow it
