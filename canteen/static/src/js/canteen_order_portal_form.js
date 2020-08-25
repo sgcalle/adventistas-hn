@@ -11,7 +11,7 @@ publicWidget.registry.timeOffPortalForm = publicWidget.Widget.extend({
         "click .o_canteen_order_portal_form_remove_line": "_removeLine",
         "change .o_canteen_order_portal_form_product_id": "_onchangeProduct",
         "change .o_canteen_order_portal_form_product_uom_qty": "_onchangeQuantity",
-        "change .o_canteen_order_portal_form_commitment_date": "_updateProducts",
+        "change .o_canteen_order_portal_form_canteen_order_date": "_updateProducts",
         "change .o_canteen_order_portal_form_student_id": "_updateProducts",
     },
 
@@ -86,7 +86,7 @@ publicWidget.registry.timeOffPortalForm = publicWidget.Widget.extend({
     _updateProducts: function(ev) {
         var self = this
         var student_id = this.$el.find("#student_id")[0].value
-        var date = this.$el.find("#commitment_date")[0].value
+        var date = this.$el.find("#canteen_order_date")[0].value
         session.rpc("/canteen/get_available_products", {
             student_id: student_id,
             date: date,

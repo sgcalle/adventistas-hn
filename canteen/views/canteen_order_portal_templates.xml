@@ -52,7 +52,7 @@
                             <a t-attf-href="/my/canteen_order/#{canteen_order.id}?{{ keep_query() }}"><span t-field="canteen_order.name"/></a>
                         </td>
                         <td><span t-field="canteen_order.student_id"/></td>
-                        <td><span t-field="canteen_order.commitment_date" t-options="{'widget': 'date'}"/></td>
+                        <td><span t-field="canteen_order.canteen_order_date"/></td>
                         <td><span t-field="canteen_order.amount_total"/></td>
                         <td>
                             <span t-if="canteen_order.state in ['draft','sent']" class="badge" style="background:lightgray;">Draft</span>
@@ -85,7 +85,6 @@
                                     <div>
                                         <button t-if="not readonly" type="submit" class="btn btn-primary mr4">Save</button>
                                         <a t-if="readonly and canteen_order.state in ['draft','sent']" t-attf-href="/my/canteen_order/#{canteen_order.id}/edit?{{ keep_query() }}" class="btn btn-primary mr4">Edit</a>
-                                        <a t-if="canteen_order and canteen_order.state in ['draft','cancel']" t-attf-href="/my/canteen_order/#{canteen_order.id}/delete?{{ keep_query() }}" class="btn btn-secondary mr4">Delete</a>
                                     </div>
                                 </div>
                                 <div class="col-sm-12 col-md-4 text-right">
@@ -110,10 +109,10 @@
                                     </div>
                                 </div>
                                 <div class="row mb8">
-                                    <div class="col-sm-12 col-md-3 col-lg-2"><label for="commitment_date">Date *</label></div>
+                                    <div class="col-sm-12 col-md-3 col-lg-2"><label for="canteen_order_date">Date *</label></div>
                                     <div class="col-sm-12 col-md-9 col-lg-10">
-                                        <input class="form-control o_canteen_order_portal_form_commitment_date" type="date" name="commitment_date" id="commitment_date" required="true" t-att-disabled="readonly"
-                                            t-att-value="canteen_order.commitment_date and canteen_order.commitment_date.date()"/>
+                                        <input class="form-control o_canteen_order_portal_form_canteen_order_date" type="date" name="canteen_order_date" id="canteen_order_date" required="true" t-att-disabled="readonly"
+                                            t-att-value="canteen_order.canteen_order_date"/>
                                     </div>
                                 </div>
                                 <h4 class="mt32">Items</h4>

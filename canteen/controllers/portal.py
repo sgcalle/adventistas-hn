@@ -35,7 +35,10 @@ class CustomerPortal(CustomerPortal):
             "products": canteen_order and canteen_order.order_line.mapped("product_id").sudo() or request.env["product.product"].sudo(),
             "plaintext2html": plaintext2html,
         }
-        return self._get_page_view_values(canteen_order, access_token, values, "my_canteen_orders_history", True, **kwargs)
+        res = self._get_page_view_values(canteen_order, access_token, values, "my_canteen_orders_history", True, **kwargs)
+        res["prev_record"] = res["prev_record"] and res["prev_record"].replace("/orders/","/canteen_order/")
+        res["next_record"] = res["next_record"] and res["next_record"].replace("/orders/","/canteen_order/")
+        return res
 
     @http.route(["/my/canteen_order/", "/my/canteen_order/page/<int:page>"], type="http", auth="user", website=True)
     def portal_my_canteen_orders(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, search=None, search_in="name", **kw):
@@ -45,10 +48,10 @@ class CustomerPortal(CustomerPortal):
 
         archive_groups = self._get_archive_groups("sale.order", domain)
         if date_begin and date_end:
-            domain += [("commitment_date",">",date_begin),("commitment_date","<=",date_end)]
+            domain += [("canteen_order_date",">",date_begin),("canteen_order_date","<=",date_end)]
     
         searchbar_sortings = {
-            "date": {"label": _("Newest"), "order": "commitment_date desc"},
+            "date": {"label": _("Newest"), "order": "canteen_order_date desc"},
             "name": {"label": _("Name"), "order": "name"},
         }
         if not sortby:
@@ -68,19 +71,16 @@ class CustomerPortal(CustomerPortal):
 
         searchbar_inputs = {
             "name": {"input": "name", "label": _("Search in Order #")},
-            "commitment_date": {"input": "commitment_date", "label": _("Search in Date"), "type": "date"},
+            "canteen_order_date": {"input": "canteen_order_date", "label": _("Search in Date"), "type": "date"},
             "student_id": {"input": "student_id", "label": _("Search in Student")},
         }
         if search and search_in:
             search_domain = []
             if search_in == "name":
                 search_domain = OR([search_domain, [("name","ilike",search)]])
-            elif search_in == "commitment_date":
-                commitment_date = parser.parse(search)
-                tz = request.env.user.sudo().tz or "UTC"
-                commitment_date_start = timezone(tz).localize(datetime.combine(commitment_date, time.min)).astimezone(UTC).replace(tzinfo=None)
-                commitment_date_end = timezone(tz).localize(datetime.combine(commitment_date, time.max)).astimezone(UTC).replace(tzinfo=None)
-                search_domain = OR([search_domain, [("commitment_date",">=",commitment_date_start),("commitment_date","<=",commitment_date_end)]])
+            elif search_in == "canteen_order_date":
+                canteen_order_date = parser.parse(search)
+                search_domain = OR([search_domain, [("canteen_order_date","=",canteen_order_date)]])
             elif search_in == "student_id":
                 member_ids = request.env.user.partner_id.family_ids.mapped('member_ids').ids
                 student_ids = request.env["res.partner"].sudo().search([("id","in",member_ids),("name","ilike",search)]).ids
@@ -136,12 +136,6 @@ class CustomerPortal(CustomerPortal):
         values = self._canteen_order_get_page_view_values(canteen_order, access_token, **kw)
         values["create_canteen_order"] = True
         return request.render("canteen.portal_my_canteen_order", values)
-    
-    @http.route(["/my/canteen_order/delete"], type="http", auth="user", website="True")
-    def portal_my_canteen_order_delete(self, access_token=None, **kw):
-        canteen_order = request.env["sale.order"].browse(canteen_order_id)
-        canteen_order.unlink()
-        return request.redirect("/my/canteen_order/")
 
     @http.route(["/my/canteen_order/<int:canteen_order_id>/confirm"], type="http", auth="user", website="True")
     def portal_my_canteen_order_confirm(self, canteen_order_id=None, access_token=None, **kw):
@@ -186,7 +180,8 @@ class CustomerPortal(CustomerPortal):
         vals = {
             "student_id": student_id,
             "family_id": family_id,
-            "commitment_date": kw.get("commitment_date"),
+            "canteen_order_date": kw.get("canteen_order_date"),
+            "commitment_date": kw.get("canteen_order_date"),
             "is_canteen_order": True,
             "order_line": order_line
         }
