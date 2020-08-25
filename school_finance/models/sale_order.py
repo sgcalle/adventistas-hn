@@ -52,7 +52,7 @@ class SaleOrderForStudents(models.Model):
             if order.invoice_date:
                 write_variables["invoice_date"] = order.invoice_date
 
-            if order.invoice_date:
+            if order.invoice_date_due:
                 write_variables["invoice_date_due"] = order.invoice_date_due
 
             if order.student_id:
