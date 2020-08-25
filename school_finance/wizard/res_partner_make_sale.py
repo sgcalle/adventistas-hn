@@ -36,11 +36,6 @@ class ResPartnerMakeSale(models.TransientModel):
 
     separate_by_financial_responsability = fields.Boolean(default=True)
     sales_ids = fields.Many2many('sale.order')
-    payment_term_id = fields.Many2one(string="Payment Terms",
-        comodel_name="account.payment.term",
-        help="Payment term for the generated order.")
-    use_student_payment_term = fields.Boolean(string="Use Student Payment Terms",
-        help="If checked, the sale order payment terms is taken from the student if any.")
 
     # partner_ids
     @api.model
@@ -125,7 +120,6 @@ class ResPartnerMakeSale(models.TransientModel):
                             "order_line": order_line,
                             "invoice_date": values["invoice_date"],
                             "invoice_date_due": values["invoice_date_due"],
-                            "payment_term_id": values["payment_term_id"],
                             "pricelist_id": sale_pricelist,
                         })
                         sales = sales + sale_id
@@ -138,16 +132,12 @@ class ResPartnerMakeSale(models.TransientModel):
                         "order_line": values["order_line_ids"],
                         "invoice_date": values["invoice_date"],
                         "invoice_date_due": values["invoice_date_due"],
-                        "payment_term_id": values["payment_term_id"],
                         "pricelist_id": sale_pricelist,
                     })
+
                 sales = sales + sale_id
 
             if sales:
-                for sale in sales:
-                    if values["use_student_payment_term"] and sale.student_id and sale.student_id.property_payment_term_id:
-                        sale.payment_term_id = sale.student_id.property_payment_term_id.id
-                        sale.invoice_date_due = False
                 values["sales_ids"].append((6, 0, sales.ids))
             # del values["order_line_ids"]
 

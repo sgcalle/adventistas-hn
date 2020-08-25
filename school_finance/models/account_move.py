@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class AccountMove(models.Model):
@@ -20,19 +20,18 @@ class AccountMove(models.Model):
     def get_receivable_line_ids(self):
         return self.mapped("line_ids").filtered(lambda line_id: line_id.account_id.user_type_id.type == 'receivable')
 
-    def _compute_grade_level(self):
-        for move_id in self:
+    @api.model
+    def create(self, vals_list):
+        move_id = super().create(vals_list)
+
+        if move_id.student_id:
             move_id.student_grade_level = move_id.student_id.grade_level_id
-
-    student_grade_level = fields.Many2one("school_base.grade_level",
-                                          compute="_compute_grade_level",
-                                          string="Grade level", store=True)
-
-    def _compute_student_homeroom(self):
-        for move_id in self:
             move_id.student_homeroom = move_id.student_id.homeroom
 
-    student_homeroom = fields.Char(compute="_compute_student_homeroom", string="Student homeroom", store=True)
+        return move_id
+
+    student_grade_level = fields.Many2one("school_base.grade_level", readonly=True, string="Grade level")
+    student_homeroom = fields.Char(readonly=True, string="Student homeroom")
 
     def set_receivable_account(self):
         """ It uses receivable_account_id field to set autoamtically the receivable account """
