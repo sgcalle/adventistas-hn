@@ -89,44 +89,49 @@ class HrPayslip(models.Model):
                 for deduction in payslip.deduction_ids:
                     credit_note_data.setdefault(deduction.move_id.partner_id.id, {})
                     credit_note_data[deduction.move_id.partner_id.id].setdefault(deduction.move_id.family_id.id, {})
-                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id].setdefault(deduction.move_id.student_id.id, {
+                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id].setdefault(deduction.move_id.student_id.id, {})
+                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id].setdefault(deduction.move_line_id.account_id.id, {
                         "amount": 0,
                         "reconcile_ids": []
                     })
-                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id]["amount"] += deduction.amount
-                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id]["reconcile_ids"] += [deduction.move_line_id.id]
+                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id][deduction.move_line_id.account_id.id]["amount"] += deduction.amount
+                    credit_note_data[deduction.move_id.partner_id.id][deduction.move_id.family_id.id][deduction.move_id.student_id.id][deduction.move_line_id.account_id.id]["reconcile_ids"] += [deduction.move_line_id.id]
                 
                 # CREATE CREDIT NOTES
                 for partner_id, family_ids in credit_note_data.items():
                     for family_id, student_ids in family_ids.items():
-                        for student_id, details in student_ids.items():
-                            credit_note = move_obj.create({
-                                "type": "out_refund",
-                                "partner_id": partner_id,
-                                "family_id": family_id,
-                                "student_id": student_id,
-                                "journal_id": payslip.employee_id.payroll_journal_id.id
-                            })
-                            credit_note._onchange_partner_id()
-                            accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=credit_note.fiscal_position_id)
-                            created_line = move_line_obj.create({
-                                "move_id": credit_note.id,
-                                "product_id": product.id,
-                                "account_id": accounts["income"].id,
-                                "analytic_account_id": payslip.contract_id.analytic_account_id.id,
-                                "quantity": 1,
-                                "payslip_id": payslip.id,
-                            })
-                            created_line._onchange_product_id()
-                            credit_note.write({
-                                "invoice_line_ids": [(1, created_line.id, {
-                                    "name": created_line.name + "\n" + payslip.number + " (" + payslip.name + ")",
-                                    "price_unit": details["amount"],
-                                })]
-                            })
-                            credit_note.action_post()
-                            for line_id in details["reconcile_ids"]:
-                                credit_note.js_assign_outstanding_line(line_id)
+                        for student_id, account_ids in student_ids.items():
+                            for account_id, details in account_ids.items():
+                                credit_note = move_obj.create({
+                                    "type": "out_refund",
+                                    "partner_id": partner_id,
+                                    "family_id": family_id,
+                                    "student_id": student_id,
+                                    "journal_id": payslip.employee_id.payroll_journal_id.id
+                                })
+                                credit_note._onchange_partner_id()
+                                accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=credit_note.fiscal_position_id)
+                                created_line = move_line_obj.create({
+                                    "move_id": credit_note.id,
+                                    "product_id": product.id,
+                                    "account_id": accounts["income"].id,
+                                    "analytic_account_id": payslip.contract_id.analytic_account_id.id,
+                                    "quantity": 1,
+                                    "payslip_id": payslip.id,
+                                })
+                                created_line._onchange_product_id()
+                                credit_note.write({
+                                    "invoice_line_ids": [(1, created_line.id, {
+                                        "name": created_line.name + "\n" + payslip.number + " (" + payslip.name + ")",
+                                        "price_unit": details["amount"],
+                                    })]
+                                })
+                                credit_note.action_post()
+                                for line_id in details["reconcile_ids"]:
+                                    credit_note.js_assign_outstanding_line(line_id)
+                                for line in credit_note.line_ids:
+                                    if line.account_id.user_type_id.type == "receivable" and line.account_id.id != account_id:
+                                        line.account_id = account_id
 
             if payslip.net_wage:
                 product = payslip.employee_id.payroll_bill_product_id

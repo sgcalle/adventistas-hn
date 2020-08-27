@@ -11,7 +11,8 @@ class HrSavingsPayment(models.Model):
 
     payslip_id = fields.Many2one(string="Payslip",
         comodel_name="hr.payslip",
-        required=True)
+        required=True,
+        ondelete="cascade")
     savings_id = fields.Many2one(string="Savings",
         comodel_name="hr.savings",
         required=True)
