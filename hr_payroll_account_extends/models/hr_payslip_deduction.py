@@ -11,7 +11,8 @@ class HrPayslipDeduction(models.Model):
 
     payslip_id = fields.Many2one(string="Payslip",
         comodel_name="hr.payslip",
-        required=True)
+        required=True,
+        ondelete="cascade")
     move_line_id = fields.Many2one(string="Journal Item",
         comodel_name="account.move.line",
         required=True,
@@ -19,6 +20,9 @@ class HrPayslipDeduction(models.Model):
     move_id = fields.Many2one(string="Invoice",
         comodel_name="account.move",
         related="move_line_id.move_id")
+    account_id = fields.Many2one(string="Account",
+        comodel_name="account.account",
+        related="move_line_id.account_id")
     due_date = fields.Date(string="Due Date",
         related="move_line_id.date_maturity")
     company_id = fields.Many2one(string="Company",
