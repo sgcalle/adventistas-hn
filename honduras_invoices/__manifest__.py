@@ -37,8 +37,10 @@
         'views/template_nota_interna.xml',
         'views/res_partner_views.xml',
         'views/account_move_views.xml',
+        'views/sale_order_views.xml',
         'views/reports.xml',
         'data/mail_template_data.xml',
         'data/base_automation_data.xml',
+        'reports/sale_order_report_templates.xml',
     ]
 }
