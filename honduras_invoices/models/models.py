@@ -29,6 +29,7 @@ class Invoice(models.Model):
     authorized_range_to = fields.Char("Authorized range to", readonly=True)
     cai = fields.Char("CAI", readonly=True)
     issue_limit_date = fields.Date("Issue limit date", readonly=True)
+    hide_line_price = fields.Boolean(string="Hide Line Price in Print")
 
     def _formatLang(self, value):
         lang = self.partner_id.lang

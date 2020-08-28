@@ -174,11 +174,11 @@
                     <tr>
                         <th>cod Alterno</th>
                         <th>Nombre</th>
-                        <th>Precio</th>
-                        <th>Cant.</th>
-                        <th>Subtotal</th>
-                        <th>Desc</th>
-                        <th>Total</th>
+                        <th t-if="not o.hide_line_price">Precio</th>
+                        <th t-if="not o.hide_line_price">Cant.</th>
+                        <th t-if="not o.hide_line_price">Subtotal</th>
+                        <th t-if="not o.hide_line_price">Desc</th>
+                        <th t-if="not o.hide_line_price">Total</th>
                         <th>E/G</th>
                     </tr>
                 </thead>
@@ -190,19 +190,19 @@
                         <td>
                             <t t-esc="invoice_line.product_id.name" />
                         </td>
-                        <td class="text-right">
+                        <td t-if="not o.hide_line_price" class="text-right">
                             <span t-field="invoice_line.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
                         </td>
-                        <td class="text-right">
+                        <td t-if="not o.hide_line_price" class="text-right">
                             <t t-esc="round(invoice_line.quantity)" />
                         </td>
-                        <td class="text-right">
+                        <td t-if="not o.hide_line_price" class="text-right">
                             <span t-field="invoice_line.price_subtotal" />
                         </td>
-                        <td class="text-right">
+                        <td t-if="not o.hide_line_price" class="text-right">
                             <span t-field="invoice_line.discount" />
                         </td>
-                        <td class="text-right">
+                        <td t-if="not o.hide_line_price" class="text-right">
                             <span t-field="invoice_line.price_total" />
                         </td>
                         <td>
