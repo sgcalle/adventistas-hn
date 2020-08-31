@@ -32,6 +32,8 @@
         'views/config_views.xml',
 
         # Inherited views
+        'views/inherited_views/account_move.xml',
+
         'views/inherited_views/product_category.xml',
         'views/inherited_views/account_journal.xml',
 
