@@ -11,8 +11,12 @@ class AccountMove(models.Model):
     family_id = fields.Many2one("res.partner", string="Family", domain=[('is_family', '=', True)])
 
     family_members_ids = fields.Many2many(related="family_id.member_ids")
-
     receivable_account_id = fields.Many2one("account.account", string="Receivable account", domain=[("user_type_id.type", "=", "receivable")])
+
+    is_in_debug_mode = fields.Boolean(compute="compute_is_in_debug_mode")
+
+    def compute_is_in_debug_mode(self):
+        self.is_in_debug_mode = self.env.user.has_group('base.group_no_one')
 
     def get_receivable_account_ids(self):
         return self.get_receivable_line_ids().mapped("account_id")
