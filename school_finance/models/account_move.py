@@ -28,7 +28,7 @@ class AccountMove(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if "student_id" in vals and vals["student_id"]:
-                student_id = self.env["res.partner"].browse([vals["studen_id"]])
+                student_id = self.env["res.partner"].browse([vals["student_id"]])
                 if student_id:
                     if "student_grade_level" not in vals:
                         vals["student_grade_level"] = student_id.grade_level_id.id
