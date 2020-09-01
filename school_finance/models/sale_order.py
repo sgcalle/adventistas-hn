@@ -58,8 +58,8 @@ class SaleOrderForStudents(models.Model):
 
             if order.student_id:
                 write_variables["student_id"] = order.student_id.id
-                write_variables["grade_level_id"] = order.student_id.grade_level_id.id
-                write_variables["homeroom"] = order.student_id.homeroom
+                write_variables["student_grade_level"] = order.student_id.grade_level_id.id
+                write_variables["student_homeroom"] = order.student_id.homeroom
 
             if order.family_id:
                 write_variables["family_id"] = order.family_id.id
