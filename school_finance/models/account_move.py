@@ -32,8 +32,8 @@ class AccountMove(models.Model):
                 if student_id:
                     if "student_grade_level" not in vals:
                         vals["student_grade_level"] = student_id.grade_level_id.id
-                    if "homeroom" not in vals:
-                        vals["homeroom"] = student_id.homeroom
+                    if "student_homeroom" not in vals:
+                        vals["student_homeroom"] = student_id.homeroom
 
         return super().create(vals_list)
 
