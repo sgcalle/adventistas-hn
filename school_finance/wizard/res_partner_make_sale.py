@@ -97,7 +97,7 @@ class ResPartnerMakeSale(models.TransientModel):
                         for line in line_ids:
                             if line[0] == 0:
 
-                                #We just clone it
+                                # We just clone it
                                 line_dict = dict(line[2])
 
                                 if line_dict["display_type"] == 'line_section':
@@ -151,8 +151,8 @@ class ResPartnerMakeSale(models.TransientModel):
                 values["sales_ids"].append((6, 0, sales.ids))
             # del values["order_line_ids"]
 
-            # We need to stop order_lines from being created
-            # because it give us error, it needs a sale.order to be created
+        # We need to stop order_lines from being created
+        # because it give us error, they need a sale.order to be created
         del values["order_line_ids"]
 
         if not values["sales_ids"]:
