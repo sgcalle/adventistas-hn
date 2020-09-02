@@ -1,21 +1,4 @@
 <odoo>
-    <record id="sale_order_school_addon" model="ir.ui.view">
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_order_form"/>
-        <field name="arch" type="xml">
-            <field name="partner_id" position="after">
-                <field name="student_id"/>
-                <field name="family_id"/>
-            </field>
-            <div class="oe_title" position="inside">
-                <group><field name="journal_id"/></group>
-            </div>
-            <field name="payment_term_id" position="after">
-                <field name="invoice_date"/>
-                <field name="invoice_date_due"/>
-            </field>
-        </field>
-    </record>
 
     <record id="account_family_selection_form_view" model="ir.ui.view">
         <field name="model">account.move</field>

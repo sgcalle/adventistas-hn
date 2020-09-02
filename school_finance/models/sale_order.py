@@ -1,14 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime, timedelta
-from functools import partial
-from itertools import groupby
-
+from lxml import etree
 from odoo import api, fields, models, SUPERUSER_ID, _
-from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools.misc import formatLang, get_lang
-from odoo.osv import expression
-from odoo.tools import float_is_zero, float_compare
+from ast import literal_eval
 
 
 class SaleOrderForStudents(models.Model):
@@ -18,63 +12,78 @@ class SaleOrderForStudents(models.Model):
     journal_id = fields.Many2one("account.journal", string="Journal", domain="[('type', '=', 'sale')]")
     
     # Invoice Date
-    invoice_date_due = fields.Datetime(string='Due Date')
-    invoice_date = fields.Datetime(string='Invoice Date')
+    invoice_date_due = fields.Datetime(string='Due Date', readonly=True, states={'draft': [('readonly', False)]})
+    invoice_date = fields.Datetime(string='Invoice Date', readonly=True, states={'draft': [('readonly', False)]})
 
     # School fields
     student_id = fields.Many2one("res.partner", string="Student", domain=[('person_type', '=', 'student')])
     family_id = fields.Many2one("res.partner", string="Family", domain=[('is_family', '=', True)])
 
+    # @api.model
+    # def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+    #     res = super().fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
+    #     if view_type == 'form':
+    #         doc = etree.XML(res['arch'])
+    #         for node in doc.xpath('//field[@name="payment_term_id"]'):
+    #             attrs = literal_eval(node.get('attrs', "{}"))
+    #
+    #             readonly_domain = attrs.get("readonly", [])
+    #             readonly_domain.append(('state', '!=', 'draft'))
+    #             attrs["readonly"] = readonly_domain
+    #
+    #             node.set("attrs", attrs)
+    #
+    #         res['arch'] = etree.tostring(doc, encoding='unicode')
+    #     return res
+
+    def _student_receivable(self):
+        self.ensure_one()
+        receivable_behaviour = self.env["ir.config_parameter"].sudo().get_param('school_finance.receivable_behaviour')
+        return receivable_behaviour == 'student' and self.student_id.person_type == 'student'
+
+    def _prepare_invoice(self):
+        invoice_vals = super()._prepare_invoice()
+
+        if self.journal_id:
+            invoice_vals["journal_id"] = self.journal_id.id
+
+        if self.invoice_date:
+            invoice_vals["invoice_date"] = self.invoice_date
+            invoice_vals["date"] = self.invoice_date
+
+        if self._student_receivable():
+            invoice_vals["receivable_account_id"] = self.student_id.property_account_receivable_id.id
+
+        if self.family_id:
+            invoice_vals["family_id"] = self.family_id.id
+
+        if not self.payment_term_id:
+            invoice_vals["invoice_date_due"] = self.invoice_date_due
+
+        if self.student_id:
+            invoice_vals["student_id"] = self.student_id.id
+            invoice_vals["student_grade_level"] = self.student_id.grade_level_id.id
+            invoice_vals["student_homeroom"] = self.student_id.homeroom
+
+        return invoice_vals
+
     def _create_invoices(self, grouped=False, final=False):
         all_moves = super()._create_invoices(grouped, final)
 
-        receivable_behaviour = self.env["ir.config_parameter"].sudo().get_param('school_finance.receivable_behaviour')
-
         for order in self:
             # Basically, we change the move_ids receivable account to student if the settings allow it
-            if receivable_behaviour == 'student' and order.student_id.person_type == 'student':
+            order_created_invoice_ids = all_moves & order.invoice_ids
 
-                # We find the line with receivable
-                receivable_lines = order.invoice_ids.line_ids.filtered(
-                    lambda line: line.account_id.internal_type == 'receivable')
+            self._set_receivable_to_invoices(order_created_invoice_ids)
 
-                # And force them to change :P
-                receivable_lines.sudo().write({
-                    "account_id": order.student_id.property_account_receivable_id.id
-                })
-
-            # Update values
-            write_variables = dict()
-
-            if order.journal_id:
-                write_variables["journal_id"] = order.journal_id.id
-            
-            if order.invoice_date:
-                write_variables["invoice_date"] = order.invoice_date
-                write_variables["date"] = order.invoice_date
-
-            if order.payment_term_id or order.invoice_date_due:
-                # If there is an invoice that already has payment terms, we will recompute the payment terms...
-                invoice_ids_with_payment_terms = order.invoice_ids.filtered("invoice_payment_term_id")
-                invoice_ids_with_payment_terms._recompute_payment_terms_lines()
-
-                # The rest of the invoices we are going to just write the invoice date due
-                (order.invoice_ids - invoice_ids_with_payment_terms).write({"invoice_date_due": order.invoice_date_due})
-
-            if order.student_id:
-                write_variables["student_id"] = order.student_id.id
-                write_variables["student_grade_level"] = order.student_id.grade_level_id.id
-                write_variables["student_homeroom"] = order.student_id.homeroom
-
-            if order.family_id:
-                write_variables["family_id"] = order.family_id.id
-
-            if write_variables:
-                order.invoice_ids.write(write_variables)
-        
         return all_moves
-        
-        
+
+    def _set_receivable_to_invoices(self, invoice_ids):
+        self.ensure_one()
+        if self._student_receivable():
+            invoice_ids.set_receivable_account()
+
+
 class SaleOrderLine(models.Model):
     """ Sale Order Line """
     _inherit = 'sale.order.line'

@@ -10,7 +10,7 @@
     'website': "http://www.Eduwebgroup.com",
 
     'category': 'Invoicing',
-    'version': '0.14',
+    'version': '0.14.1',
 
     # any module necessary for this one to work correctly
     'depends': [
@@ -34,7 +34,7 @@
 
         # Inherited views
         'views/inherited_views/account_move.xml',
-
+        'views/inherited_views/sale_order.xml',
         'views/inherited_views/product_category.xml',
         'views/inherited_views/account_journal.xml',
 
