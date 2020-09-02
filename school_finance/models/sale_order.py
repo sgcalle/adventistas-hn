@@ -53,8 +53,13 @@ class SaleOrderForStudents(models.Model):
                 write_variables["invoice_date"] = order.invoice_date
                 write_variables["date"] = order.invoice_date
 
-            if order.invoice_date_due:
-                write_variables["invoice_date_due"] = order.invoice_date_due
+            if order.payment_term_id or order.invoice_date_due:
+                # If there is an invoice that already has payment terms, we will recompute the payment terms...
+                invoice_ids_with_payment_terms = order.invoice_ids.filtered("invoice_payment_term_id")
+                invoice_ids_with_payment_terms._recompute_payment_terms_lines()
+
+                # The rest of the invoices we are going to just write the invoice date due
+                (order.invoice_ids - invoice_ids_with_payment_terms).write({"invoice_date_due": order.invoice_date_due})
 
             if order.student_id:
                 write_variables["student_id"] = order.student_id.id
