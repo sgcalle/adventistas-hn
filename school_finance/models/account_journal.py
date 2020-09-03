@@ -18,6 +18,9 @@ class AccountJournal(models.Model):
     facts_id = fields.Char("Fact id (Char)", readonly=True, compute="_compute_facts_id")
     is_invoice = fields.Boolean()
 
+    default_debit_account_code = fields.Char("default_debit_account_code", readonly=True, related="default_debit_account_id.code")
+    default_credit_account_code = fields.Char("default_debit_account_code", readonly=True, related="default_credit_account_id.code")
+
     def _compute_facts_id(self):
         for record in self:
             record.facts_id = str(record.facts_id_int)
