@@ -74,7 +74,7 @@ class SaleOrderForStudents(models.Model):
             # Basically, we change the move_ids receivable account to student if the settings allow it
             order_created_invoice_ids = all_moves & order.invoice_ids
 
-            self._set_receivable_to_invoices(order_created_invoice_ids)
+            order._set_receivable_to_invoices(order_created_invoice_ids)
 
         return all_moves
 
