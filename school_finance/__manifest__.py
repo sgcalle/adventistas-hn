@@ -26,6 +26,7 @@
         # Actions
         'data/actions/sale_order_actions.xml',
         'data/actions/account_move_actions.xml',
+        'data/base_automation_data.xml',
 
         # Views
         'views/views.xml',
