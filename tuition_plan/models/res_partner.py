@@ -11,7 +11,8 @@ class TuitionPlan(models.Model):
         relation="partner_tuition_plan_rel",
         help="""Tuition plans that were manually assigned to the student.
             If a plan in the Default Tuition Plan overlaps with any of these,
-            then the overlapping default tuition plan will be removed""")
+            then the overlapping default tuition plan will be removed""",
+        domain="[('grade_level_ids','in',[grade_level_id])]")
     default_tuition_plan_ids = fields.Many2many(string="Default Tuition Plans",
         comodel_name="tuition.plan",
         compute="_compute_default_tuition_plan_ids",
