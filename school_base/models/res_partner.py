@@ -24,6 +24,15 @@ SELECT_STATUS_TYPES = [
     ("withdrawn", "Withdrawn"),
 ]
 
+SELECT_REENROLLMENT_STATUS = [
+    ("admissions", "Admissions"),
+    ("enrolled", "Enrolled"),
+    ("graduate", "Graduate"),
+    ("inactive", "Inactive"),
+    ("pre-enrolled", "Pre-Enrolled"),
+    ("withdrawn", "Withdrawn"),
+]
+
 
 class Contact(models.Model):
     """ We inherit to enable School features for contacts """
@@ -39,12 +48,9 @@ class Contact(models.Model):
     is_name_edit_allowed = fields.Boolean(compute="_compute_allow_name_edition")
 
     def _retrieve_allow_name_edit_from_config(self):
-        self.allow_edit_student_name = self.env["ir.config_parameter"].sudo().get_param(
-            "school_base.allow_edit_student_name") != False
-        self.allow_edit_parent_name = self.env["ir.config_parameter"].sudo().get_param(
-            "school_base.allow_edit_parent_name") != False
-        self.allow_edit_person_name = self.env["ir.config_parameter"].sudo().get_param(
-            "school_base.allow_edit_person_name") != False
+        self.allow_edit_student_name = bool(self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_student_name", False))
+        self.allow_edit_parent_name = bool(self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_parent_name", False))
+        self.allow_edit_person_name = bool(self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_person_name", False))
 
     @api.depends("allow_edit_student_name",
                  "allow_edit_parent_name",
@@ -68,10 +74,6 @@ class Contact(models.Model):
     company_type = fields.Selection(SELECT_COMPANY_TYPES, string="Company Type")
     person_type = fields.Selection(SELECT_PERSON_TYPES, string="Person Type")
 
-    grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level")
-    homeroom = fields.Char("Homeroom")
-
-    student_status = fields.Char("Student status (Deprecated)", help="(This field is deprecated)")
 
     comment_facts = fields.Text("Facts Comment")
     family_ids = fields.Many2many("res.partner", string="Families", relation="partner_families", column1="partner_id",
@@ -79,8 +81,6 @@ class Contact(models.Model):
     member_ids = fields.Many2many("res.partner", string="Members", relation="partner_members", column1="partner_id",
                                   column2="partner_member_id")
 
-    facts_id_int = fields.Integer("Facts id (Integer)", compute="_converts_facts_id_to_int", store=True, readonly=True)
-    facts_id = fields.Char("Facts id")
     facts_approved = fields.Boolean()
 
     is_family = fields.Boolean("Is a family?")
@@ -90,13 +90,43 @@ class Contact(models.Model):
                                          relation="partner_financial_res", column1="partner_id",
                                          column2="partner_financial_id")
 
+    # Demographics fields
     first_name = fields.Char("First Name")
     middle_name = fields.Char("Middle Name")
     last_name = fields.Char("Last Name")
 
-    date_of_birth = fields.Date()
+    date_of_birth = fields.Date('Date of birth')
+
+    # Fields for current student status, grade leve, status, etc...
+    school_code_id = fields.Many2one('school_base.school_code', string='Current school code')
+    grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level")
+    student_status = fields.Char("Student status (Deprecated)", help="(This field is deprecated)")
     student_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student status")
+
+    # Fields for next student status, grade leve, status, etc...
+    next_school_code_id = fields.Many2one('school_base.school_code', string='Current school code')
+    next_grade_level_id = fields.Many2one("school_base.grade_level", string="Next grade level")
     student_next_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student next status")
+
+    # School information
+    homeroom = fields.Char("Homeroom")
+    class_year = fields.Char("Class year")
+    student_sub_status_id = fields.Many2one('school_base.enrollment.sub_status', string=_("Sub status"))
+
+    enrolled_date = fields.Date(string=_("Enrolled date"))
+    graduation_date = fields.Date(string=_("Graduation date"))
+
+    withdraw_date = fields.Date(string=_("Withdraw date"))
+    withdraw_reason_id = fields.Many2one('school_base.withdraw_reason', string=_("Withdraw reason"))
+
+    reenrollment_status_id = fields.Selection(SELECT_REENROLLMENT_STATUS, string="Reenrollment Status")
+    reenrollment_school_year_id = fields.Many2one('school_base.school_year', string=_("Reenollment school year"))
+
+    # Facts metadata
+    facts_id_int = fields.Integer("Facts id (Integer)", compute="_converts_facts_id_to_int", store=True, readonly=True)
+    facts_id = fields.Char("Facts id")
+
+    # Healthcare
     allergy_ids = fields.One2many("school_base.allergy", "partner_id", string="Allergies")
     condition_ids = fields.One2many("school_base.condition", "partner_id", string="Conditions")
 
@@ -228,3 +258,14 @@ class Contact(models.Model):
                         })
 
         return super().write(values)
+
+    # Helpers methods
+    def recompute_status_id(self):
+        for partner_id in self.filtered('student_status'):
+            student_status = partner_id.student_status
+            if student_status:
+                for status_name, status_label in SELECT_STATUS_TYPES:
+                    if student_status.lower() == status_name.lower():
+                        partner_id.student_status_id = status_name
+                        break
+
