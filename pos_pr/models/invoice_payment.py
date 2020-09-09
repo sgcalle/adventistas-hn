@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, exceptions
 
 
 # noinspection PyProtectedMember
@@ -14,11 +14,20 @@ class InvoicePaymentRegister(models.Model):
     name = fields.Char()
     date = fields.Date()
 
+    display_amount = fields.Float('Amount', compute='_compute_display_amount', store=True)
     payment_amount = fields.Float()
     payment_method_id = fields.Many2one("pos.payment.method")
 
     pos_session_id = fields.Many2one("pos.session")
     move_id = fields.Many2one("account.move", "Invoice", domain="[ ('type', '=', 'out_invoice') ]")
+
+    currency_id = fields.Many2one("res.currency", related="pos_session_id.currency_id")
+    discount_amount = fields.Monetary()
+
+    @api.depends('payment_amount', 'discount_amount')
+    def _compute_display_amount(self):
+        for payment in self:
+            payment.display_amount = payment.payment_amount + payment.discount_amount
 
     @api.model
     def create(self, vals_list):
@@ -37,6 +46,9 @@ class InvoicePaymentRegister(models.Model):
             move_id, cash_line_ids = invoice_payment_ids._create_payment_miscellaneous_move(journal_id)
             invoice_payment_ids._create_statements_and_reconcile_with_cash_line_ids(cash_line_ids)
             invoice_payment_ids._reconcile_miscellaneous_move_with_invocies(move_id)
+
+            invoice_payment_ids._generate_invoice_discount()
+
             pos_session_id.invoice_payment_move_id = move_id
 
     def _create_payment_miscellaneous_move(self, journal_id):
@@ -45,7 +57,8 @@ class InvoicePaymentRegister(models.Model):
         })
 
         journal_items = self._build_miscellaneous_moves_journal_items(payment_miscellaneous_move_id)
-        receivable_per_invoice_and_partner = self._build_invoice_partner_receivable_journal_items(payment_miscellaneous_move_id)
+        receivable_per_invoice_and_partner = self._build_invoice_partner_receivable_journal_items(
+            payment_miscellaneous_move_id)
 
         account_move_line_env = self.env["account.move.line"].with_context(check_move_validity=False)
         pos_line_ids = account_move_line_env.create(journal_items)
@@ -79,7 +92,6 @@ class InvoicePaymentRegister(models.Model):
         journal_items = []
 
         for payment_id in self:
-
             payment_move_id = payment_id.move_id
 
             journal_items.append({
@@ -107,7 +119,9 @@ class InvoicePaymentRegister(models.Model):
 
             statement = statements_by_journal_id[payment_method_id.cash_journal_id.id]
 
-            statement_line_values = pos_session_id._get_statement_line_vals(statement, payment_method_id.receivable_account_id, amount)
+            statement_line_values = pos_session_id._get_statement_line_vals(statement,
+                                                                            payment_method_id.receivable_account_id,
+                                                                            amount)
             BankStatementLine = self.env['account.bank.statement.line']
             statement_line = BankStatementLine.create(statement_line_values)
 
@@ -117,7 +131,8 @@ class InvoicePaymentRegister(models.Model):
             statement.button_confirm_bank()
             if not statement_line.journal_entry_ids:
                 statement_line.fast_counterpart_creation()
-            lines_ids_to_reconcile += statement_line.journal_entry_ids.filtered(lambda aml: aml.account_id.internal_type == 'receivable')
+            lines_ids_to_reconcile += statement_line.journal_entry_ids.filtered(
+                lambda aml: aml.account_id.internal_type == 'receivable')
 
         accounts = lines_ids_to_reconcile.mapped('account_id')
         lines_by_account = [lines_ids_to_reconcile.filtered(lambda l: l.account_id == account) for account in accounts]
@@ -133,7 +148,9 @@ class InvoicePaymentRegister(models.Model):
             payment_method_ids = payment_method_ids.filtered("is_cash_count")
 
         for payment_method_id in payment_method_ids:
-            payment_amount = sum(self.filtered(lambda invoice_payment: invoice_payment.payment_method_id == payment_method_id).mapped("payment_amount"))
+            payment_amount = sum(
+                self.filtered(lambda invoice_payment: invoice_payment.payment_method_id == payment_method_id).mapped(
+                    "payment_amount"))
             payment_method_amounts[payment_method_id.id] = payment_amount
 
         return payment_method_amounts
@@ -154,3 +171,53 @@ class InvoicePaymentRegister(models.Model):
             lines_by_account = [lines_by_account.filtered(lambda l: l.account_id == account) for account in accounts]
             for lines in lines_by_account:
                 lines.reconcile()
+
+    def _generate_invoice_discount(self):
+        payments_with_discounts = self.filtered('discount_amount')
+
+        for invoice_payment_id in payments_with_discounts:
+            credit_note_vals = invoice_payment_id._build_credit_note_vals()
+            credit_note = self.env["account.move"].create(credit_note_vals)
+
+            credit_note_receivable_line_ids = credit_note.get_receivable_line_ids()
+            invoice_payment_id.move_id.js_assign_outstanding_line(credit_note_receivable_line_ids.id)
+
+    def _build_credit_note_vals(self):
+        """ Builds a credit note based on discount_amount field """
+        self.ensure_one()
+
+        discount_id = self.env['ir.config_parameter'].get_param('pos_pr.discount_product_id', 0)
+        try:
+            discount_product_id = self.env["product.product"].browse([int(discount_id)])
+            if not discount_product_id:
+                raise ValueError
+        except ValueError:
+            raise exceptions.UserError(_("You need to set up a discount product first"))
+
+        # Checking if there is an default discount account
+        # By default we set an empty record to discount_account_id
+        # That way we discount_account_id.id will return False
+        discount_account_id = self.env["account.account"]
+        account_id = self.env['ir.config_parameter'].get_param('pos_pr.discount_product_id', 0)
+        if account_id:
+            try:
+                discount_account_id = self.env["account.account"].browse([int(account_id)])
+                if not discount_product_id:
+                    discount_account_id = self.env["account.account"]
+            except ValueError:
+                # int(account_id) can raise ValueError if there is an invalid value for pos_pr.discount_product_id
+                # As we want it this to be optional, then we simply continue if there is some error
+                # If it is false, we simply set it to its default value...
+                pass
+
+        return {
+            "type": "out_refund",
+            "partner_id": self.move_id.partner_id.id,
+            "journal_id": self.move_id.journal_id.id,
+            "invoice_line_ids": [(0, 0, {
+                "product_id": discount_product_id.id,
+                "account_id": discount_account_id.id or discount_product_id.property_account_income_id.id,
+                "price_unit": self.discount_amount,
+                "quantity": 1,
+            })],
+        }

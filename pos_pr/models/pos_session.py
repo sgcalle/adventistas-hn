@@ -3,6 +3,7 @@ from collections import defaultdict
 
 from odoo import fields, models, api, _
 
+
 class PosSession(models.Model):
     _inherit = "pos.session"
 
@@ -131,12 +132,13 @@ class PosSession(models.Model):
 
             if cash_payment_method_ids:
                 transaction_total_amount = session.get_cash_transaction_total_amount()
-                total_cash_invoice_payment_amount = 0.0 if session.state == 'closed' else sum(session.invoice_payment_ids.filtered("payment_method_id.is_cash_count").mapped("payment_amount"))
+                total_cash_invoice_payment_amount = 0.0 if session.state == 'closed' else sum(
+                    session.invoice_payment_ids.filtered("payment_method_id.is_cash_count").mapped("display_amount"))
 
                 cash_register_total_entry_encoding = self.cash_register_id.total_entry_encoding + transaction_total_amount + total_cash_invoice_payment_amount
 
                 session.cash_register_total_entry_encoding = cash_register_total_entry_encoding
-                session.invoice_payment_amount = sum(session.invoice_payment_ids.mapped("payment_amount"))
+                session.invoice_payment_amount = sum(session.invoice_payment_ids.mapped("display_amount"))
                 session.cash_register_balance_end = session.cash_register_balance_start + session.cash_register_total_entry_encoding
                 session.cash_register_difference = session.cash_register_balance_end_real - session.cash_register_balance_end
             else:
@@ -153,7 +155,7 @@ class PosSession(models.Model):
             total_cash_payment = sum(self.order_ids.mapped('payment_ids').filtered(
                 lambda payment: payment.payment_method_id == cash_payment_method).mapped('amount'))
             # cash_register_total_entry_encoding += (0.0 if self.state == 'closed' else total_cash_payment)
-            cash_register_total_entry_encoding += total_cash_payment # (0.0 if self.state == 'closed' else total_cash_payment)
+            cash_register_total_entry_encoding += total_cash_payment  # (0.0 if self.state == 'closed' else total_cash_payment)
 
         # cash_register_total_entry_encoding += self.cash_register_id.total_entry_encoding
         return cash_register_total_entry_encoding

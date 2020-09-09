@@ -1,18 +1,18 @@
-.pos .pos-register-payment .background-message {
+.pos .pos-payment-register .background-message {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.pos .pos-register-payment .screen-left, .pos .pos-register-payment .screen-right {
+.pos .pos-payment-register .screen-left, .pos .pos-payment-register .screen-right {
   max-width: 50%;
   min-width: 50%;
 }
-.pos .pos-register-payment .background-message {
+.pos .pos-payment-register .background-message {
   text-align: center;
   font-size: 64px;
   height: 90%;
 }
-.pos .pos-register-payment .surcharge-blocking-invoices-message {
+.pos .pos-payment-register .surcharge-blocking-invoices-message {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,20 +25,20 @@
   font-size: 4em;
   color: white;
 }
-.pos .pos-register-payment .input-group {
+.pos .pos-payment-register .input-group {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
 }
-.pos .pos-register-payment .input-group .input-addon {
+.pos .pos-payment-register .input-group .input-addon {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
-.pos .pos-register-payment .input-group .form-select {
+.pos .pos-payment-register .input-group .form-select {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-.pos .pos-register-payment .input-addon {
+.pos .pos-payment-register .input-addon {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -60,7 +60,7 @@
   border: 1px solid #ced4da;
   border-radius: 0.25rem;
 }
-.pos .pos-register-payment .form-select {
+.pos .pos-payment-register .form-select {
   text-align: left;
   display: inline-block;
   overflow: hidden;
@@ -76,93 +76,108 @@
   box-sizing: border-box;
   width: 80%;
 }
-.pos .pos-register-payment .searchbox {
+.pos .pos-payment-register .searchbox {
   right: auto;
   margin-left: -90px;
   margin-top: 8px;
   left: 50%;
 }
-.pos .pos-register-payment .searchbox input {
+.pos .pos-payment-register .searchbox input {
   width: 120px;
 }
-.pos .pos-register-payment .background-message {
+.pos .pos-payment-register .background-message {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.pos .pos-register-payment .screen-left, .pos .pos-register-payment .screen-right {
+.pos .pos-payment-register .screen-left, .pos .pos-payment-register .screen-right {
   max-width: 50%;
   min-width: 50%;
 }
-.pos .pos-register-payment .screen-right {
+.pos .pos-payment-register .screen-right {
   float: right;
 }
-.pos .pos-register-payment .screen-left {
+.pos .pos-payment-register .screen-left {
   float: left;
 }
-.pos .pos-register-payment .invoice-list {
+.pos .pos-payment-register .invoice-list {
   font-size: 16px;
   width: 100%;
   line-height: 40px;
 }
-.pos .pos-register-payment .invoice-list th, .pos .pos-register-payment .invoice-list td {
+.pos .pos-payment-register .invoice-list th, .pos .pos-payment-register .invoice-list td {
   padding: 0 8px;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__content-line {
+.pos .pos-payment-register .invoice-list__container {
+  position: relative;
+  height: 100%;
+}
+.pos .pos-payment-register .invoice-list__message {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  background-color: rgba(145, 145, 145, 0.75);
+}
+.pos .pos-payment-register .invoice-list .invoice-list__content-line {
   transition: all 150ms linear;
   background: #E6E6E6;
   cursor: pointer;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__content-line:nth-child(even) {
+.pos .pos-payment-register .invoice-list .invoice-list__content-line:nth-child(even) {
   background: #F7F7F7;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__content-line:hover {
+.pos .pos-payment-register .invoice-list .invoice-list__content-line:hover {
   background-color: #6f6f6f;
   color: #dedede;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__content-line.overdue {
+.pos .pos-payment-register .invoice-list .invoice-list__content-line.overdue {
   color: red;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__content-line.overdue-today {
+.pos .pos-payment-register .invoice-list .invoice-list__content-line.overdue-today {
   color: orange;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__content-line--selected {
+.pos .pos-payment-register .invoice-list .invoice-list__content-line--selected {
   background: #75d0a5 !important;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__content-line--selected:hover {
+.pos .pos-payment-register .invoice-list .invoice-list__content-line--selected:hover {
   background: #4a8f6e !important;
 }
-.pos .pos-register-payment .invoice-list .invoice-list__column-names {
+.pos .pos-payment-register .invoice-list .invoice-list__column-names {
   background: #f7f7f7;
 }
-.pos .pos-register-payment .invoice-details, .pos .pos-register-payment .payment-global-details {
+.pos .pos-payment-register .invoice-details, .pos .pos-payment-register .payment-global-details {
   font-size: 1rem;
   line-height: 1.5;
 }
-.pos .pos-register-payment .payment-global-details {
+.pos .pos-payment-register .payment-global-details {
   width: 100%;
 }
-.pos .pos-register-payment .register-payment-row {
+.pos .pos-payment-register .payment-register-row {
   float: left;
   clear: left;
   width: 100%;
   margin-top: 20px;
 }
-.pos .pos-register-payment .register-payment-row .label {
+.pos .pos-payment-register .payment-register-row .label {
   width: 30%;
   float: left;
 }
-.pos .pos-register-payment .register-payment-row .input {
+.pos .pos-payment-register .payment-register-row .input {
   width: 70%;
   float: left;
 }
-.pos .pos-register-payment .payment-row {
+.pos .pos-payment-register .payment-row {
   float: left;
   clear: left;
   width: 100%;
   padding: 0.3em;
 }
-.pos .pos-register-payment .payment-row .label {
+.pos .pos-payment-register .payment-row .label {
   float: left;
   clear: left;
   width: 20%;
@@ -170,48 +185,48 @@
   font-weight: bold;
   margin-right: 8px;
 }
-.pos .pos-register-payment .payment-row .payment-text {
+.pos .pos-payment-register .payment-row .payment-text {
   width: 13%;
   border-right: 1px solid black;
 }
-.pos .pos-register-payment .payment-row .payment-total {
+.pos .pos-payment-register .payment-row .payment-total {
   width: 10%;
   padding-left: 8px;
 }
-.pos .pos-register-payment .payment-row:nth-child(odd) {
+.pos .pos-payment-register .payment-row:nth-child(odd) {
   background-color: #e4e4e4;
 }
-.pos .pos-register-payment .payment-method-list {
+.pos .pos-payment-register .payment-method-list {
   float: left;
   width: 100%;
 }
-.pos .pos-register-payment .invoice-details {
+.pos .pos-payment-register .invoice-details {
   float: left;
   width: 100% !important;
   /* Taken from boostrap 4 input css this is not my code*/
 }
-.pos .pos-register-payment .invoice-details .invoice-details-left {
+.pos .pos-payment-register .invoice-details .invoice-details-left {
   float: left;
   width: 50%;
 }
-.pos .pos-register-payment .invoice-details .invoice-details-right {
+.pos .pos-payment-register .invoice-details .invoice-details-right {
   float: right;
   width: 50%;
 }
-.pos .pos-register-payment .invoice-details .title {
+.pos .pos-payment-register .invoice-details .title {
   background-color: #6EC89B !important;
   border-bottom: solid 1px #40B379 !important;
 }
-.pos .pos-register-payment .invoice-details .selection {
+.pos .pos-payment-register .invoice-details .selection {
   line-height: 40px !important;
   max-height: 400px !important;
   font-size: 13px !important;
 }
-.pos .pos-register-payment .invoice-details .footer {
+.pos .pos-payment-register .invoice-details .footer {
   background-color: #6EC89B;
   border-top: solid 1px #40B379 !important;
 }
-.pos .pos-register-payment .invoice-details .footer .button {
+.pos .pos-payment-register .invoice-details .footer .button {
   background-color: #f0eeee !important;
 }
 

@@ -29,7 +29,7 @@ class AccountMove(models.Model):
     @api.depends("pos_pr_payment_ids")
     def _compute_pos_pr_paid_amount(self):
         for move_id in self:
-            move_id.pos_pr_paid_amount = sum(move_id.pos_pr_payment_ids.mapped(lambda payment: payment.payment_amount) or [0])
+            move_id.pos_pr_paid_amount = sum(move_id.pos_pr_payment_ids.mapped(lambda payment: payment.display_amount) or [0])
 
     def _compute_is_overdue(self):
         for move_id in self:
@@ -45,14 +45,17 @@ class AccountMove(models.Model):
         for move_id in self:
             move_id.is_overdue_stored = move_id.is_overdue
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals_list):
-        move_id = super().create(vals_list)
+        for vals in vals_list:
+            if "surcharge_amount" not in vals:
 
-        if "surcharge_amount" not in vals_list:
-            move_id.write({"surcharge_amount": move_id.journal_id.surcharge_amount})
+                journal_id = self._get_default_journal() if "journal_id" not in vals and vals['journal_id'] else \
+                    self.env["account.journal"].browse([vals['journal_id']])
 
-        return move_id
+                vals["surcharge_amount"] = journal_id.surcharge_amount
+
+        return super().create(vals_list)
 
 
 class AccountMoveLine(models.Model):
