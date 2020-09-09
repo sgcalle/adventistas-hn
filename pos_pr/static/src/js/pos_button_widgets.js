@@ -2,8 +2,8 @@ odoo.define('pos_pr.buttons', function (require) {
     'use strict';
 
     const screens = require("point_of_sale.screens");
-    const pos_screen = require("pos_pr.screen.invoice_payment");
-    
+    require("pos_pr.payment_register.screen");
+
     let BtnRegisterPayment = screens.ActionButtonWidget.extend({
         template: "BtnRegisterPayment",
 

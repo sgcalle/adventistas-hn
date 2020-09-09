@@ -16,12 +16,12 @@
                         <div class="o_setting_left_pane">
                         </div>
                         <div class="o_setting_right_pane">
-                            <label for="surcharge_product_id"/>
+                            <label for="pos_pr_surcharge_product_id"/>
                             <div class="text-muted">
                                 Set default product for surcharge invoices.
                             </div>
                             <div class="content-group m16">
-                                <field name="surcharge_product_id" nolabel="1" colspan="4"/>
+                                <field name="pos_pr_surcharge_product_id" nolabel="1" colspan="4"/>
                             </div>
                         </div>
                     </div>
@@ -29,12 +29,40 @@
                     <!-- Surcharge Amount -->
                     <div class="col-12 col-md-6 o_setting_box">
                         <div class="o_setting_right_pane">
-                            <label for="surcharge_default_amount"/>
+                            <label for="pos_pr_surcharge_default_amount"/>
                             <div class="text-muted">
                                 Set default amount for every overdue invoice when is paid with the payment register
                             </div>
                             <div class="content-group m16">
-                                <field name="surcharge_default_amount" nolabel="1" colspan="4"/>
+                                <field name="pos_pr_surcharge_default_amount" nolabel="1" colspan="4"/>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Default discount product -->
+                    <div class="col-12 col-md-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="pos_pr_discount_product_id"/>
+                            <div class="text-muted">
+                                Set default discount product for point of sale payment register
+                            </div>
+                            <div class="content-group m16">
+                                <field name="pos_pr_discount_product_id" nolabel="1" colspan="4"/>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Default discount account -->
+                    <div class="col-12 col-md-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <label for="pos_pr_discount_default_account_id"/>
+                            <div class="text-muted">
+                                Set default account for default discount product
+                            </div>
+                            <div class="content-group m16">
+                                <field name="pos_pr_discount_default_account_id" nolabel="1" colspan="4"/>
                             </div>
                         </div>
                     </div>

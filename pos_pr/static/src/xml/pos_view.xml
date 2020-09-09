@@ -8,7 +8,7 @@
     </t>
 
     <t t-name="InvoicesLineWidget">
-        <div class="pos-register-payment screen">
+        <div class="pos-payment-register screen">
             <div class="screen-content" style="max-width: 100%;">
                 <section class="top-content">
                     <span class="button back">
@@ -36,82 +36,17 @@
                                 Pay surcharge <i class="fa fa-angle-double-right"/>
                             </span>
                         </div>
-                        <!--                        <span class="button cancel-surcharge" id="btn_cancel_surcharge">-->
-                        <!--                            Cancel surcharge <i class="fa fa-angle-double-right"/>-->
-                        <!--                        </span>-->
                     </div>
-                    <!--                     <span class="button  highlight">
-                        Register payment
-                        <i class="fa fa-angle-double-right"></i>
-                    </span> -->
                 </section>
                 <section class="full-content">
                     <div class="window">
-                        <section class="screen-right">
-                            <table class="payment-global-details">
-                                <tr>
-                                    <td>Total:</td>
-                                    <td><span class="js-global-total-paid"/></td>
-                                </tr>
-                                <tr>
-                                    <td>Total due:</td>
-                                    <td><span class="js-global-total-due"/></td>
-                                </tr>
-
-                                <tr class="js_hidden_when_surcharge">
-                                    <td colspan="2"><h1>You have no surcharges</h1></td>
-                                </tr>
-                                <tr class="js-global-total-surcharge js_hidden_when_no_surcharge">
-                                    <td>Surcharge:</td>
-                                    <td>
-                                        <div class="input-group">
-                                            <label class="input-addon"><t t-esc="widget.pos.currency.symbol"/></label>
-                                            <input class="form-select js-global-total-surcharge-input"
-                                                   readonly="readonly"
-                                                   type="text" disabled="disabled"/>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr class="js-global-free-surcharge js_hidden_when_no_surcharge">
-                                    <td>
-                                        Free of surcharge:
-                                    </td>
-                                    <td>
-                                        <div class="input-group">
-                                            <label class="input-addon"><t t-esc="widget.pos.currency.symbol"/></label>
-                                            <input class="form-select js-global-free-surcharge-input" type="text"/>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <hr/>
-                            <div class="invoice-details-contents"/>
-                        </section>
+                        <section class="screen-right"/>
                         <section class="screen-left">
                             <div class="subwindow-container">
-                                <div class="subwindow-container-fix touch-scrollable scrollable-y register-content" style="height: 100vh;">
-                                    <div>
-                                        <table class="invoice-list">
-                                            <thead>
-                                                <tr class="invoice-list__column-names">
-                                                    <th>Name</th>
-                                                    <th>Customer</th>
-                                                    <th>Journal</th>
-                                                    <th>Invoice date</th>
-                                                    <th>Due date</th>
-                                                    <th>Amount total</th>
-                                                    <th>Amount due</th>
-                                                    <th>Session payment</th>
-                                                    <th>Expected final due</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="invoice-list__content"/>
-                                        </table>
-                                    </div>
-                                    <div class="surcharge-blocking-invoices-message js_hidden_when_no_surcharge">
-                                        You need to pay surcharge first
-                                    </div>
+                                <div class="subwindow-container-fix js_invoice_list_container"
+                                     style="height: 100vh;">
+                                    <div/>
+                                    <div class="surcharge-blocking-invoices-message js_hidden_when_no_surcharge"/>
                                 </div>
                             </div>
                         </section>
@@ -121,19 +56,19 @@
         </div>
     </t>
 
-    <t t-name="PosInvoiceLine">
-        <tr class="invoice-list__content-line" t-att-data-id="invoice_id.id">
-            <td class="js-name"><t t-esc="invoice_id.name"/></td>
-            <td class="js-partner-id"><t t-esc="invoice_id.partner_id[1]"/></td>
-            <td class="js-invoice-date"><t t-esc="invoice_id.journal_id[1]"/></td>
-            <td class="js-invoice-date"><t t-esc="invoice_id.invoice_date"/></td>
-            <td class="js-invoice-date_due"><t t-esc="invoice_id.invoice_date_due"/></td>
-            <td class="js-amount-total"><t t-esc="invoice_id.amount_total"/></td>
-            <td class="js-amount-residual"><t t-esc="invoice_id.amount_residual"/></td>
-            <td class="js-session-payment"><t t-esc="invoice_id.session_payment"/></td>
-            <td class="js-expected-final-due"><t t-esc="invoice_id.expected_final_due"/></td>
-        </tr>
-    </t>
+<!--    <t t-name="PosInvoiceLine">-->
+<!--        <tr class="invoice-list__content-line" t-att-data-id="invoice_id.id">-->
+<!--            <td class="js-name"><t t-esc="invoice_id.name"/></td>-->
+<!--            <td class="js-partner-id"><t t-esc="invoice_id.partner_id[1]"/></td>-->
+<!--            <td class="js-invoice-date"><t t-esc="invoice_id.journal_id[1]"/></td>-->
+<!--            <td class="js-invoice-date"><t t-esc="invoice_id.invoice_date"/></td>-->
+<!--            <td class="js-invoice-date_due"><t t-esc="invoice_id.invoice_date_due"/></td>-->
+<!--            <td class="js-amount-total"><t t-esc="invoice_id.amount_total"/></td>-->
+<!--            <td class="js-amount-residual"><t t-esc="invoice_id.amount_residual"/></td>-->
+<!--            <td class="js-session-payment"><t t-esc="invoice_id.session_payment"/></td>-->
+<!--            <td class="js-expected-final-due"><t t-esc="invoice_id.expected_final_due"/></td>-->
+<!--        </tr>-->
+<!--    </t>-->
 
     <t t-name="InvoiceDetails">
         <t t-set="ID_ARRAY_POS" t-value="0"/>
@@ -228,71 +163,37 @@
                         </td>
                     </tr>
                 </t>
+                <tr class="input-payment-discount">
+                    <td>
+                        <span>Discount type</span>
+                    </td>
+                    <td colspan="3">
+                        <div class="input-group">
+                            <label for="discount_type-radio-fixed">Fixed</label>
+                            <input type="radio" class="js_readio_discount_type" id="discount_type-radio-fixed" name="discount_type" value="fixed"/>
+                            <label for="discount_type-radio-percentage">Percentage</label>
+                            <input type="radio" class="js_readio_discount_type" id="discount_type-radio-percentage" name="discount_type" value="percentage"/>
+                        </div>
+                        <div class="input-group oe_hidden" id="discount_percentage-group">
+                            <label class="input-addon" for="discount_percentage">%</label>
+                            <input class="form-select" id="discount_percentage" name="discount_percentage"
+                                   type="text" step="0.01" mix="0"/>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="input-payment-discount">
+                    <td>
+                        <span>Discount</span>
+                    </td>
+                    <td colspan="3">
+                        <div class="input-group">
+                            <label class="input-addon"><t t-esc="widget.pos.currency.symbol"/></label>
+                            <input class="form-select" type="text" step="0.01" mix="0"
+                                   name="input_payment_discount"/>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </t>
-
-    <!-- con widget option podemos acceder las opciones del widget -->
-    <t t-name="InvoicePaymentPopupWidget">
-        <div role="dialog" class="modal-dialog">
-            <div class="popup">
-                <header class="title">Register Payment</header>
-                <article class="container-fluid">
-                    <div class="register-payment-row">
-                        <div class="label">
-                            <label for="journal_id">Journal:</label>
-                        </div>
-                        <div class="input">
-                            <t t-if="widget.options.journal_ids">
-                                <select id="journal_id" name="journal_id" class="invoice-select">
-                                    <t t-foreach="widget.options.journal_ids" t-as="journal_id">
-                                        <option t-att-value="journal_id.id"
-                                                t-att-data-payment-method-ids="journal_id.inbound_payment_method_ids">
-                                            <t t-esc="journal_id.display_name"/>
-                                        </option>
-                                    </t>
-                                </select>
-                            </t>
-                        </div>
-                    </div>
-                    <div class="register-payment-row">
-                        <div class="label">
-                            <label for="journal_id">Payment method:</label>
-                        </div>
-                        <div class="input">
-                            <t t-if="widget.options.payment_method_ids">
-                                <select id="payment_method_id" name="payment_method_id" class="invoice-select">
-                                    <t t-foreach="widget.options.payment_method_ids" t-as="payment_method_id">
-                                        <option t-att-value="payment_method_id.id">
-                                            <t t-esc="payment_method_id.name"/>
-                                        </option>
-                                    </t>
-                                </select>
-                            </t>
-                        </div>
-                    </div>
-                    <div class="register-payment-row">
-                        <div class="label">
-                            <label for="amount">Amount:</label>
-                        </div>
-                        <div class="input">
-                            <div class="input-group">
-                                <label class="input-addon"><t t-esc="widget.pos.currency.symbol"/></label>
-                                <input class="form-select" id="amount" type="text" name="amount"/>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-                <footer class="footer">
-                    <div class="button cancel">
-                        Cancel
-                    </div>
-                    <div class="button confirm">
-                        Confirm
-                    </div>
-                </footer>
-            </div>
-        </div>
-    </t>
-
 </template>

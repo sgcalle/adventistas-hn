@@ -13,7 +13,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="payment_amount"/>
+                <field name="display_amount" sum="Total paid"/>
                 <field name="move_id"/>
                 <field name="date"/>
 

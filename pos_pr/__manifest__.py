@@ -15,11 +15,12 @@
     # Check https://github.com/odoo/odoo/blob/13.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Sales/Point Of Sale',
-    'version': '1.1-beta',
+    'version': '1.0.0-alpha',
 
 
     # any module necessary for this one to work correctly
     'depends': ['base',
+                'eduweb_js_utils',
                 'point_of_sale',
                 'school_base',
                 'school_finance'],
@@ -27,9 +28,10 @@
     'data': [
         'security/ir.model.access.csv',
 
-        'data/surcharge_product.xml',
+        'data/products.xml',
         'data/assets.xml',
         'data/sequence.xml',
+        'data/payment_method.xml',
 
         'views/invoice_payment_views_and_menus.xml',
 
@@ -41,7 +43,9 @@
     ],
 
     'qweb': [
-        'static/src/xml/pos_view.xml'
+        'static/src/xml/pos_view.xml',
+        'static/src/xml/payment_register/components/invoice_list.xml',
+        'static/src/xml/payment_register/components/dashboard.xml',
     ],
 
 }
