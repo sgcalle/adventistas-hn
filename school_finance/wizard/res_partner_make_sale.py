@@ -114,6 +114,9 @@ class ResPartnerMakeSale(models.TransientModel):
                                 if line_dict["price_unit"] != 0:
                                     order_line.append((0, 0, line_dict))
 
+                        if not order_line:
+                            continue
+
                         sale_id = SaleOrderEnv.create({
                             "date_order": datetime.now(),
                             "partner_id": sale_dict["partner_id"],
