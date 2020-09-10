@@ -100,7 +100,7 @@ odoo.define("pos_pr.payment_register.components.invoice_list.screen", function (
             this.invoice_row_list = [];
             const self = this;
             _.each(this.getParent().invoice_ids, function (invoice) {
-                if (invoice.amount_residual > 0) {
+                if (parseFloat(invoice.amount_residual.toFixed(2)) > 0) {
                     const invoiceRow = new InvoiceListRow(this, invoice);
                     invoiceRow.renderElement();
                     self.invoice_row_list.push(invoiceRow);

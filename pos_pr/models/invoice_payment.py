@@ -42,14 +42,20 @@ class InvoicePaymentRegister(models.Model):
         pos_session_ids = self.mapped("pos_session_id")
         for pos_session_id in pos_session_ids:
             journal_id = pos_session_id.config_id.journal_id
-            invoice_payment_ids = pos_session_ids.invoice_payment_ids
-            move_id, cash_line_ids = invoice_payment_ids._create_payment_miscellaneous_move(journal_id)
-            invoice_payment_ids._create_statements_and_reconcile_with_cash_line_ids(cash_line_ids)
-            invoice_payment_ids._reconcile_miscellaneous_move_with_invocies(move_id)
 
-            invoice_payment_ids._generate_invoice_discount()
+            payment_with_moves = pos_session_id.invoice_payment_ids.filtered('move_id')
 
-            pos_session_id.invoice_payment_move_id = move_id
+            if payment_with_moves:
+                invoice_payment_ids = payment_with_moves.filtered('payment_amount')
+                discount_invoice_payment_ids = payment_with_moves.filtered('discount_amount')
+
+                move_id, cash_line_ids = invoice_payment_ids._create_payment_miscellaneous_move(journal_id)
+                invoice_payment_ids._create_statements_and_reconcile_with_cash_line_ids(cash_line_ids)
+                invoice_payment_ids._reconcile_miscellaneous_move_with_invocies(move_id)
+
+                discount_invoice_payment_ids._generate_invoice_discount()
+
+                pos_session_id.invoice_payment_move_id = move_id
 
     def _create_payment_miscellaneous_move(self, journal_id):
         payment_miscellaneous_move_id = self.env["account.move"].create({

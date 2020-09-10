@@ -1,8 +1,8 @@
 from odoo import models, fields, api
 from odoo.addons import account
 
-class InvoicePaymentSurcharge(models.Model):
 
+class InvoicePaymentSurcharge(models.Model):
     _name = "pos_pr.invoice.surcharge"
 
     move_ids = fields.Many2many("account.move")
@@ -21,7 +21,7 @@ class InvoicePaymentSurcharge(models.Model):
         return surcharge_ids
 
     def apply_surcharge(self):
-        for surcharge_id in self:
+        for surcharge_id in self.filtered('move_ids'):
             if surcharge_id.amount > 0:
                 surcharge_product_id = self.env["ir.config_parameter"].get_param("pos_pr.surcharge_product_id", False)
 
