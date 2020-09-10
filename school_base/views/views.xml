@@ -26,13 +26,14 @@
     </record>
     
     <record model="ir.ui.view" id="view_grade_level_tree">
-        <field name="name">School level</field>
+        <field name="name">Grade level</field>
         <field name="model">school_base.grade_level</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="sequence" widget='handle'/>
                 <field name="name"/>
                 <field name="capacity"/>
+                <field name="active_admission"/>
                 <field name="school_code_id"/>
                 <field name="district_code_id" readonly="1"/>
             </tree>
