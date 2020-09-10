@@ -6,7 +6,8 @@ class Allergy(models.Model):
     _name = "school_base.allergy"
     _description = "Allergies for contacts (students or somebody else)"
 
-    name = fields.Char("Description")
+    name = fields.Char("Name")
+    description = fields.Char("Description")
     partner_id = fields.Many2one("res.partner", "Contact")
     facts_id = fields.Integer('Facts Id')
 
