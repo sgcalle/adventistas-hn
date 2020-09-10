@@ -48,4 +48,5 @@
         'static/src/xml/payment_register/components/dashboard.xml',
     ],
 
+    'post_init_hook': 'default_settings_values',
 }
