@@ -43,6 +43,9 @@
     ],
 
     'qweb': [
+        # Core
+        'static/src/xml/core/chrome.xml',
+
         'static/src/xml/pos_view.xml',
         'static/src/xml/payment_register/components/invoice_list.xml',
         'static/src/xml/payment_register/components/dashboard.xml',

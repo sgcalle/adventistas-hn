@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <template id="template" xml:space="preserve">
     <t t-name="BtnRegisterPayment">
-        <div class="control-button">Register payment</div>
-    </t>
-    <t t-name="BtnInvoices">
-        <div class="control-button">Invoices</div>
+        <div class="control-button">Payment Register</div>
     </t>
 
     <t t-name="InvoicesLineWidget">

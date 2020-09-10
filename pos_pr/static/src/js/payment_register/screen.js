@@ -72,7 +72,7 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
 
             this._clear_register_dashboard();
 
-            if (this.pos.get_cashier().role !== 'manager') {
+            if (this.pos.get('cashier').role !== 'manager') {
                 this.$el.find('.js-global-free-surcharge').addClass("oe_hidden");
             } else {
                 this._show_free_surcharge_input();
@@ -583,7 +583,7 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
          */
         pay_surcharge: function () {
             let surcharge = this._generate_surcharge();
-            this.pos.send_surcharge(surcharge);
+            this.pos.synch_invoive_payment_and_surcharges([], [surcharge]);
             this.show(true);
         },
 
@@ -659,18 +659,16 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
         validate_payment: function () {
             let invoicePayments = this.build_invoice_payments();
             const self = this;
-            this.pos.send_invoice_payments(invoicePayments)
-                .then(function () {
-                    _.each(self.invoice_ids, function (invoice) {
-                        self._deselect_invoice();
-                        invoice.amount_residual = invoice.expected_final_due;
-                        invoice.discount_amount = 0;
-                        _.each(self.pos.payment_methods, function (paymentMethod) {
-                            self._update_invoice_payment_amount(invoice.id, paymentMethod.id, 0);
-                        });
-                    });
-                    self.show(true);
+            this.pos.synch_invoive_payment_and_surcharges(invoicePayments, []);
+            _.each(self.invoice_ids, function (invoice) {
+                self._deselect_invoice();
+                invoice.amount_residual = invoice.expected_final_due;
+                invoice.discount_amount = 0;
+                _.each(self.pos.payment_methods, function (paymentMethod) {
+                    self._update_invoice_payment_amount(invoice.id, paymentMethod.id, 0);
                 });
+            });
+            self.show(true);
         },
 
         /**

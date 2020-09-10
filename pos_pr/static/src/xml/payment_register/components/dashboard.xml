@@ -72,7 +72,7 @@
                             <span class="label">Amount due</span>
                             <t t-if="widget.invoice.amount_residual">
                                 <span class="detail invoice-residual">
-                                    <t t-esc="widget.invoice.amount_residual" widget="monetary"/>
+                                    <t t-esc="widget.invoice.amount_residual.toFixed(2)" widget="monetary"/>
                                 </span>
                             </t>
                             <t t-if="!widget.invoice.amount_residual">

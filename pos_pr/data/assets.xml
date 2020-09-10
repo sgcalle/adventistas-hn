@@ -15,6 +15,9 @@
                 <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_account_payment_methods.js" />
                 <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_journals.js" />
 
+                <!-- Core (point of sale chrome... and I am not speaking about the browser...) -->
+                <script type="text/javascript" src="/pos_pr/static/src/js/core/chrome.js" />
+
                 <script type="text/javascript" src="/pos_pr/static/src/js/payment_register/screen.js" />
                 <script type="text/javascript" src="/pos_pr/static/src/js/payment_register/components/invoice_list/screen.js" />
                 <script type="text/javascript" src="/pos_pr/static/src/js/payment_register/components/dashboard/screen.js" />
