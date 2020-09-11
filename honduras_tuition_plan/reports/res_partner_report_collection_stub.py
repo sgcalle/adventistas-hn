@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.exceptions import MissingError
 
 class ResPartnerReportCollectionStub(models.AbstractModel):
     _name = "report.honduras_tuition_plan.res_partner_report_collection_stub"
@@ -12,7 +13,7 @@ class ResPartnerReportCollectionStub(models.AbstractModel):
         partner_ids = self.env.context.get("active_ids", [])
         partners = partner_obj.browse(partner_ids or docids)
 
-        details = {}        
+        no_tuition_plan = partner_obj
         for partner in partners.filtered(lambda p: p.person_type == "student"):
             tuition_plan = partner.tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
             if not tuition_plan:
@@ -20,10 +21,18 @@ class ResPartnerReportCollectionStub(models.AbstractModel):
             if tuition_plan:
                 tuition_plan = tuition_plan[0]
             else:
-                continue
+                no_tuition_plan |= partner
+        
+        if no_tuition_plan:
+            raise MissingError("The following students have no valid tuition plan: %s" % ", ".join(no_tuition_plan.mapped("name")))
 
+        details = {}
+        for partner in partners.filtered(lambda p: p.person_type == "student"):
+            tuition_plan = partner.tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
+            if not tuition_plan:
+                tuition_plan = partner.default_tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
             details[partner.id] = {
-                "tuition_plan": tuition_plan,
+                "tuition_plan": tuition_plan[0],
                 "start_year": tuition_plan.installment_ids[0].date.year,
                 "installments": [],
             }
