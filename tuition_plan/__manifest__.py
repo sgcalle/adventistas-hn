@@ -12,7 +12,7 @@
     'website': 'http://www.eduwebgroup.com',
 
     'category': 'Accounting',
-    'version': '0.1',
+    'version': '1.0',
 
     'depends': [
         'account',

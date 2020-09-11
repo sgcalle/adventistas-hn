@@ -23,9 +23,10 @@ class TuitionPlanInstallment(models.Model):
     
     def execute(self):
         make_sale_obj = self.env["res.partner.make.sale"]
+        make_sale = make_sale_obj
         for installment in self.filtered(lambda i: i.plan_id.active and i.product_ids):
             plan = installment.plan_id
-            students = plan.partner_ids | plan.default_partner_ids
+            students = self._context.get("students") or (plan.partner_ids | plan.default_partner_ids)
             students = students.filtered(lambda s: s.grade_level_id in plan.grade_level_ids and s.student_status == "Enrolled")
             invoice_due_date = False
             if not plan.payment_term_id and plan.first_due_date:
@@ -77,6 +78,7 @@ class TuitionPlanInstallment(models.Model):
                                     "price_unit": min(-amount * discounts[index].percentage / 100, sale.amount_total),
                                 })]
                             })
+            automation = self._context.get("automation") or plan.automation
             if plan.automation in ["sales_order", "draft_invoice", "posted_invoice"]:
                 for sale in make_sale.sales_ids:
                     sale.action_confirm()
@@ -89,3 +91,4 @@ class TuitionPlanInstallment(models.Model):
                                     line.analytic_account_id = product.analytic_account_id.id
                         if plan.automation == "posted_invoice":
                             invoices.action_post()
+        return make_sale.sales_ids
