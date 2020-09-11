@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paper_format_collection_stub" model="report.paperformat">
+        <field name="name">Collection Stub Paper Format</field>
+        <field name="format">Letter</field>
+        <field name="default" eval="True"/>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">4</field>
+        <field name="margin_bottom">4</field>
+        <field name="margin_left">1</field>
+        <field name="margin_right">1</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">2</field>
+        <field name="dpi">110</field>
+    </record>
+
+    <report
+        id="action_res_partner_report_collection_stub"
+        model="res.partner"
+        string="Collection Stub"
+        report_type="qweb-pdf"
+        name="honduras_tuition_plan.res_partner_report_collection_stub"
+        file="honduras_tuition_plan.res_partner_report_collection_stub"
+        paperformat="paper_format_collection_stub"/>
+</odoo>
