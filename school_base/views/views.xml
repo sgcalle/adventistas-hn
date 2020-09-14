@@ -33,7 +33,7 @@
                 <field name="sequence" widget='handle'/>
                 <field name="name"/>
                 <field name="capacity"/>
-                <field name="active_admission"/>
+                <field name="active_admissions"/>
                 <field name="school_code_id"/>
                 <field name="district_code_id" readonly="1"/>
             </tree>

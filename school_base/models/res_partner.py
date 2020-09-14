@@ -69,11 +69,10 @@ class Contact(models.Model):
     def _onchange_person_type(self):
         self._compute_allow_name_edition()
 
-    name = fields.Char(index=True, compute="_compute_name", store=True)
+    name = fields.Char(index=True, compute="_compute_name", store=True, readonly=False)
 
     company_type = fields.Selection(SELECT_COMPANY_TYPES, string="Company Type")
     person_type = fields.Selection(SELECT_PERSON_TYPES, string="Person Type")
-
 
     comment_facts = fields.Text("Facts Comment")
     family_ids = fields.Many2many("res.partner", string="Families", relation="partner_families", column1="partner_id",
