@@ -14,5 +14,5 @@ class Allergy(models.Model):
     @api.constrains('facts_id')
     def check_unique_facts_id(self):
         for allergy in self:
-            if allergy.facts_id and allergy.search_count([('facts_id', '=', allergy.facts_id)]) > 0:
+            if allergy.facts_id and allergy.search_count([('facts_id', '=', allergy.facts_id)]) > 1:
                 raise exceptions.ValidationError(_('There exists an codition with the same facts id [%s]' % allergy.facts_id))

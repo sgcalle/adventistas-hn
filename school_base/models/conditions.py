@@ -15,5 +15,5 @@ class Condition(models.Model):
     @api.constrains('facts_id')
     def check_unique_facts_id(self):
         for condition in self:
-            if condition.facts_id and condition.search_count([('facts_id', '=', condition.facts_id)]) > 0:
+            if condition.facts_id and condition.search_count([('facts_id', '=', condition.facts_id)]) > 1:
                 raise exceptions.ValidationError(_('There exists an codition with the same facts id [%s]' % condition.facts_id))
