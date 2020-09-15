@@ -7,3 +7,4 @@ access_tuition_plan_installment_user,access.tuition.plan.installment.user,model_
 access_tuition_plan_installment_sale,access.tuition.plan.installment.sale,model_tuition_plan_installment,sales_team.group_sale_manager,1,1,1,1
 access_tuition_plan_product_user,access.tuition.plan.product.user,model_tuition_plan_product,base.group_user,1,0,0,0
 access_tuition_plan_product_sale,access.tuition.plan.product.sale,model_tuition_plan_product,sales_team.group_sale_manager,1,1,1,1
+access_tuition_plan_report,access.tuition.plan.report,model_tuition_plan_report,sales_team.group_sale_manager,1,1,1,1
