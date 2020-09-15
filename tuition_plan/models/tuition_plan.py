@@ -90,6 +90,9 @@ class TuitionPlan(models.Model):
         compute="_compute_default_partner_ids")
     use_student_payment_term = fields.Boolean(string="Use Student Payment Terms",
         help="If checked, the invoice payment terms is taken from the student if any")
+    report_ids = fields.One2many(string="Report Lines",
+        comodel_name="tuition.plan.report",
+        inverse_name="plan_id")
 
     @api.constrains("default", "grade_level_ids", "period_date_from", "period_date_to", "category_id", "active")
     def _check_default(self):
@@ -159,3 +162,49 @@ class TuitionPlan(models.Model):
                 ])
                 result = students.ids
             plan.default_partner_ids = result
+    
+    def action_open_report(self):
+        self.ensure_one()
+        action = self.env.ref("tuition_plan.tuition_plan_report_action").read()[0]
+        context = eval(action["context"])
+        context.update({
+            "search_default_plan_id": self.id,
+        })
+        action["context"] = context
+        return action
+    
+    def action_generate_forecast(self):
+        report_obj = self.env["tuition.plan.report"]
+        plan_reports = report_obj.search([("plan_id","in",self.ids)])
+        plan_reports.unlink()
+        for plan in self:
+            record_data = []
+            for installment in plan.installment_ids:
+                self._cr.execute("SAVEPOINT tuition_plan_report")
+                sales = installment.with_context(
+                    override_sale_order_name="For Tuition Plan Report",
+                    automation="quotation").execute()
+                for sale in sales:
+                    for line in sale.order_line:
+                        record_data.append({
+                            "plan_id": plan.id,
+                            "partner_id": sale.partner_id.id,
+                            "family_id": sale.family_id.id,
+                            "student_id": sale.student_id.id,
+                            "product_id": line.product_id.id,
+                            "price_subtotal": line.price_subtotal,
+                            "price_tax": line.price_tax,
+                            "price_total": line.price_total,
+                            "grade_level_id": sale.student_id.grade_level_id.id,
+                            "currency_id": sale.currency_id.id,
+                            "homeroom": sale.student_id.homeroom,
+                            "date": installment.date,
+                        })
+                try:
+                    self._cr.execute("ROLLBACK TO SAVEPOINT tuition_plan_report")
+                    self.pool.clear_caches()
+                    self.pool.reset_changes()
+                except psycopg2.InternalError:
+                    pass
+            for data in record_data:
+                report_obj.create(data)
