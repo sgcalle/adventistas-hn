@@ -12,6 +12,14 @@
     display: flex;
 }
 
+@mixin transform($prop) {
+    -webkit-transform: $prop;
+    -moz-transform: $prop;
+    -ms-transform: $prop;
+    -o-transform: $prop;
+    transform: $prop;
+}
+
 @mixin align-items($align) {
     -webkit-box-align: $align;
     -webkit-align-items: $align;

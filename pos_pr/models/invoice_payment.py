@@ -11,6 +11,8 @@ class InvoicePaymentRegister(models.Model):
 
     _name = 'pos_pr.invoice.payment'
 
+    payment_group_id = fields.Many2one("pos_pr.payment_group")
+
     name = fields.Char()
     date = fields.Date()
 
@@ -20,6 +22,7 @@ class InvoicePaymentRegister(models.Model):
 
     pos_session_id = fields.Many2one("pos.session")
     move_id = fields.Many2one("account.move", "Invoice", domain="[ ('type', '=', 'out_invoice') ]")
+    partner_id = fields.Many2one("res.partner", 'Customer', related='move_id.partner_id')
 
     currency_id = fields.Many2one("res.currency", related="pos_session_id.currency_id")
     discount_amount = fields.Monetary()

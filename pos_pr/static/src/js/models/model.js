@@ -18,60 +18,28 @@ odoo.define('pos_pr.models', function (require) {
     };
 
     models.AccountMove = EduwebClass.extend({
+        fields: [
+            {name: 'id', type: 'integer'},
 
-        fields: {
-            'id': {type: 'integer'},
+            {name: 'name', type: 'char'},
 
-            'name': {type: 'char'},
+            {name: 'amount_total', type: 'float'},
+            {name: 'amount_residual', type: 'float'},
+            {name: 'session_payment', type: 'float'},
+            {name: 'expected_final_due', type: 'float'},
+            {name: 'pos_pr_paid_amount', type: 'float'},
+            {name: 'surcharge_amount', type: 'float'},
 
+            {name: 'invoice_date', type: 'date'},
+            {name: 'invoice_date_due', type: 'date'},
 
-            'amount_total': {type: 'float'},
-            'amount_residual': {type: 'float'},
-            'session_payment': {type: 'float'},
-            'expected_final_due': {type: 'float'},
-            'pos_pr_paid_amount': {type: 'float'},
-            'surcharge_amount': {type: 'float'},
+            {name: 'partner_id', type: 'many2one'},
+            {name: 'journal_id', type: 'many2one'},
+            {name: 'student_id', type: 'many2one'},
+            {name: 'family_id', type: 'many2one'},
 
-            'invoice_date': {type: 'date'},
-            'invoice_date_due': {type: 'date'},
-
-            'partner_id': {type: 'many2one'},
-            'journal_id': {type: 'many2one'},
-            'student_id': {type: 'many2one'},
-            'family_id': {type: 'many2one'},
-
-            'invoice_line_ids': {type: 'one2many'},
-        },
-
-        init_from_JSON: function (json) {
-            this.id = json.id;
-            this.name = json.name || '/';
-            this.partner_id = json.partner_id || false;
-            this.journal_id = json.journal_id || false;
-            this.invoice_date = json.invoice_date || false;
-            this.invoice_date_due = json.invoice_date_due || false;
-            this.amount_total = json.amount_total || false;
-            this.amount_residual = json.amount_residual || 0;
-            this.session_payment = json.session_payment || 0;
-
-            this.expected_final_due = json.expected_final_due || 0;
-
-            this.invoice_line_ids = json.invoice_line_ids || [];
-
-            this.student_id = json.student_id || false;
-            this.family_id = json.family_id || false;
-        },
-        export_as_JSON: function () {
-            return {
-                id: this.id,
-                name: this.name,
-                partner_id: this.partner_id,
-                student_id: this.student_id,
-                family_id: this.family_id,
-                journal_id: this.journal_id,
-                invoice_line_ids: this.invoice_line_ids,
-            };
-        },
+            {name: 'invoice_line_ids', type: 'one2many'},
+        ],
     });
 
     models.AccountMoveLine = Backbone.Model.extend({
@@ -95,48 +63,28 @@ odoo.define('pos_pr.models', function (require) {
         },
     });
 
-    models.InvoicePayment = Backbone.Model.extend({
+    models.InvoicePayment = EduwebClass.extend({
+        fields: [
+            {name: 'id', type: 'integer'},
+            {name: 'name', type: 'char'},
 
-        fields: ["id", "date", "move_id", "payment_amount", "payment_method_id", "pos_session_id", "discount_amount"],
+            {name: 'payment_amount', type: 'float'},
+            {name: 'discount_amount', type: 'float'},
 
-        init_from_JSON: function (json) {
-            initAsJSON(this, this.fields, json);
-        },
-        export_as_JSON: function () {
-            return exportAsJSON(this, this.fields);
-        },
+            {name: 'date', type: 'date'},
+            {name: 'payment_method_id', type: 'many2one'},
+            {name: 'pos_session_id', type: 'many2one'},
+            {name: 'move_id', type: 'many2one'},
+        ],
     });
 
-    models.SurchargeInvoice = Backbone.Model.extend({
-
-        constructor: function () {
-            this.move_ids = [];
-            this.payment_ids = [];
-            this.amount = 0;
-            this.free_of_surcharge = 0;
-            Backbone.Model.apply(this, arguments);
-        },
-
-        init_from_JSON: function (json) {
-            this.id = json.id;
-            this.date = json.date;
-            this.move_ids = json.move_ids;
-            this.amount = json.amount;
-            this.payment_ids = json.payment_ids;
-            this.free_of_surcharge = json.free_of_surcharge;
-            this.pos_session_id = json.pos_session_id;
-        },
-        export_as_JSON: function () {
-            return {
-                id: this.id,
-                date: this.date,
-                move_ids: this.move_ids,
-                amount: this.amount,
-                free_of_surcharge: this.free_of_surcharge,
-                payment_ids: this.payment_ids.map(payment => payment.id),
-                pos_session_id: this.pos_session_id,
-            };
-        },
+    models.SurchargeInvoice = EduwebClass.extend({
+        fields: [
+            {name: 'move_ids', type: 'one2many'},
+            {name: 'payment_ids', type: 'many2many'},
+            {name: 'amount', type: 'integer', default: 0},
+            {name: 'free_of_surcharge', type: 'integer', default: 0},
+        ],
     });
 
     models.PaymentRegisterPadState = Backbone.Model.extend({
@@ -153,6 +101,23 @@ odoo.define('pos_pr.models', function (require) {
             });
         },
 
+    });
+
+    models.PaymentGroup = EduwebClass.extend({
+        fields: [
+            {name: 'id', type: 'integer'},
+            {name: 'name', type: 'char'},
+            {name: 'invoice_payment_ids', type: 'one2many'},
+            {name: 'payment_amount_total', type: 'compute', method: '_getPaymentAmountTotal'}
+        ],
+
+        _getPaymentAmountTotal: function () {
+            let paymentAmountTotal = 0;
+            _.each(this.invoice_payment_ids, function (invoicePayment) {
+                paymentAmountTotal += invoicePayment.payment_amount;
+            });
+            return paymentAmountTotal;
+        }
     });
 
     models.PaymentRegisterState = Backbone.Model.extend({});

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+
+    <t t-name="PosPr.InvoicePaymentReceipt">
+        <div class="payment-receipt pos-bootstrap">
+            <!--            <h1 t-if="modo == 'COPIA'" class="markwater">COPIA</h1>-->
+            <header class="font-weight-bold">
+                <!-- Yes, we bring bootstrap to point of sale -->
+                <!-- Calculo de cantidad a pagar -->
+                <table class="w-100">
+                    <tr>
+                        <td rowspan="4" style="text-align: center; width: 110px; vertical-align: middle !important;">
+                            <img class="pos-receipt-logo" t-att-src='widget.pos.company_logo_base64'
+                                 style="width: 100px;" alt="Logo"/>
+                        </td>
+                        <td colspan="2">
+                            <div class="h3 company_name" t-esc="widget.company.name"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div class="company-address">
+                                <t t-esc="widget.pos.getFormattedCompanyAddress()"/>
+                            </div>
+                        </td>
+                        <td style="font-size: 24px; text-align: center;">
+                            <div class="payment-receipt">
+                                <strong class="label">Payment recipment:</strong>
+                                <br/>
+                                <t t-esc="widget.paymentGroup.name"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="company-vat" t-if="widget.company.vat">
+                                <strong class="label">VAT:</strong>
+                                <span t-esc="widget.company.vat" class="col"/>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="company-email" t-if="widget.company.email">
+                                <strong class="label">Email:</strong>
+                                <span t-esc="widget.company.email"/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="company-email" t-if="widget.company.phone">
+                                <strong class="label">Phone</strong>
+                                <span t-esc="widget.company.phone" class="col"/>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </header>
+            <div class="page">
+                <div class="row mt64">
+                    <t t-if="widget.paymentGroup.date">
+                        <div class="col-3"><strong>Payment Date: </strong></div>
+                        <div class="col-3"><strong><t t-esc="widget.paymentGroup.date"/></strong></div>
+                    </t>
+                </div>
+
+                <div class="row">
+                    <t t-if="widget.customer">
+                        <div class="col-6 h2">
+                            <strong>Customer:</strong>
+                            <t t-esc="widget.customer.name"/>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="row mb-4" t-foreach="widget.invoices" t-as="invoice">
+                    <div class="col-12 invoice_payments">
+                        <h1><span><strong>Invoice:</strong> <t t-esc="invoice.name"/></span></h1>
+
+                        <!-- Invoice details -->
+                        <section class="container">
+                            <div class="row">
+                                <div class="col-3 h6 text-right"><strong>Amount total:</strong></div>
+                                <div class="col-3 h6"><t t-esc="widget.format_currency(invoice.amount_total)"/></div>
+                                <div class="col-3 h6 text-right"><strong>Amount due:</strong></div>
+                                <div class="col-3 h6"><t t-esc="widget.format_currency(invoice.amount_residual)"/></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3 h6 text-right"><strong>Invoice date:</strong></div>
+                                <div class="col-3 h6"><t t-esc="invoice.invoice_date"/></div>
+                                <div class="col-3 h6 text-right"><strong>Invoice due date:</strong></div>
+                                <div class="col-3 h6"><t t-esc="invoice.invoice_date_due"/></div>
+                            </div>
+                        </section>
+
+                        <!-- Invoice payments -->
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <span>Payment Date</span>
+                                    </th>
+                                    <th>
+                                        <span>Payment Number</span>
+                                    </th>
+                                    <th class="text-right">
+                                        <span>Payment method</span>
+                                    </th>
+                                    <th class="text-right">
+                                        <span>Invoice due</span>
+                                    </th>
+                                    <th class="text-right">
+                                        <span>Amount Paid</span>
+                                    </th>
+                                    <th class="text-right">
+                                        <span>Invoice Balance</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="invoice_balance" t-value="invoice.amount_residual"/>
+                                <tr t-foreach="widget.payments_by_invoice[invoice.id]" t-as="payment">
+                                    <td><t t-esc="payment.date"/></td>
+                                    <td><t t-esc="payment.name"/></td>
+                                    <td class="text-right"><t t-esc="payment.payment_method_id.name"/></td>
+                                    <td class="text-right"><t
+                                            t-esc="widget.format_currency(invoice_balance)"/></td>
+                                    <td class="text-right"><t
+                                            t-esc="widget.format_currency(payment.payment_amount)"/></td>
+
+                                    <t t-set="invoice_balance" t-value="invoice_balance - payment.payment_amount"/>
+                                    <td class="text-right"><t t-esc="widget.format_currency(invoice_balance)"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Payment group details -->
+                <section class="row mb-4">
+                    <div class="offset-md-6 col-6 payment-amounts">
+                        <div class="row text-right payment-amount-total justify-content-end pr-4 h4">
+                            <div class="col-6"><strong class="label">Total paid: </strong></div>
+                            <div class="col-6">
+                                <t t-esc="widget.format_currency(widget.paymentGroup.payment_amount_total)"/>
+                            </div>
+                        </div>
+
+                        <div class="row text-right justify-content-end pr-4 h6" t-foreach="widget.payment_methods"
+                             t-as="payment_method">
+                            <div class="col-6"><strong class="label"><t t-esc="payment_method.name"/>: </strong></div>
+                            <div class="col-6">
+                                <t t-esc="widget.format_currency(widget.payment_totals_by_method[payment_method.id])"/>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <div class="d-flex" style="margin-top: 4cm;">
+                    <div class="col-3">Sign and casher stamp</div>
+                    <div class="col" style="border-bottom: 2px solid black !important;"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

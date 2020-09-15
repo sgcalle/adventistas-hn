@@ -46,8 +46,8 @@
             color: red;
         }
 
-        &.overdue-today {
-            color: orange;
+        &.overdue--surcharge-paid {
+            color: $invoice-row-orange;
         }
 
         &--selected {

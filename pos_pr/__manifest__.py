@@ -46,6 +46,13 @@
         # Core
         'static/src/xml/core/chrome.xml',
 
+        # Payment receipt
+        'static/src/xml/templates/payment_reports.xml',
+        'static/src/xml/templates/surcharge_reports.xml',
+
+        'static/src/xml/screens/invoice_payment_receipt.xml',
+        'static/src/xml/screens/surchare_payment_receipt.xml',
+
         'static/src/xml/pos_view.xml',
         'static/src/xml/payment_register/components/invoice_list.xml',
         'static/src/xml/payment_register/components/dashboard.xml',

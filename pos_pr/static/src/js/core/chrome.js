@@ -1,7 +1,10 @@
 odoo.define('pos_pr.core.chrome', function (require) {
     const core = require('web.core');
     const chrome = require('point_of_sale.chrome');
+    const posPrButtons = require('pos_pr.components.buttons');
     const _lt = core._lt;
+
+    const PaymentRegisterButtonWidget = posPrButtons.PaymentRegisterButtonWidget;
 
     const SynchInvoicePaymentWidget = chrome.StatusWidget.extend({
         // status: ['connected','connecting','disconnected','warning','error']
@@ -53,6 +56,7 @@ odoo.define('pos_pr.core.chrome', function (require) {
             this.widgets.some(function (widget, index) {
                 if (widget.name === 'notification') {
                     self.widgets.splice(index, 0, self.synch_invoice_payment_widget);
+                    self.widgets.splice(index, 0, self.payment_register_button_widget);
                     return true;
                 }
                 return false;
@@ -69,8 +73,17 @@ odoo.define('pos_pr.core.chrome', function (require) {
             'name': 'synch_invoice_payment',
             'widget': SynchInvoicePaymentWidget,
             'append': '.pos-rightheader',
+        },
+
+        /**
+         *
+         */
+        payment_register_button_widget: {
+            'name': 'payment_register_button',
+            'widget': PaymentRegisterButtonWidget,
+            'append': '.pos-branding',
             'args': {
-                label: _lt('Lock'),
+                label: _lt('Payment register'),
             }
         },
     });
