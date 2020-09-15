@@ -36,11 +36,12 @@ odoo.define('eduweb_utils.Class', function (require) {
             }
 
             if (this.fields && typeof (this.fields) == 'object') {
-                _.each(this.fields, (fieldDescription, fieldName) => {
+                _.each(this.fields, (fieldDescription) => {
+                    const fieldName = fieldDescription.name;
                     if (Object.hasOwnProperty.call(odooJson, fieldName)) {
-                        
+
                         const jsonFieldValue = odooJson[fieldName];
-                        
+
                         switch (fieldDescription.type) {
                             case 'intenger':
                                 this[fieldName] = parseInt(jsonFieldValue);
@@ -64,10 +65,59 @@ odoo.define('eduweb_utils.Class', function (require) {
                                 this[fieldName] = jsonFieldValue;
                                 break;
                         }
+                    } else if (fieldDescription.type === 'compute') {
+                        Object.defineProperty(this, fieldName, {
+                            get: ({
+                                'string': this[fieldDescription.method],
+                                'function': fieldDescription.method,
+                            })[typeof (fieldDescription.method)] || null
+                        });
                     } else {
                         this[fieldName] = fieldDescription.default || this._get_default_field_type_value(fieldDescription.type);
                     }
                 });
+            }
+        },
+
+        /**
+         * Export a json compatible with odoo rpc methods (create, update, etc...)
+         * @returns {JSON}
+         */
+        export_as_json: function () {
+            if (this.fields && typeof (this.fields) == 'object') {
+                const exportableJson = {};
+                _.each(this.fields, (fieldDescription) => {
+                    const fieldName = fieldDescription.name;
+                    if (Object.hasOwnProperty.call(this, fieldName)) {
+                        switch (fieldDescription.type) {
+                            case 'many2one':
+                                if (this[fieldName]) {
+                                    if (this[fieldName].export_as_json) {
+                                        exportableJson[fieldName] = this[fieldName].export_as_json();
+                                        break;
+                                    } else if (Object.hasOwnProperty.call(this[fieldName], 'id')) {
+                                        exportableJson[fieldName] = parseInt(this[fieldName].id);
+                                        break;
+                                    }
+                                }
+                                exportableJson[fieldName] = this[fieldName];
+                                break;
+                            case 'one2many':
+                            case 'many2many':
+                                exportableJson[fieldName] = [];
+                                _.each(this[fieldName], function (fieldRelationMany) {
+                                    if (fieldRelationMany.export_as_json) {
+                                        exportableJson[fieldName].push(fieldRelationMany.export_as_json());
+                                    }
+                                });
+                                break;
+                            default:
+                                exportableJson[fieldName] = this[fieldName];
+                                break;
+                        }
+                    }
+                });
+                return exportableJson;
             }
         },
 
