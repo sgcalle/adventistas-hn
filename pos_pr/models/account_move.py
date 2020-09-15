@@ -48,19 +48,15 @@ class AccountMove(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if "surcharge_amount" not in vals:
-
-                journal_id = self._get_default_journal() if "journal_id" not in vals and vals['journal_id'] else \
-                    self.env["account.journal"].browse([vals['journal_id']])
-
-                vals["surcharge_amount"] = journal_id.surcharge_amount
-
+            if 'type' in vals and vals['type'] == 'out_invoice' and 'surcharge_amount' not in vals:
+                journal_id = self.env['account.journal'].browse([vals['journal_id']]) if 'journal_id' in vals and vals['journal_id'] else self._get_default_journal()
+                vals['surcharge_amount'] = journal_id.surcharge_amount
         return super().create(vals_list)
 
 
 class AccountMoveLine(models.Model):
     """ Added some metadata to move lines """
-    _inherit = "account.move.line"
+    _inherit = 'account.move.line'
 
     pos_payment_method_id = fields.Many2one("pos.payment.method", 'POS Payment method')
     pos_payment_id = fields.Many2one("pos_pr.invoice.payment", 'POS Invoice Payment')

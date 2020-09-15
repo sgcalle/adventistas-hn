@@ -1,29 +1,38 @@
 <odoo>
     <data>
+
         <template id="pos_pr.pos_assets" inherit_id="point_of_sale.assets">
             <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/pos_pr/static/src/css/pos_invoices.css"/>
 
-                <link rel="stylesheet" href="/pos_pr/static/src/css/pos_invoices.css" />
+                <script type="text/javascript" src="/pos_pr/static/src/js/util/tools.js"/>
 
-                <script type="text/javascript" src="/pos_pr/static/src/js/util/tools.js" />
+                <script type="text/javascript" src="/pos_pr/static/src/js/models/model.js"/>
 
-                <script type="text/javascript" src="/pos_pr/static/src/js/models/model.js" />
+                <script type="text/javascript" src="/pos_pr/static/src/js/save_data/save_invoice_payments.js"/>
 
-                <script type="text/javascript" src="/pos_pr/static/src/js/save_data/save_invoice_payments.js" />
-
-                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_invoices.js" />
-                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_account_payment_methods.js" />
-                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_journals.js" />
+                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_invoices.js"/>
+                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_account_payment_methods.js"/>
+                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/load_journals.js"/>
 
                 <!-- Core (point of sale chrome... and I am not speaking about the browser...) -->
-                <script type="text/javascript" src="/pos_pr/static/src/js/core/chrome.js" />
+                <script type="text/javascript" src="/pos_pr/static/src/js/core/chrome.js"/>
+                <script type="text/javascript" src="/pos_pr/static/src/js/load_data/pos_config.js"/>
 
-                <script type="text/javascript" src="/pos_pr/static/src/js/payment_register/screen.js" />
-                <script type="text/javascript" src="/pos_pr/static/src/js/payment_register/components/invoice_list/screen.js" />
-                <script type="text/javascript" src="/pos_pr/static/src/js/payment_register/components/dashboard/screen.js" />
-                <script type="text/javascript" src="/pos_pr/static/src/js/pos_button_widgets.js" />
+                <!-- Payment receipt view -->
+                <script type="text/javascript" src="/pos_pr/static/src/js/screens/invoice_payment_receipt/screen.js"/>
+                <script type="text/javascript" src="/pos_pr/static/src/js/screens/surcharge_payment_receipt/screen.js"/>
+
+                <script type="text/javascript" src="/pos_pr/static/src/js/screens/payment_register/screen.js"/>
+                <script type="text/javascript"
+                        src="/pos_pr/static/src/js/screens/payment_register/components/invoice_list/screen.js"/>
+                <script type="text/javascript"
+                        src="/pos_pr/static/src/js/screens/payment_register/components/dashboard/screen.js"/>
+                <script type="text/javascript" src="/pos_pr/static/src/js/components/pos_button_widgets.js"/>
+                <script type="text/javascript" src="/pos_pr/static/src/js/components/reports.js"/>
 
             </xpath>
         </template>
+
     </data>
 </odoo>

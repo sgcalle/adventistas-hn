@@ -1,0 +1,49 @@
+@media print {
+    .top-content {
+        display: none;
+    }
+}
+
+
+.payment-receipt {
+    background-color: white !important;
+}
+
+.full-content {
+
+    @media print {
+        position: static;
+    }
+
+    button.print {
+        line-height: 40px;
+        padding: 3px 13px;
+        font-size: 20px;
+        text-align: center;
+        background: rgb(230, 230, 230);
+        border-radius: 3px;
+        border: solid 1px rgb(209, 209, 209);
+        cursor: pointer;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+        display: block;
+        @media print {
+            display: none;
+        }
+    }
+
+    .pos-payment-receipt-container {
+        background: white;
+        @media print {
+            width: 297mm;
+            height: 210mm;
+            position: static;
+            border: none;
+        }
+    }
+
+
+}
+
+

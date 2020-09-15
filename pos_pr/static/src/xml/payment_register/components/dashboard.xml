@@ -60,7 +60,7 @@
                             <span class="label">Amount total</span>
                             <t t-if="widget.invoice.amount_total">
                                 <span class="detail invoice-total">
-                                    <t t-esc="widget.invoice.amount_total"/>
+                                    <t t-esc="widget.format_currency(widget.invoice.amount_total)"/>
                                 </span>
                             </t>
                             <t t-if="!widget.invoice.amount_total">
@@ -72,7 +72,7 @@
                             <span class="label">Amount due</span>
                             <t t-if="widget.invoice.amount_residual">
                                 <span class="detail invoice-residual">
-                                    <t t-esc="widget.invoice.amount_residual.toFixed(2)" widget="monetary"/>
+                                    <t t-esc="widget.format_currency(widget.invoice.amount_residual)" widget="monetary"/>
                                 </span>
                             </t>
                             <t t-if="!widget.invoice.amount_residual">
@@ -120,7 +120,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Amount</th>
-                        <th>invoice paid amount</th>
+<!--                        <th>invoice paid amount</th>-->
 <!--                        <th>session total paid</th>-->
                     </tr>
                 </thead>
@@ -135,7 +135,7 @@
                                            t-att-value="widget.payment_methods_amounts[payment_method_id.id]"/>
                                 </div>
                             </td>
-                            <td/>
+<!--                            <td/>-->
 <!--                            <td>-->
 <!--                                <t t-if="invoice" t-esc="widget.getParent().invoice.payment_amount"/>-->
 <!--                                <t t-else="">0</t>-->

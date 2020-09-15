@@ -8,9 +8,15 @@ class PosSession(models.Model):
     _inherit = "pos.session"
 
     invoice_payment_ids = fields.One2many("pos_pr.invoice.payment", "pos_session_id")
+    invoice_payment_groups_ids = fields.Many2many('pos_pr.payment_group', compute='_compute_invoice_payment_groups_ids', store=True)
     invoice_surcharge_ids = fields.One2many("pos_pr.invoice.surcharge", "pos_session_id")
     invoice_payment_amount = fields.Float(compute='_compute_cash_balance')
     invoice_payment_move_id = fields.Many2one("account.move", string="Invoice payment misc move")
+
+    @api.depends('invoice_payment_ids')
+    def _compute_invoice_payment_groups_ids(self):
+        for pos_session in self:
+            pos_session.invoice_payment_groups_ids = pos_session.invoice_payment_ids.mapped('payment_group_id')
 
     def _validate_session(self):
         action = super()._validate_session()

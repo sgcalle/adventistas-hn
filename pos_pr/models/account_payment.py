@@ -11,8 +11,6 @@ class AccountPayment(models.Model):
     """ Added some functionalities to payment and add some group """
     _inherit = "account.payment"
 
-    payment_group_id = fields.Many2one("pos_pr.payment_group")
-
     def get_receivable_line(self):
         """ Return the receivable line """
         self.ensure_one()
