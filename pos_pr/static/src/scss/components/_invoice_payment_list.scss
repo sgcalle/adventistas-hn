@@ -1,7 +1,6 @@
 .invoice_payments {
     border: 1px solid #ddd;
     margin-top: 1em;
-    width: 500px;
 }
 
 .invoice_payments h1 {
@@ -12,7 +11,7 @@
 .invoice_payments h1 span {
     display: inline;
     border: 1px solid #ddd;
-    background: #fff;
+    background: #fff !important;
     padding: 5px 10px;
     position: relative;
     top: -1.3em;

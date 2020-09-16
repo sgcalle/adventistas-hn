@@ -3,8 +3,6 @@
         display: none;
     }
 }
-
-
 .payment-receipt {
     background-color: white !important;
 }
@@ -35,11 +33,17 @@
 
     .pos-payment-receipt-container {
         background: white;
+        height: calc(100% - 150px);
         @media print {
-            width: 297mm;
-            height: 210mm;
-            position: static;
-            border: none;
+            width: 21cm;
+            height: 29.7cm;
+            //margin: 30mm 45mm 30mm 45mm;
+        }
+
+        @page {
+            width: 21cm;
+            height: 29.7cm;
+            //margin: 30mm 45mm 30mm 45mm;
         }
     }
 

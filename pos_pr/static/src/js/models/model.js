@@ -84,6 +84,7 @@ odoo.define('pos_pr.models', function (require) {
             {name: 'payment_ids', type: 'many2many'},
             {name: 'amount', type: 'integer', default: 0},
             {name: 'free_of_surcharge', type: 'integer', default: 0},
+            {name: 'date', type: 'date'},
         ],
     });
 

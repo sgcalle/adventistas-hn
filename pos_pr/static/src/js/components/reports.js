@@ -94,21 +94,22 @@ odoo.define('pos_pr.components.reports', function (require) {
 
             // Default attributes
             this.company = this.pos.company;
-            // Object.defineProperty(this, 'invoices', {get: this._compute_invoice});
+            Object.defineProperty(this, 'invoices', {get: this._compute_invoice});
             // Object.defineProperty(this, 'payments_by_invoice', {get: this._compute_payments_by_invoice});
             // Object.defineProperty(this, 'payment_totals_by_method', {get: this._compute_payment_totals_by_method});
             // Object.defineProperty(this, 'payment_methods', {get: this._compute_payment_methods});
         },
-        //
-        // _compute_invoice: function () {
-        //     const invoices = [];
-        //     _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
-        //         if (!invoices.some(invoice => invoice.id === invoicePayment.move_id.id)) {
-        //             invoices.push(invoicePayment.move_id);
-        //         }
-        //     });
-        //     return invoices;
-        // },
+
+        _compute_invoice: function () {
+            const invoices = [];
+            _.each(this.surcharge.move_ids, (moveId) => {
+                if (!invoices.some(invoice => invoice.id === moveId)) {
+                    const surchargeAuxPaidInvoice = this.pos.db.due_invoices_by_id[moveId];
+                    invoices.push(surchargeAuxPaidInvoice);
+                }
+            });
+            return invoices;
+        },
         //
         // _compute_payment_methods: function () {
         //     const paymentMethods = [];

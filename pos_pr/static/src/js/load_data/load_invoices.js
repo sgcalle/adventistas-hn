@@ -33,7 +33,8 @@ odoo.define("pos_pr.load_data.invoices", function (require) {
         {
             model: "account.move",
             fields: ["name", "journal_id", "partner_id", "invoice_date", "invoice_date_due", "amount_total",
-                     "amount_residual", "surcharge_invoice_id", "is_overdue", "surcharge_amount", "pos_pr_paid_amount"],
+                     "amount_residual", "surcharge_invoice_id", "is_overdue", "surcharge_amount", "pos_pr_paid_amount",
+            'student_id', 'family_id'],
             domain: [
                 ["type", "=", "out_invoice"],
                 ["invoice_payment_state", "!=", "paid"],

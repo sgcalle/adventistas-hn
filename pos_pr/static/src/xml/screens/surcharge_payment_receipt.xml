@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
-    <t t-name="PosPr.InvoicePaymentReceiptScreenWidget">
-         <div class='surcharge-receipt-screen screen'>
+    <t t-name="PosPr.SurchargePaymentReceiptScreenWidget">
+         <div class='invoice-receipt-screen screen'>
             <div class='screen-content'>
                 <div class='top-content'>
                     <span class='button next'>

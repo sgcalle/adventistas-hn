@@ -11,12 +11,11 @@
                     <i class="fa fa-angle-double-left"/>
                     Cancel
                 </span>
-                <span class="searchbox">
-                    <input placeholder="Search Invoice"/>
-                    <span class="search-clear"/>
-                </span>
-                <span class="searchbox"/>
-
+<!--                <span class="searchbox">-->
+<!--                    <input placeholder="Search Invoice"/>-->
+<!--                    <span class="search-clear"/>-->
+<!--                </span>-->
+<!--                <span class="searchbox"/>-->
 
                 <div style="right: 0; display: block; width: 35%; height: 100%; position: absolute;">
                     <div class="js_hidden_when_surcharge">
