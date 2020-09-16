@@ -18,6 +18,10 @@ class AccountMove(models.Model):
         # for move_id in self:
         #     move_id.surcharge_amount = move_id.journal_id.surcharge_amount
 
+    def recompute_surcharge_amount(self):
+        for move_id in self:
+            move_id.surcharge_amount = move_id.journal_id.surcharge_amount
+
     surcharge_invoice_id = fields.Many2one("account.move", "Surcharge Invoice")
     surcharge_amount = fields.Monetary(default=_default_surcharge_amount)
     is_overdue = fields.Boolean(compute="_compute_is_overdue", default=False)

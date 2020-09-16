@@ -56,10 +56,15 @@ odoo.define('eduweb_utils.Class', function (require) {
                                 this[fieldName] = "" + jsonFieldValue;
                                 break;
                             case 'many2one':
-                                this[fieldName] = {
-                                    id: parseInt(jsonFieldValue[0]),
-                                    name: jsonFieldValue[1],
-                                };
+                                if (jsonFieldValue) {
+                                    this[fieldName] = {
+                                        id: parseInt(jsonFieldValue[0]),
+                                        name: jsonFieldValue[1],
+                                    };
+                                } else {
+                                    this[fieldName] = null;
+                                }
+
                                 break;
                             default:
                                 this[fieldName] = jsonFieldValue;

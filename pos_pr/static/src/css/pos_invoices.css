@@ -269,19 +269,23 @@
 }
 .pos .invoice-receipt-screen .full-content .pos-payment-receipt-container, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container {
   background: white;
+  height: calc(100% - 150px);
 }
 @media print {
   .pos .invoice-receipt-screen .full-content .pos-payment-receipt-container, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container {
-    width: 297mm;
-    height: 210mm;
-    position: static;
-    border: none;
+    width: 21cm;
+    height: 29.7cm;
+  }
+}
+@page {
+  .pos .invoice-receipt-screen .full-content .pos-payment-receipt-container, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container {
+    width: 21cm;
+    height: 29.7cm;
   }
 }
 .pos .invoice-receipt-screen .invoice_payments, .pos .surcharge-receipt-screen .invoice_payments {
   border: 1px solid #ddd;
   margin-top: 1em;
-  width: 500px;
 }
 .pos .invoice-receipt-screen .invoice_payments h1, .pos .surcharge-receipt-screen .invoice_payments h1 {
   font-size: 12px;
@@ -290,7 +294,7 @@
 .pos .invoice-receipt-screen .invoice_payments h1 span, .pos .surcharge-receipt-screen .invoice_payments h1 span {
   display: inline;
   border: 1px solid #ddd;
-  background: #fff;
+  background: #fff !important;
   padding: 5px 10px;
   position: relative;
   top: -1.3em;

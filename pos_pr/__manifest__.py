@@ -31,12 +31,12 @@
         'data/products.xml',
         'data/assets.xml',
         'data/sequence.xml',
-        'data/payment_method.xml',
 
         'views/invoice_payment_views_and_menus.xml',
 
         'views/inherited/point_of_save_views.xml',
         'views/inherited/account_journal_views.xml',
+        'views/inherited/account_move_views.xml',
         'views/inherited/cash_control_views.xml',
 
         'views/settings_view.xml',
@@ -51,7 +51,7 @@
         'static/src/xml/templates/surcharge_reports.xml',
 
         'static/src/xml/screens/invoice_payment_receipt.xml',
-        'static/src/xml/screens/surchare_payment_receipt.xml',
+        'static/src/xml/screens/surcharge_payment_receipt.xml',
 
         'static/src/xml/pos_view.xml',
         'static/src/xml/payment_register/components/invoice_list.xml',

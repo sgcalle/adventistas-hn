@@ -495,6 +495,8 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
                         }
                     }
 
+                    invoice.last_surcharge_amount = invoice.surcharge_amount;
+
                     if (this.free_of_surcharge[this.partner_id.id] > 0) {
                         let freeOfSurchargeAmount = Math.min(invoice.surcharge_amount, (this.free_of_surcharge[this.partner_id.id] || 0));
                         invoice.surcharge_amount -= freeOfSurchargeAmount;
@@ -558,24 +560,18 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
          * @private
          */
         _append_payments_to_surcharge: function (surchargeId, surchargePaymentInvoiceIds) {
-            let self = this;
 
-            for (let paymentMethod in surchargePaymentInvoiceIds) {
-                if (Object.prototype.hasOwnProperty.call(surchargePaymentInvoiceIds, paymentMethod)) {
+            _.each(surchargePaymentInvoiceIds, (paymentAmount, paymentMethodId) => {
+                let invoicePayment = new registerModels.InvoicePayment;
 
-                    let paymentAmount = parseFloat(surchargePaymentInvoiceIds[paymentMethod]);
-                    let invoicePayment = new registerModels.InvoicePayment;
+                invoicePayment.name = this.pos.generateNextPaymentNumber();
+                invoicePayment.date = tools.format_date(new Date());
+                invoicePayment.payment_amount = paymentAmount;
+                invoicePayment.payment_method_id = this.pos.payment_methods_by_id[paymentMethodId];
+                invoicePayment.pos_session_id = this.pos.pos_session.id;
 
-                    invoicePayment.date = tools.format_date(new Date());
-                    invoicePayment.payment_amount = paymentAmount;
-                    invoicePayment.payment_method_id = parseInt(paymentMethod);
-                    invoicePayment.pos_session_id = self.pos.pos_session.id;
-
-                    surchargeId.payment_ids.push(invoicePayment);
-
-                }
-            }
-
+                surchargeId.payment_ids.push(invoicePayment);
+            });
         },
 
         /**
@@ -584,7 +580,7 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
         pay_surcharge: function () {
             let surcharge = this._generate_surcharge();
             this.pos.gui.show_screen('surchargePaymentReceipt', {surcharge});
-            this.pos.synch_invoive_payment_and_surcharges([], [surcharge]);
+            // this.pos.synch_invoive_payment_and_surcharges([], [surcharge]);
             // this.show(true);
         },
 
