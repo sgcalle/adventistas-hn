@@ -14,9 +14,11 @@ class PaymentGroup(models.Model):
 
     name = fields.Char(string='Name')
     invoice_payment_ids = fields.One2many("pos_pr.invoice.payment", "payment_group_id", string="Payments")
+    payment_amount_total = fields.Float('')
 
     @api.model_create_multi
     def create(self, vals_list):
+        _logger.info(vals_list)
         for vals in vals_list:
             if 'name' not in vals:
                 vals['name'] = self.env['ir.sequence'].next_by_code('seq.pos.payment.register.invoice.payment_group')
