@@ -97,10 +97,7 @@ odoo.define('eduweb_utils.Class', function (require) {
                         switch (fieldDescription.type) {
                             case 'many2one':
                                 if (this[fieldName]) {
-                                    if (this[fieldName].export_as_json) {
-                                        exportableJson[fieldName] = this[fieldName].export_as_json();
-                                        break;
-                                    } else if (Object.hasOwnProperty.call(this[fieldName], 'id')) {
+                                    if (Object.hasOwnProperty.call(this[fieldName], 'id')) {
                                         exportableJson[fieldName] = parseInt(this[fieldName].id);
                                         break;
                                     }

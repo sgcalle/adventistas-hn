@@ -17,7 +17,6 @@
     'category': 'Sales/Point Of Sale',
     'version': '1.0.0-alpha',
 
-
     # any module necessary for this one to work correctly
     'depends': ['base',
                 'eduweb_js_utils',

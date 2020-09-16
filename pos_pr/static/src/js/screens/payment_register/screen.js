@@ -580,7 +580,7 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
         pay_surcharge: function () {
             let surcharge = this._generate_surcharge();
             this.pos.gui.show_screen('surchargePaymentReceipt', {surcharge});
-            // this.pos.synch_invoive_payment_and_surcharges([], [surcharge]);
+            this.pos.synch_invoive_payment_and_surcharges([], [surcharge]);
             // this.show(true);
         },
 
@@ -665,10 +665,8 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
                     'invoice_payment_ids': invoicePayments
                 });
 
-                console.log(paymentGroup.payment_amount_total);
-
                 this.pos.gui.show_screen('invoicePaymentReceipt', {paymentGroup: paymentGroup});
-                this.pos.synch_invoive_payment_and_surcharges(invoicePayments, []);
+                this.pos.synch_invoive_payment_and_surcharges(paymentGroup, []);
                 _.each(self.invoice_ids, function (invoice) {
                     self._deselect_invoice();
                     invoice.amount_residual = invoice.expected_final_due;
