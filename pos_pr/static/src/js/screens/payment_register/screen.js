@@ -489,10 +489,6 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
 
                     if (invoice.surcharge_amount <= 0 && paymentMethodIndex >= invoicePaymentsAmounts.length) {
                         break;
-                    } else {
-                        if (surchargeId.move_ids.indexOf(invoice.id) === -1) {
-                            surchargeId.move_ids.push(invoice.id);
-                        }
                     }
 
                     invoice.last_surcharge_amount = invoice.surcharge_amount;
@@ -518,6 +514,11 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
 
                         if (paymentId.payment_amount <= 0) {
                             paymentMethodIndex++;
+                        }
+
+                        // We relate this invoice to the surcharge
+                        if (!surchargeId.move_ids.some(move_id => move_id.id === invoice.id)) {
+                            surchargeId.move_ids.push(invoice);
                         }
 
                         this._update_invoice_payment_amount(undefined, paymentId.payment_method_id, paymentId.payment_amount);
@@ -589,43 +590,58 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
          */
         build_invoice_payments: function () {
             let invoicePaymentList = [];
+
+
+
             if (this.invoice_ids) {
                 let self = this;
+
+                /**
+                 * Builds an invoice payment
+                 * @param invoice {AccountMove}
+                 * @param paymentMethod {InvoicePayment}
+                 * @param paymentAmount {number}
+                 * @param paymentDiscount {number=0}
+                 */
+                const buildInvoicePayment = function (invoice, paymentMethod, paymentAmount, paymentDiscount) {
+                    const invoicePayment = new registerModels.InvoicePayment;
+
+                    invoicePayment.name = self.pos.generateNextPaymentNumber();
+                    invoicePayment.date = tools.format_date(new Date());
+                    invoicePayment.move_id = invoice;
+                    invoicePayment.pos_session_id = self.pos.pos_session.id;
+                    invoicePayment.payment_method_id = paymentMethod;
+
+                    invoicePayment.payment_amount = paymentAmount;
+                    invoicePayment.discount_amount = paymentDiscount || 0;
+
+                    return invoicePayment;
+                };
+
                 _.each(this.invoice_ids, (invoice) => {
                     let invoicePaymentAmounts = this._get_payment_method_amounts(invoice);
                     _.each(this.pos.payment_methods, (paymentMethod) => {
-
-                        let invoicePayment = new registerModels.InvoicePayment;
-
                         let invoicePaymentAmount = invoicePaymentAmounts[paymentMethod.id];
                         if (invoicePaymentAmount > 0) {
-
-                            // Name is generated when the payment is created in odoo
-                            invoicePayment.name = self.pos.generateNextPaymentNumber();
-                            invoicePayment.date = tools.format_date(new Date());
-                            invoicePayment.payment_amount = invoicePaymentAmounts[paymentMethod.id];
-                            invoicePayment.payment_method_id = paymentMethod;
-                            invoicePayment.move_id = invoice;
-                            invoicePayment.pos_session_id = self.pos.pos_session.id;
-
+                            const invoicePayment = buildInvoicePayment(
+                                invoice,
+                                paymentMethod,
+                                invoicePaymentAmounts[paymentMethod.id]
+                            );
                             invoicePaymentList.push(invoicePayment);
-
                         }
                     });
 
                     // Check if we have some discount
                     // We are going to pass the discount as an payment without payment method
                     if (invoice.discount_amount) {
-                        // console.debug('Odoo discount');
-                        const invoicePayment = new registerModels.InvoicePayment;
-
-                        // Name is generated when the payment is created in odoo
-                        invoicePayment.name = self.pos.generateNextPaymentNumber();
-                        invoicePayment.date = tools.format_date(new Date());
-                        invoicePayment.move_id = {id: invoice.id, name: invoice.name};
-                        invoicePayment.pos_session_id = self.pos.pos_session.id;
-                        invoicePayment.payment_method_id = self.pos.db.discount_payment_method.id;
-                        invoicePayment.discount_amount = parseFloat(invoice.discount_amount);
+                        const paymentMethod = self.pos.db.discount_payment_method;
+                        const invoicePayment = buildInvoicePayment(
+                            invoice,
+                            paymentMethod,
+                            invoicePaymentAmounts[paymentMethod.id],
+                            parseFloat(invoice.discount_amount)
+                        );
 
                         invoicePaymentList.push(invoicePayment);
                     }

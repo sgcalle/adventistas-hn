@@ -8,7 +8,8 @@ class PosSession(models.Model):
     _inherit = "pos.session"
 
     invoice_payment_ids = fields.One2many("pos_pr.invoice.payment", "pos_session_id")
-    invoice_payment_groups_ids = fields.Many2many('pos_pr.payment_group', compute='_compute_invoice_payment_groups_ids', store=True)
+    invoice_payment_groups_ids = fields.Many2many('pos_pr.payment_group', compute='_compute_invoice_payment_groups_ids',
+                                                  store=True)
     invoice_surcharge_ids = fields.One2many("pos_pr.invoice.surcharge", "pos_session_id")
     invoice_payment_amount = fields.Float(compute='_compute_cash_balance')
     invoice_payment_move_id = fields.Many2one("account.move", string="Invoice payment misc move")
@@ -17,6 +18,12 @@ class PosSession(models.Model):
     def _compute_invoice_payment_groups_ids(self):
         for pos_session in self:
             pos_session.invoice_payment_groups_ids = pos_session.invoice_payment_ids.mapped('payment_group_id')
+
+    def json_get_paid_surcharge_by_customer(self):
+        self.ensure_one()
+        partner_ids = self.invoice_surcharge_ids.mapped("partner_id")
+        json_paid_surcharge_by_customer = {partner_id.id: sum(self.invoice_surcharge_ids.filtered(lambda surcharge: surcharge.partner_id == partner_id).mapped('amount')) for partner_id in partner_ids}
+        return json_paid_surcharge_by_customer
 
     def _validate_session(self):
         action = super()._validate_session()

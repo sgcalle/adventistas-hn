@@ -10,8 +10,9 @@ odoo.define('pos_pr.components.reports', function (require) {
          * This will be used to render payments receipts in POS.
          * @param {Object} parent The current parent
          * @param {Object} options Widget's options
-         * @param {Object} options.paymentGroup The payment group to rendered
+         * @param {PaymentGroup} options.paymentGroup The payment group to rendered
          * @param {Object} options.customer The customer to rendered
+         * @param {Boolean=false} options.copy The customer to rendered
          */
         init: function (parent, options) {
             this._super.apply(this, arguments);
@@ -19,10 +20,12 @@ odoo.define('pos_pr.components.reports', function (require) {
             // Attributes by options
             this.paymentGroup = options.paymentGroup || {};
             this.customer = options.customer || {};
+            this.customer = !!options.copy;
 
             // Default attributes
             this.company = this.pos.company;
             Object.defineProperty(this, 'invoices', {get: this._compute_invoice});
+            Object.defineProperty(this, 'discount_total', {get: this._compute_discount_total});
             Object.defineProperty(this, 'payments_by_invoice', {get: this._compute_payments_by_invoice});
             Object.defineProperty(this, 'payment_totals_by_method', {get: this._compute_payment_totals_by_method});
             Object.defineProperty(this, 'payment_methods', {get: this._compute_payment_methods});
@@ -38,10 +41,19 @@ odoo.define('pos_pr.components.reports', function (require) {
             return invoices;
         },
 
+        _compute_discount_total: function () {
+            let discountTotal = 0;
+            _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
+                discountTotal += invoicePayment.discount_amount || 0;
+            });
+            return discountTotal;
+        },
+
         _compute_payment_methods: function () {
             const paymentMethods = [];
-            _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
-                if (!paymentMethods.some(paymentMethod => paymentMethod.id === invoicePayment.payment_method_id.id)) {
+            _.each(this.paymentGroup.invoice_payment_ids, invoicePayment => {
+                if (invoicePayment.payment_method_id.id !== this.pos.db.discount_payment_method.id
+                    && !paymentMethods.some(paymentMethod => paymentMethod.id === invoicePayment.payment_method_id.id)) {
                     paymentMethods.push(invoicePayment.payment_method_id);
                 }
             });
@@ -50,13 +62,14 @@ odoo.define('pos_pr.components.reports', function (require) {
 
         _compute_payments_by_invoice: function () {
             const paymentsByInvoice = {};
-            _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
-
-                const invoicePaymentInvoice = invoicePayment.move_id;
-                if (!paymentsByInvoice[invoicePaymentInvoice.id]) {
-                    paymentsByInvoice[invoicePaymentInvoice.id] = [];
+            _.each(this.paymentGroup.invoice_payment_ids, invoicePayment => {
+                if (invoicePayment.payment_method_id.id !== this.pos.db.discount_payment_method.id) {
+                    const invoicePaymentInvoice = invoicePayment.move_id;
+                    if (!paymentsByInvoice[invoicePaymentInvoice.id]) {
+                        paymentsByInvoice[invoicePaymentInvoice.id] = [];
+                    }
+                    paymentsByInvoice[invoicePaymentInvoice.id].push(invoicePayment);
                 }
-                paymentsByInvoice[invoicePaymentInvoice.id].push(invoicePayment);
             });
             return paymentsByInvoice;
         },
@@ -94,22 +107,23 @@ odoo.define('pos_pr.components.reports', function (require) {
 
             // Default attributes
             this.company = this.pos.company;
-            Object.defineProperty(this, 'invoices', {get: this._compute_invoice});
+            this.invoices = this.surcharge.move_ids || [];
+            // Object.defineProperty(this, 'invoices', {get: this._compute_invoice});
             // Object.defineProperty(this, 'payments_by_invoice', {get: this._compute_payments_by_invoice});
             // Object.defineProperty(this, 'payment_totals_by_method', {get: this._compute_payment_totals_by_method});
             // Object.defineProperty(this, 'payment_methods', {get: this._compute_payment_methods});
         },
 
-        _compute_invoice: function () {
-            const invoices = [];
-            _.each(this.surcharge.move_ids, (moveId) => {
-                if (!invoices.some(invoice => invoice.id === moveId)) {
-                    const surchargeAuxPaidInvoice = this.pos.db.due_invoices_by_id[moveId];
-                    invoices.push(surchargeAuxPaidInvoice);
-                }
-            });
-            return invoices;
-        },
+        // _compute_invoice: function () {
+        //     const invoices = [];
+        //     _.each(this.surcharge.move_ids, (moveId) => {
+        //         if (!invoices.some(invoice => invoice.id === moveId)) {
+        //             const surchargeAuxPaidInvoice = this.pos.db.due_invoices_by_id[moveId];
+        //             invoices.push(surchargeAuxPaidInvoice);
+        //         }
+        //     });
+        //     return invoices;
+        // },
         //
         // _compute_payment_methods: function () {
         //     const paymentMethods = [];

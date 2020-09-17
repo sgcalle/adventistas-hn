@@ -80,7 +80,7 @@ odoo.define('pos_pr.models', function (require) {
 
     models.SurchargeInvoice = EduwebClass.extend({
         fields: [
-            {name: 'move_ids', type: 'one2many'},
+            {name: 'move_ids', type: 'many2many'},
             {name: 'payment_ids', type: 'many2many'},
             {name: 'amount', type: 'integer', default: 0},
             {name: 'free_of_surcharge', type: 'integer', default: 0},
@@ -115,7 +115,7 @@ odoo.define('pos_pr.models', function (require) {
         _getPaymentAmountTotal: function () {
             let paymentAmountTotal = 0;
             _.each(this.invoice_payment_ids, function (invoicePayment) {
-                paymentAmountTotal += invoicePayment.payment_amount;
+                paymentAmountTotal += invoicePayment.payment_amount || 0;
             });
             return paymentAmountTotal;
         }

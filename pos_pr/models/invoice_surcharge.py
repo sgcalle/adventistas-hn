@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.addons import account
 
 
@@ -11,8 +11,17 @@ class InvoicePaymentSurcharge(models.Model):
     amount = fields.Float("Amount")
     pos_session_id = fields.Many2one("pos.session")
     free_of_surcharge = fields.Float("Free of surcharge", default=0)
+    partner_id = fields.Many2one('res.partner', string=_("Customer"), store=True, compute='_compute_partner_id')
 
     date = fields.Date()
+
+    @api.depends('move_ids')
+    def _compute_partner_id(self):
+        for surcharge_id in self:
+            partner_id = surcharge_id.mapped('move_ids.partner_id')
+            if partner_id:
+                partner_id.ensure_one()
+                surcharge_id.partner_id = partner_id
 
     @api.model
     def create(self, vals_list):
