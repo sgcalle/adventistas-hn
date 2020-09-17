@@ -242,6 +242,12 @@
 }
 .pos .invoice-receipt-screen .payment-receipt, .pos .surcharge-receipt-screen .payment-receipt {
   background-color: white !important;
+  position: relative;
+}
+@media print {
+  .pos .invoice-receipt-screen .payment-receipt, .pos .surcharge-receipt-screen .payment-receipt {
+    page-break-after: always;
+  }
 }
 @media print {
   .pos .invoice-receipt-screen .full-content, .pos .surcharge-receipt-screen .full-content {
@@ -273,14 +279,15 @@
 }
 @media print {
   .pos .invoice-receipt-screen .full-content .pos-payment-receipt-container, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container {
-    width: 21cm;
-    height: 29.7cm;
+    border: initial;
+    border-radius: initial;
+    min-height: initial;
+    height: initial;
+    page-break-after: always;
   }
-}
-@page {
-  .pos .invoice-receipt-screen .full-content .pos-payment-receipt-container, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container {
-    width: 21cm;
-    height: 29.7cm;
+  .pos .invoice-receipt-screen .full-content .pos-payment-receipt-container .page-breakable-block, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container .page-breakable-block {
+    page-break-inside: avoid;
+    padding-top: 2mm;
   }
 }
 .pos .invoice-receipt-screen .invoice_payments, .pos .surcharge-receipt-screen .invoice_payments {
@@ -298,22 +305,6 @@
   padding: 5px 10px;
   position: relative;
   top: -1.3em;
-}
-.pos .payment-receipt .markwater {
-  position: absolute;
-  top: 33%;
-  margin-top: -140px;
-  text-align: center;
-  width: 3em;
-  margin-left: 0.5em;
-  -webkit-transform: rotate(-45deg);
-  -moz-transform: rotate(-45deg);
-  -ms-transform: rotate(-45deg);
-  -o-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-  font-size: 280px;
-  z-index: -1;
-  color: rgba(81, 156, 154, 0.5);
 }
 .pos .pos-bootstrap {
   /*!

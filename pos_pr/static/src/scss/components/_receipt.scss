@@ -1,10 +1,17 @@
+@import '../abstract/variables';
+
 @media print {
     .top-content {
         display: none;
     }
 }
+
 .payment-receipt {
     background-color: white !important;
+    position: relative;
+    @media print {
+        page-break-after: always;
+    }
 }
 
 .full-content {
@@ -35,19 +42,20 @@
         background: white;
         height: calc(100% - 150px);
         @media print {
-            width: 21cm;
-            height: 29.7cm;
-            //margin: 30mm 45mm 30mm 45mm;
-        }
 
-        @page {
-            width: 21cm;
-            height: 29.7cm;
-            //margin: 30mm 45mm 30mm 45mm;
+            border: initial;
+            border-radius: initial;
+            min-height: initial;
+            height: initial;
+            page-break-after: always;
+
+            .page-breakable-block {
+                page-break-inside: avoid;
+                padding-top: 2mm;
+            }
+
         }
     }
-
-
 }
 
 

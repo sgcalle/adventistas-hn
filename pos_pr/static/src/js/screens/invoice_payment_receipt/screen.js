@@ -15,12 +15,40 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
             const paymentGroup = this.pos.gui.get_current_screen_param('paymentGroup');
             this.receipt_template = new reports.InvoicePaymentReceiptment(this, {
                 paymentGroup: paymentGroup,
-                customer: this.pos.get_client(),
-            });
-            this.receipt_template.renderElement();
+                customer: this.pos.get_client()
+            }, false);
+            this.receipt_template_copy = new reports.InvoicePaymentReceiptment(this, {
+                paymentGroup: paymentGroup,
+                customer: this.pos.get_client()
+            }, true);
 
+            this.receipt_template.renderElement();
+            this.receipt_template_copy.renderElement();
+            this.cssPageRuleElement = this._create_css_page_rule();
             this.render_receipt();
             this.handle_auto_print();
+        },
+
+        hide: function () {
+            this._super.apply(this, arguments);
+            if (this.cssPageRuleElement) {
+                this.cssPageRuleElement.remove();
+                this.cssPageRuleElement = null;
+            }
+        },
+
+        _create_css_page_rule: function () {
+            const styleElement = document.createElement('STYLE');
+
+            styleElement.innerHTML = `      
+                @page {
+                    size: auto;
+                    margin: 1cm;
+                }
+            `;
+
+            styleElement.ref = 'js_receipt_css_page_rule';
+            return styleElement;
         },
 
         handle_auto_print: function () {
@@ -120,7 +148,10 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
         },
 
         render_receipt: function () {
-            this.$('[ref="pos_payment_receipt_container"]').html(this.receipt_template.el);
+            this.$('[ref="pos_payment_receipt_container"]').empty()
+                .append(this.receipt_template.el)
+                // .append(this.receipt_template_copy.el)
+                .append(this.cssPageRuleElement);
         },
 
         get_receipt_template_as_html: function () {

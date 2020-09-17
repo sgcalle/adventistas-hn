@@ -76,6 +76,7 @@ odoo.define("pos_pr.save_invoice_payments", function (require) {
                 _.each(surcharges, function (surcharge) {
                     const surchargeJSON = surcharge.export_as_json();
                     surchargeJSON.payment_ids = surchargeJSON.payment_ids.map(payment => [0, 0, payment]);
+                    surchargeJSON.move_ids = surchargeJSON.move_ids.map(move => move.id);
                     newSurchargesJSON.push(surchargeJSON);
                 });
             }
