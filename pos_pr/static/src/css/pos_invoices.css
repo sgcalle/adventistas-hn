@@ -290,6 +290,9 @@
     padding-top: 2mm;
   }
 }
+.pos .invoice-receipt-screen .full-content .pos-payment-receipt-container table td, .pos .invoice-receipt-screen .full-content .pos-payment-receipt-container table tr, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container table td, .pos .surcharge-receipt-screen .full-content .pos-payment-receipt-container table tr {
+  background: transparent !important;
+}
 .pos .invoice-receipt-screen .invoice_payments, .pos .surcharge-receipt-screen .invoice_payments {
   border: 1px solid #ddd;
   margin-top: 1em;
@@ -301,10 +304,15 @@
 .pos .invoice-receipt-screen .invoice_payments h1 span, .pos .surcharge-receipt-screen .invoice_payments h1 span {
   display: inline;
   border: 1px solid #ddd;
-  background: #fff !important;
   padding: 5px 10px;
   position: relative;
   top: -1.3em;
+}
+.pos .pos-payment-receipt-container .markwater {
+  background-size: 50% 50% !important;
+  background-repeat: repeat-y !important;
+  background-origin: border-box !important;
+  background-position: top !important;
 }
 .pos .pos-bootstrap {
   /*!
