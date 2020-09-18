@@ -2,6 +2,11 @@ odoo.define('pos_pr.components.reports', function (require) {
     'use strict';
 
     const BaseWidget = require('point_of_sale.BaseWidget');
+    const core = require('web.core');
+    const gui = require('point_of_sale.gui');
+
+    const QWeb = core.qweb;
+    const _t = core._t;
 
     const InvoicePaymentReceiptment = BaseWidget.extend({
         template: 'PosPr.InvoicePaymentReceipt',
@@ -20,7 +25,7 @@ odoo.define('pos_pr.components.reports', function (require) {
             // Attributes by options
             this.paymentGroup = options.paymentGroup || {};
             this.customer = options.customer || {};
-            this.customer = !!options.copy;
+            this.copy = !!options.copy;
 
             // Default attributes
             this.company = this.pos.company;
@@ -29,6 +34,30 @@ odoo.define('pos_pr.components.reports', function (require) {
             Object.defineProperty(this, 'payments_by_invoice', {get: this._compute_payments_by_invoice});
             Object.defineProperty(this, 'payment_totals_by_method', {get: this._compute_payment_totals_by_method});
             Object.defineProperty(this, 'payment_methods', {get: this._compute_payment_methods});
+        },
+
+        /**
+         * @override
+         */
+        renderElement: function () {
+            this._super.apply(this, arguments);
+
+            if (this.copy) {
+                const svg = document.createElement('div');
+                const copyText = _t('COPY');
+
+                svg.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="595.28px"' +
+                    'height="841.89px" viewBox="0 0 595.28 841.89" enable-background="new 0 0 595.28 841.89" xml:space="preserve">' +
+                    '<text fill="#009DE0" font-weight="bold" font-size="200" text-anchor="middle" transform="translate(350, 480) rotate(-45)">' + copyText + '</text>' +
+                    '</svg>';
+
+                const backgroundCopyImageSVG = `url(data:image/svg+xml;utf8,${svg.innerHTML})`;
+                console.log('backgroundCopyImageSVG: ' + backgroundCopyImageSVG);
+
+                this.$el.css({
+                    'background-url': backgroundCopyImageSVG
+                });
+            }
         },
 
         _compute_invoice: function () {
@@ -97,6 +126,7 @@ odoo.define('pos_pr.components.reports', function (require) {
          * @param {Object} options Widget's options
          * @param {Object} options.surcharge The surcharge to rendered
          * @param {Object} options.customer The customer to rendered
+         * @param {Object} options.copy Check if there is watermark
          */
         init: function (parent, options) {
             this._super.apply(this, arguments);
@@ -104,6 +134,7 @@ odoo.define('pos_pr.components.reports', function (require) {
             // Attributes by options
             this.surcharge = options.surcharge || {};
             this.customer = options.customer || {};
+            this.copy = !!options.copy;
 
             // Default attributes
             this.company = this.pos.company;
@@ -113,6 +144,25 @@ odoo.define('pos_pr.components.reports', function (require) {
             // Object.defineProperty(this, 'payment_totals_by_method', {get: this._compute_payment_totals_by_method});
             // Object.defineProperty(this, 'payment_methods', {get: this._compute_payment_methods});
         },
+
+        /**
+         * @override
+         */
+        renderElement: function () {
+            this._super.apply(this, arguments);
+
+            const svg = document.createElement('div');
+            const copyText = _t('COPY');
+            svg.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="595.28px"' +
+                'height="841.89px" viewBox="0 0 595.28 841.89" enable-background="new 0 0 595.28 841.89" xml:space="preserve">' +
+                '<text fill="#009DE0" font-weight="bold" font-size="200" text-anchor="middle" transform="translate(350, 480) rotate(-45)">' + copyText + '</text>' +
+                '</svg>';
+            const backgroundCopyImageSVG = `url(data:image/svg+xml;utf8,${svg.innerHTML})`;
+            console.log('backgroundCopyImageSVG: ' + backgroundCopyImageSVG);
+            this.$el.find('.markwater').css({
+                'background-url': backgroundCopyImageSVG
+            });
+        }
 
         // _compute_invoice: function () {
         //     const invoices = [];

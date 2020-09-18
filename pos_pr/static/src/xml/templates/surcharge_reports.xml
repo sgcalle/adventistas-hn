@@ -2,7 +2,7 @@
 <templates>
 
     <t t-name="PosPr.SurchargePaymentReceipt">
-        <div class="payment-receipt pos-bootstrap">
+        <div t-attf-class="payment-receipt pos-bootstrap #{widget.copy and 'markwater'}">
             <!--            <h1 t-if="modo == 'COPIA'" class="markwater">COPIA</h1>-->
             <header class="font-weight-bold row">
                 <!-- Yes, we bring bootstrap to point of sale -->

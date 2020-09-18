@@ -19,8 +19,9 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
             }, false);
             this.receipt_template_copy = new reports.InvoicePaymentReceiptment(this, {
                 paymentGroup: paymentGroup,
-                customer: this.pos.get_client()
-            }, true);
+                customer: this.pos.get_client(),
+                copy: true,
+            });
 
             this.receipt_template.renderElement();
             this.receipt_template_copy.renderElement();
@@ -150,7 +151,7 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
         render_receipt: function () {
             this.$('[ref="pos_payment_receipt_container"]').empty()
                 .append(this.receipt_template.el)
-                // .append(this.receipt_template_copy.el)
+                .append(this.receipt_template_copy.el)
                 .append(this.cssPageRuleElement);
         },
 

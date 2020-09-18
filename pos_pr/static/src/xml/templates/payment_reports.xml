@@ -2,8 +2,7 @@
 <templates>
 
     <t t-name="PosPr.InvoicePaymentReceipt">
-        <div class="payment-receipt pos-bootstrap markwater">
-<!--            <h1 t-if="widget.copy" class="markwater">COPIA</h1>-->
+        <div t-attf-class="payment-receipt pos-bootstrap #{widget.copy and 'markwater'}">
 <!--            <div class="markwater"/>-->
             <header class="row font-weight-bold">
                 <!-- Yes, we bring bootstrap to point of sale -->
@@ -193,17 +192,13 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <div class="row page-breakable-block" style="margin-top: 4cm;">
-                <div class="col-12 page-breakable-block">
-                    <div class="row">
+                    <div class="row pt-4">
                         <div class="col-3">Sign and casher stamp</div>
                         <div class="col" style="border-bottom: 2px solid black !important;"/>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     </t>
 
