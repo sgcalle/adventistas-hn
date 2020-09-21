@@ -17,6 +17,9 @@ def sort_by_wallet_hierarchy(line_tuple):
 
 
 class AccountMove(models.Model):
+    """ Adds wallet features:
+        Todo: We need to write this better... Because if there is a bug, it will be really hard to see it.
+    """
     _inherit = 'account.move'
 
     def is_wallet_payment(self):
@@ -57,7 +60,6 @@ class AccountMove(models.Model):
         return dict(current_invoices_category_amounts)
 
     def get_wallet_due_amounts(self):
-        walletCategoryEnv = self.env["wallet.category"]
 
         all_wallet_due_amounts = defaultdict(float)
         for move_id in self:
@@ -82,17 +84,17 @@ class AccountMove(models.Model):
                             if looking_wallet_amount - amount < 0:
                                 wallet_remove_amount = looking_wallet_amount
 
-                            wallet_paid_amounts[looking_wallet] = round(round(wallet_paid_amounts[looking_wallet], 2) \
-                                                                    - \
-                                                                    round(wallet_remove_amount, 2), 2)
-                            amount = round(round(amount, 2) - round(wallet_remove_amount, 2), 2)
-                            wallet_due_amounts[wallet_id] = round(round(wallet_due_amounts[wallet_id], 2) - round(wallet_remove_amount, 2), 2)
+                            wallet_paid_amounts[looking_wallet] = wallet_paid_amounts[
+                                                                      looking_wallet] - wallet_remove_amount
+                            amount = amount - wallet_remove_amount
+
+                            wallet_due_amounts[wallet_id] = wallet_due_amounts[wallet_id] - wallet_remove_amount
                         if looking_wallet == self.env.ref("wallet.default_wallet_category"):
                             break
                         looking_wallet = wallet_id.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
 
             for wallet_id, amount in wallet_due_amounts.items():
-                all_wallet_due_amounts[wallet_id] = round(round(all_wallet_due_amounts[wallet_id], 2) + round(amount, 2), 2)
+                all_wallet_due_amounts[wallet_id] = all_wallet_due_amounts[wallet_id] + amount
 
         return all_wallet_due_amounts
 
@@ -133,12 +135,14 @@ class AccountMove(models.Model):
 
                                     invoice_line_ids.append((0, 0, {
                                         "product_id": wallet_id.product_id.id,
-                                        # "account_id": wallet_id.account_id.id,
+                                        "account_id": wallet_id.account_id.id,
                                         "price_unit": amount,
                                         "quantity": 1,
                                     }))
                                 else:
-                                    raise exceptions.ValidationError(_("Your are trying to pay %s in %s when there is only %s available") % (amount, wallet_id.name, wallet_amount))
+                                    raise exceptions.ValidationError(
+                                        _("Your are trying to pay %s in %s when there is only %s available") % (
+                                            amount, wallet_id.name, wallet_amount))
 
                             credit_note_id = accountMoveEnv.create({
                                 "type": "out_refund",
@@ -163,12 +167,15 @@ class AccountMove(models.Model):
                                           credit_note_id.id, credit_note_id.name, credit_note_id.amount_total))
                             move_id.js_assign_outstanding_line(receivable_line_id.id)
 
-            wallet_ids = self.env["wallet.category"].browse(set(map(lambda wallet_id: wallet_id.id, wallet_payment_dict.keys())))
+            wallet_ids = self.env["wallet.category"].browse(
+                set(map(lambda wallet_id: wallet_id.id, wallet_payment_dict.keys())))
             wallet_ids.sorted(lambda wallet_id: wallet_id.category_id.parent_count, reverse=True)
             for wallet_id in wallet_ids:
                 wallet_amount = wallet_id.get_wallet_amount(partner_id)
-                if wallet_amount < wallet_id.credit_limit:
-                    raise exceptions.ValidationError(_("[%s] Wallet will have a final amount of [%s]!. Credit limit: %s") % (wallet_id.name, wallet_amount, wallet_id.credit_limit))
+                if wallet_amount < -abs(wallet_id.credit_limit):
+                    raise exceptions.ValidationError(
+                        _("[%s] Wallet will have a final amount of [%s]!. Credit limit: %s") % (
+                            wallet_id.name, wallet_amount, wallet_id.credit_limit))
 
     def get_available_wallet_amounts(self):
         """ This will return an array of dicts
@@ -180,7 +187,6 @@ class AccountMove(models.Model):
         partner_ids_wallet_amounts = {}
         if self:
             partner_ids = self.mapped("partner_id")
-            walletCategoryEnv = self.env["wallet.category"]
             for partner_id in partner_ids:
                 move_ids = self.filtered(lambda move: move.partner_id == partner_id).sorted("invoice_date_due")
                 walletCategoryEnv = self.env["wallet.category"]
@@ -204,7 +210,7 @@ class AccountMove(models.Model):
         return partner_ids_wallet_amounts
 
     def calculate_wallet_distribution(self, wallet_dict_to_pay, wallet_dict_available):
-        #wallet_dict_available = defaultdict(float, wallet_dict_available)
+        # wallet_dict_available = defaultdict(float, wallet_dict_available)
         sorted_wallet_dict_to_pay = sorted(wallet_dict_to_pay.items(), key=sort_by_wallet_hierarchy, reverse=True)
         wallet_amount_to_apply = defaultdict(float)
         for wallet_id, amount in sorted_wallet_dict_to_pay:
@@ -218,13 +224,11 @@ class AccountMove(models.Model):
                         if looking_wallet_amount - amount < -abs(looking_wallet.credit_limit):
                             wallet_remove_amount = looking_wallet_amount + abs(looking_wallet.credit_limit)
 
-                        wallet_dict_available[looking_wallet] = round(wallet_dict_available[looking_wallet], 2) \
-                                                                - \
-                                                                round(wallet_remove_amount, 2)
-                        amount = round(amount, 2) - round(wallet_remove_amount, 2)
+                        wallet_dict_available[looking_wallet] = wallet_dict_available[looking_wallet] - wallet_remove_amount
+                        amount = amount - wallet_remove_amount
 
-                        wallet_amount_to_apply[looking_wallet] = round(wallet_amount_to_apply[looking_wallet], 2) + round(
-                            wallet_remove_amount, 2)
+                        wallet_amount_to_apply[looking_wallet] = wallet_amount_to_apply[looking_wallet] + wallet_remove_amount
+
                 if looking_wallet == self.env.ref("wallet.default_wallet_category"):
                     break
                 looking_wallet = wallet_id.get_wallet_by_category_id(looking_wallet.category_id.parent_id)

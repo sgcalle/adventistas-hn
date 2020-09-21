@@ -86,11 +86,19 @@ class PayWithWallet(models.TransientModel):
     partner_id = fields.Many2one("res.partner", required=True)
     wallet_ids = fields.Many2many("wallet.category", compute="_compute_wallet_ids")
     used_wallet_ids = fields.Many2many("wallet.category", compute="_compute_used_wallet_ids")
-    wallet_payment_line_ids = fields.Many2many("wallet.payment.line", string="Wallets", default=_get_default_lines)
+    wallet_payment_line_ids = fields.One2many("wallet.payment.line", "pay_with_wallet_id", string="Wallets", default=_get_default_lines)
 
 
 class WalletPaymentLine(models.TransientModel):
     _name = "wallet.payment.line"
 
+    @api.depends("wallet_id", "amount")
+    def _compute_partner_amount(self):
+        for record in self:
+            if record.wallet_id:
+                record.partner_amount = record.wallet_id.get_wallet_amount(record.pay_with_wallet_id.partner_id) - record.amount
+
+    pay_with_wallet_id = fields.Many2one("pay.with.wallet")
     wallet_id = fields.Many2one("wallet.category", required=True)
     amount = fields.Float()
+    partner_amount = fields.Float("Partner amount", readonly=True, compute="_compute_partner_amount")
