@@ -14,7 +14,7 @@ class AccountPayment(models.Model):
         for payment_id in self:
             invoices = payment_id.reconciled_invoice_ids
             if invoices:
-                invoices_sum = sum(invoices.mapped(lambda inv: payment_id._get_invoice_payment_amount(inv)))
+                invoices_sum = sum(invoices.mapped(lambda inv: payment_id._get_invoice_payment_amount(inv._origin)))
                 payment_id.paid_amount = invoices_sum
             else:
                 payment_id.paid_amount = 0.0

@@ -214,12 +214,19 @@ class ResPartner (models.Model):
         return move_ids
 
     def _compute_json_dict_wallet_amounts(self):
-        wallet_category_ids = self.env["wallet.category"].search([])
         for partner_id in self:
-            json_dict_wallet_amounts = {}
+            partner_id.json_dict_wallet_amounts = self.get_wallet_balances_json([])
 
-            for wallet_category_id in wallet_category_ids:
-                json_dict_wallet_amounts[wallet_category_id.id] = wallet_category_id.get_wallet_amount(partner_id)
-            partner_id.json_dict_wallet_amounts = json.dumps(json_dict_wallet_amounts)
+    def get_wallet_balances_json(self, wallet_id_list):
+        self.ensure_one()
+        wallet_category_ids = self.env["wallet.category"].browse(wallet_id_list or [])
+        json_dict_wallet_amounts = {}
+        for wallet_category_id in wallet_category_ids:
+            json_dict_wallet_amounts[wallet_category_id.id] = wallet_category_id.get_wallet_amount(self)
+        return json.dumps(json_dict_wallet_amounts)
+
+
+
+
 
 
