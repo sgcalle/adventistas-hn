@@ -11,7 +11,7 @@
         <field name="name">pos.payment.register.invoice.payment.tree</field>
         <field name="model">pos_pr.invoice.payment</field>
         <field name="arch" type="xml">
-            <tree expand="1">
+            <tree>
                 <field name="name"/>
                 <field name="display_amount" sum="Total paid"/>
                 <field name="move_id"/>
