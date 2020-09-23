@@ -9533,7 +9533,7 @@ a.text-dark:hover, a.text-dark:focus {
 }
 
 .text-hide {
-  font: 0/0 a;
+  font: 0/0;
   color: transparent;
   text-shadow: none;
   background-color: transparent;
@@ -9608,9 +9608,6 @@ h3 {
     page-break-after: avoid;
   }
 
-  @page {
-    size: a3;
-  }
   body {
     min-width: 992px !important;
   }

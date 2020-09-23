@@ -15,7 +15,7 @@
                 <div class="col-5">
                     <div class="row">
                         <div class="col-12">
-                            <div class="h3 company_name"> <t t-if="widget.company.parent_id" t-esc="widget.company.parent_id[1]"/>, <t t-esc="widget.company.name"/></div>
+                            <div class="h3 company_name" t-esc="widget.company.name"/>
                         </div>
                     </div>
                     <div class="row">

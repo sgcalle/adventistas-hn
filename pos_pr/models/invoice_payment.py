@@ -187,6 +187,7 @@ class InvoicePaymentRegister(models.Model):
         for invoice_payment_id in payments_with_discounts:
             credit_note_vals = invoice_payment_id._build_credit_note_vals()
             credit_note = self.env["account.move"].create(credit_note_vals)
+            credit_note.post()
 
             credit_note_receivable_line_ids = credit_note.get_receivable_line_ids()
             invoice_payment_id.move_id.js_assign_outstanding_line(credit_note_receivable_line_ids.id)
@@ -207,12 +208,12 @@ class InvoicePaymentRegister(models.Model):
         # By default we set an empty record to discount_account_id
         # That way we discount_account_id.id will return False
         discount_account_id = self.env["account.account"]
-        account_id = self.env['ir.config_parameter'].get_param('pos_pr.discount_product_id', 0)
+        account_id = self.env['ir.config_parameter'].get_param('pos_pr.discount_default_account_id', 0)
         if account_id:
             try:
                 discount_account_id = self.env["account.account"].browse([int(account_id)])
                 if not discount_product_id:
-                    discount_account_id = self.env["account.account"]
+                    discount_account_id = discount_product_id.property_account_income_id
             except ValueError:
                 # int(account_id) can raise ValueError if there is an invalid value for pos_pr.discount_product_id
                 # As we want it this to be optional, then we simply continue if there is some error

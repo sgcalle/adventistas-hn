@@ -46,11 +46,16 @@ odoo.define('pos_pr.components.reports', function (require) {
                 const svg = document.createElement('div');
                 const copyText = _t('COPY');
 
-                const backgroundCopyImageSVG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" width="595.28px" height="841.89px" viewBox="0 0 595.28 841.89" enable-background="new 0 0 595.28 841.89"><text fill="LightBlue" font-weight="bold" font-size="300" text-anchor="middle" transform="translate(360, 560) rotate(-45)" font-family="Arial, Helvetica, sans-serif">' + copyText + '</text></svg>';
-                //const encodedUrl = encodeURIComponent(backgroundCopyImageSVG);
+                svg.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="595.28px"' +
+                    'height="841.89px" viewBox="0 0 595.28 841.89" enable-background="new 0 0 595.28 841.89" xml:space="preserve">' +
+                    '<text fill="#009DE0" font-weight="bold" font-size="200" text-anchor="middle" transform="translate(350, 480) rotate(-45)">' + copyText + '</text>' +
+                    '</svg>';
+
+                const backgroundCopyImageSVG = `url(data:image/svg+xml;utf8,${svg.innerHTML})`;
+                console.log('backgroundCopyImageSVG: ' + backgroundCopyImageSVG);
 
                 this.$el.css({
-                    'background-image': `url('${backgroundCopyImageSVG}')`
+                    'background-url': backgroundCopyImageSVG
                 });
             }
         },
