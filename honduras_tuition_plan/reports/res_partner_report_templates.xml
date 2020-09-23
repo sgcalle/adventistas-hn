@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="res_partner_report_collection_stub_half" name="Collection Stub Half">
+    <template id="res_partner_report_collectionstub_half" name="Collection Stub Half">
         <style>
             .table-sm th, .table-sm td { padding: 0.1rem !important; }
         </style>
@@ -69,7 +69,7 @@
         </div>
     </template>
 
-    <template id="res_partner_report_collection_stub" name="Collection Stub">
+    <template id="res_partner_report_collectionstub" name="Collection Stub">
         <t t-call="web.html_container">
             <t t-call="web.basic_layout">
                 <t t-foreach="docs" t-as="o">
@@ -91,12 +91,52 @@
                         <table class="w-100">
                             <tr>
                                 <td class="w-50 border-right" style="padding-right:1rem;">
-                                    <t t-call="honduras_tuition_plan.res_partner_report_collection_stub_half">
+                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
                                         <t t-set="mode" t-value="'CONTABILIDAD'"/>
                                     </t>
                                 </td>
                                 <td class="w-50 border-left" style="padding-left:1rem;">
-                                    <t t-call="honduras_tuition_plan.res_partner_report_collection_stub_half">
+                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
+                                        <t t-set="mode" t-value="'BANCO'"/>
+                                    </t>
+                                </td> 
+                            </tr>
+                        </table>
+                        <hr/>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="res_partner_report_collectionstub2" name="Collection Stub">
+        <t t-call="web.html_container">
+            <t t-call="web.basic_layout">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="months" t-value="{
+                        1: 'ENERO',
+                        2: 'FEBRERO',
+                        3: 'MARZO',
+                        4: 'ABRIL',
+                        5: 'MAYO',
+                        6: 'JUNIO',
+                        7: 'JULIO',
+                        8: 'AGOSTO',
+                        9: 'SEPTIEMBRE',
+                        10: 'OCTUBRE',
+                        11: 'NOVIEMBRE',
+                        12: 'DICIEMBRE',
+                    }"/>
+                    <t t-foreach="details[o.id]['installments']" t-as="installment">
+                        <table class="w-100">
+                            <tr>
+                                <td class="w-50 border-right" style="padding-right:1rem;">
+                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
+                                        <t t-set="mode" t-value="'CONTABILIDAD'"/>
+                                    </t>
+                                </td>
+                                <td class="w-50 border-left" style="padding-left:1rem;">
+                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
                                         <t t-set="mode" t-value="'BANCO'"/>
                                     </t>
                                 </td> 
