@@ -4,6 +4,7 @@ import logging
 from odoo import fields, models, api
 from odoo.exceptions import ValidationError
 import json
+import typing
 
 logger = logging.getLogger(__name__)
 
@@ -24,16 +25,21 @@ def sort_invoice_line_by_wallet_hierarchy(invoice_line_id):
     return parent_count
 
 
-class ResPartner (models.Model):
+class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     json_dict_wallet_amounts = fields.Char(compute="_compute_json_dict_wallet_amounts")
 
     def execute_autoclear(self):
         for partner in self:
-            partner.autoload_payments_to_wallet()
-            partner.autoload_credit_notes_to_wallet()
-            partner.autopay_invoices_with_wallet()
+            try:
+                if partner.id == 3356:
+                    debug = 0
+                partner.autoload_payments_to_wallet()
+                partner.autoload_credit_notes_to_wallet()
+                partner.autopay_invoices_with_wallet()
+            except Exception as err:
+                raise err
 
     def autoload_credit_notes_to_wallet(self):
         for partner_id in self:
@@ -204,7 +210,8 @@ class ResPartner (models.Model):
 
         move_id.post()
 
-        payments_receivable_line_ids = payment_ids.move_line_ids.filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
+        payments_receivable_line_ids = payment_ids.move_line_ids.filtered(
+            lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
 
         for receivable_line_id in payments_receivable_line_ids:
             move_id.js_assign_outstanding_line(receivable_line_id.id)
@@ -215,18 +222,24 @@ class ResPartner (models.Model):
 
     def _compute_json_dict_wallet_amounts(self):
         for partner_id in self:
-            partner_id.json_dict_wallet_amounts = self.get_wallet_balances_json([])
+            partner_id.json_dict_wallet_amounts = partner_id.get_wallet_balances_json([])
 
-    def get_wallet_balances_json(self, wallet_id_list):
+    def get_wallet_balances_json(self, wallet_id_list: typing.List[int]) -> str:
+        """ :return A json with the wallet balances """
+
         self.ensure_one()
-        wallet_category_ids = self.env["wallet.category"].browse(wallet_id_list or [])
-        json_dict_wallet_amounts = {}
+        return json.dumps(self.get_wallet_balances_dict(wallet_id_list))
+
+    def get_wallet_balances_dict(self, wallet_id_list: typing.List[int]) -> dict:
+        """ :return A dict with the wallet balances """
+
+        self.ensure_one()
+        wallet_category_ids = self.env["wallet.category"]
+        if wallet_id_list:
+            wallet_category_ids = wallet_category_ids.browse(wallet_id_list)
+        else:
+            wallet_category_ids = wallet_category_ids.search([])
+        dict_wallet_amounts = {}
         for wallet_category_id in wallet_category_ids:
-            json_dict_wallet_amounts[wallet_category_id.id] = wallet_category_id.get_wallet_amount(self)
-        return json.dumps(json_dict_wallet_amounts)
-
-
-
-
-
-
+            dict_wallet_amounts[wallet_category_id.id] = wallet_category_id.get_wallet_amount(self)
+        return dict_wallet_amounts
