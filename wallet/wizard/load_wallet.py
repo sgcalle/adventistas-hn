@@ -21,6 +21,7 @@ class LoadWallet(models.TransientModel):
     wallet_id = fields.Many2one("wallet.category", "Wallet")
     amount = fields.Monetary("Amount")
     max_amount = fields.Monetary(compute="_compute_max_amount", store=True, readonly=True)
+    current_amount = fields.Monetary(string="Current Amount", compute="_compute_current_amount")
 
     # For some reason, payment_ids is not required ._.
     payment_ids = fields.Many2many("account.payment", required=True)
@@ -78,3 +79,12 @@ class LoadWallet(models.TransientModel):
             if self.payment_ids:
                 resPartner = self.env["res.partner"]
                 resPartner.browse(partner_ids).load_wallet_with_payments(self.payment_ids.ids, self.wallet_id, self.amount)
+    
+    @api.depends("wallet_id", "partner_id")
+    def _compute_current_amount(self):
+        for wizard in self:
+            result = 0
+            if wizard.wallet_id and wizard.partner_id:
+                wallet_balances = wizard.partner_id.get_wallet_balances_dict([wizard.wallet_id.id])
+                result = wallet_balances[wizard.wallet_id.id]
+            wizard.current_amount = result
