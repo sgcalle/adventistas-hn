@@ -1,4 +1,5 @@
 from odoo import fields, models, api
+from odoo.tools.misc import formatLang
 from collections import defaultdict
 # from ..util import DefaultOrderedDict
 import logging
@@ -82,11 +83,27 @@ class PayWithWallet(models.TransientModel):
                 })
                 wallet_payment_line_ids += wallet_payment_line_id
             return wallet_payment_line_ids
+    
+    @api.depends("partner_id")
+    def _compute_wallet_balances(self):
+        for wizard in self:
+            result = ""
+            if wizard.partner_id:
+                wallet_balances = wizard.partner_id.get_wallet_balances_dict([])
+                for wallet_id, amount in wallet_balances.items():
+                    wallet = self.env["wallet.category"].browse(wallet_id)
+                    result += "<li><strong>%s:</strong> %s %s %s</li>" % (
+                        wallet.name,
+                        self.env.company.currency_id.symbol if self.env.company.currency_id.position == 'before' else "",
+                        formatLang(self.env, amount),
+                        self.env.company.currency_id.symbol if self.env.company.currency_id.position == 'after' else "")
+            wizard.wallet_balances = "<div><ul>%s</ul></div>" % result
 
     partner_id = fields.Many2one("res.partner", required=True)
     wallet_ids = fields.Many2many("wallet.category", compute="_compute_wallet_ids")
     used_wallet_ids = fields.Many2many("wallet.category", compute="_compute_used_wallet_ids")
     wallet_payment_line_ids = fields.One2many("wallet.payment.line", "pay_with_wallet_id", string="Wallets", default=_get_default_lines)
+    wallet_balances = fields.Html(string="Wallet Balances", compute="_compute_wallet_balances")
 
 
 class WalletPaymentLine(models.TransientModel):

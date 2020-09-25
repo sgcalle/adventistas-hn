@@ -10,13 +10,10 @@
                         <field name="partner_id"/>
                         <field name="wallet_id" editable="true"/>
                     </group>
-                    <group col="2">
-                        <group colspan="1">
-                            <field name="amount" editable="true" attrs="{ 'readonly': [('wallet_id', '=', False)] }"/>
-                        </group>
-                        <group colspan="1">
-                            <field name="max_amount"/>
-                        </group>
+                    <group col="6">
+                        <field name="amount" editable="true" attrs="{ 'readonly': [('wallet_id', '=', False)] }"/>
+                        <field name="max_amount"/>
+                        <field name="current_amount"/>
                     </group>
                     <field name="payment_ids"
                            domain="[

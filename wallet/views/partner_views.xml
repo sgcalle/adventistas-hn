@@ -19,6 +19,16 @@
                     <button id="autoclear_btn" name="execute_autoclear" confirm="Are you sure?" type="object" class="oe_highlight" string="Autoclear" />
                 </header>
             </xpath>
+            <div name="button_box" position="inside">
+                <button type="object" class="oe_stat_button" icon="fa-credit-card" name="action_open_wallet_history">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="total_wallet_balance" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </span>
+                        <span class="o_stat_text">Wallet</span>
+                    </div>
+                </button>
+            </div>
         </field>
     </record>
 

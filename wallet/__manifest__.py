@@ -29,14 +29,15 @@
         'wizard/load_wallet.xml',
         'wizard/pay_with_wallet.xml',
 
+        # Inherit views
+        'views/inherited/account_payment_views.xml',
+        'views/inherited/account_move.xml',
+        'views/inherited/account_move_line_views.xml',
+
         'views/partner_views.xml',
         'views/wallet_views.xml',
         'views/config_views.xml',
         'views/templates.xml',
-
-        # Inherit views
-        'views/inherited/account_payment_views.xml',
-        'views/inherited/account_move.xml',
 
         'data/add_assets.xml',
         'data/category_all_wallet.xml',
