@@ -91,7 +91,7 @@ class AccountMove(models.Model):
                                                                       looking_wallet] - wallet_remove_amount
                             amount = amount - wallet_remove_amount
 
-                            wallet_due_amounts[wallet_id.id] = wallet_due_amounts[wallet_id.id] - wallet_remove_amount
+                            wallet_due_amounts[wallet_id] = wallet_due_amounts[wallet_id] - wallet_remove_amount
                         if looking_wallet == self.env.ref("wallet.default_wallet_category"):
                             break
                         looking_wallet = wallet_id.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
@@ -114,14 +114,20 @@ class AccountMove(models.Model):
         wallet_ids = self.env['wallet.category'].browse(wallet_payment_dict.keys())
         partner_id = self.mapped("partner_id")
         partner_id.ensure_one()
-
+        partner_current_balances = partner_id.get_wallet_balances_dict([])
         for move_id in move_ids:
-            amounts_to_pay = move_id.get_wallet_payment_distribution(wallet_payment_dict)
+            amounts_to_pay = move_id.get_wallet_payment_distribution(wallet_payment_dict, partner_current_balances)
+
+            # If someone can find a shorter way to update wallet_payment_dict with the new values, plase, help me ;-;
+            for wallet_id, amount in amounts_to_pay.items():
+                wallet_payment_dict[wallet_id] -= amount
+                partner_current_balances[wallet_id] -= amount
+
             amounts_to_pay = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
                               amounts_to_pay.items()}
             journal_ids = wallet_ids.mapped("journal_category_id")
 
-            if amounts_to_pay:
+            if sum(amounts_to_pay.values()):
                 for journal_id in journal_ids:
                     filtered_wallet_line_ids = {wallet_id: amount for wallet_id, amount in amounts_to_pay.items() if
                                                 wallet_id.journal_category_id == journal_id}
@@ -169,7 +175,8 @@ class AccountMove(models.Model):
                                       credit_note_id.id, credit_note_id.name, credit_note_id.amount_total))
                         move_id.js_assign_outstanding_line(receivable_line_id.id)
 
-        wallet_payment_dict = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in wallet_payment_dict.items()}
+        wallet_payment_dict = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
+                               wallet_payment_dict.items()}
         wallet_ids = self.env["wallet.category"].browse(
             set(map(lambda wallet_id: wallet_id.id, wallet_payment_dict.keys())))
         wallet_ids.sorted(lambda wallet_id: wallet_id.category_id.parent_count, reverse=True)
@@ -184,33 +191,33 @@ class AccountMove(models.Model):
         """ :return The moves sorted by a field setted in setting view """
         return self.sorted('invoice_date_due')
 
-    def get_wallet_payment_distribution(self, wallet_payment_dict: WalletDict) -> WalletDict:
+    def get_wallet_payment_distribution(self, wallet_payment_dict: WalletDict, partner_current_balances=False) -> WalletDict:
         partner_id = self.mapped("partner_id")
         partner_id.ensure_one()
         wallet_payment_dict = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
                                wallet_payment_dict.items()}
-        sorted_wallet_dict_to_pay = sorted(wallet_payment_dict.items(), key=sort_by_wallet_hierarchy, reverse=True)
         wallet_due_amounts = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
                               self.get_wallet_due_amounts().items()}
-        partner_wallet_amounts = partner_id.get_wallet_balances_dict([])
+        sorted_wallet_due_amounts = sorted(wallet_due_amounts.items(), key=sort_by_wallet_hierarchy, reverse=True)
+        partner_wallet_amounts = partner_current_balances or partner_id.get_wallet_balances_dict([])
 
         amounts_to_pay_dict = {}
-        for wallet_id, amount in sorted_wallet_dict_to_pay:
+        for wallet_id, due_amount in sorted_wallet_due_amounts:
             looking_wallet = wallet_id
-            while amount > 0:
-                due_amount = wallet_due_amounts[wallet_id]
+            while due_amount > 0:
+                amount = wallet_payment_dict[wallet_id]
 
                 # Here we check how much it can pay
                 partner_wallet_amount = partner_wallet_amounts[looking_wallet.id]
-                wallet_limit_payment_amount = abs(partner_wallet_amount - looking_wallet.credit_limit)
+                wallet_limit_payment_amount = abs(abs(partner_wallet_amount) - abs(looking_wallet.credit_limit))
                 amount_to_pay = min(wallet_limit_payment_amount, amount, due_amount)
 
                 # Now we added to the dict
                 amounts_to_pay_dict[looking_wallet.id] = amount_to_pay
 
                 # And we reduce some value to "simulate" the payment
-                amount -= amount_to_pay
-                wallet_due_amounts[wallet_id] -= amount_to_pay
+                due_amount -= amount_to_pay
+                wallet_payment_dict[wallet_id] -= amount_to_pay
 
                 if looking_wallet == self.env.ref("wallet.default_wallet_category"):
                     break
@@ -233,7 +240,7 @@ class AccountMove(models.Model):
 
                 # Getting how much we can pay
                 all_wallet_ids = walletCategoryEnv.search([])
-                partner_wallet_amounts = {wallet_id: wallet_id.get_wallet_amount(partner_id)
+                partner_wallet_amounts = {wallet_id.id: wallet_id.get_wallet_amount(partner_id)
                                           for wallet_id in all_wallet_ids}
 
                 # Now we perform the operations
@@ -242,7 +249,7 @@ class AccountMove(models.Model):
                     move_wallet_amounts = move_id.get_wallet_due_amounts()
                     amounts_to_pay = self.calculate_wallet_distribution(move_wallet_amounts, partner_wallet_amounts)
                     for wallet_id, amount in amounts_to_pay.items():
-                        wallet_to_apply[wallet_id] += amount
+                        wallet_to_apply[wallet_id.id] += amount
 
                 # wallet_to_apply = self.calculate_wallet_distribution(current_invoices_category_amounts,
                 # partner_wallet_amounts)

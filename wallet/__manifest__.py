@@ -13,7 +13,7 @@
     # Check https://github.com/odoo/odoo/blob/13.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Wallet',
-    'version': '1.0.1-beta1',
+    'version': '1.0.1-beta2',
 
     # any module necessary for this one to work correctly
     'depends': [
@@ -26,6 +26,8 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'security/account_security.xml',
+
         'wizard/load_wallet.xml',
         'wizard/pay_with_wallet.xml',
 

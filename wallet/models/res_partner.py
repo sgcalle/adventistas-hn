@@ -83,7 +83,8 @@ class ResPartner(models.Model):
             move_ids_wallet_amounts = move_ids.get_available_wallet_amounts()
             if move_ids_wallet_amounts:
                 partner_wallet_amounts = move_ids_wallet_amounts[partner_id]
-                move_ids.pay_with_wallet(partner_wallet_amounts)
+                if sum(partner_wallet_amounts.values()):
+                    move_ids.pay_with_wallet(partner_wallet_amounts)
 
     def autoload_payments_to_wallet(self):
         """ This will load payment to wallet automatically """
