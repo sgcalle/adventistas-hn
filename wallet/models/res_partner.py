@@ -29,6 +29,8 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     json_dict_wallet_amounts = fields.Char(compute="_compute_json_dict_wallet_amounts")
+    total_wallet_balance = fields.Monetary(string="Total Wallet Balance",
+        compute="_compute_total_wallet_balance")
 
     def execute_autoclear(self):
         for partner in self:
@@ -219,6 +221,13 @@ class ResPartner(models.Model):
         move_ids += move_id
 
         return move_ids
+    
+    def _compute_total_wallet_balance(self):
+        for partner in self:
+            result = 0
+            for key, value in partner.get_wallet_balances_dict([]).items():
+                result += value
+            partner.total_wallet_balance = result
 
     def _compute_json_dict_wallet_amounts(self):
         for partner_id in self:
@@ -243,3 +252,11 @@ class ResPartner(models.Model):
         for wallet_category_id in wallet_category_ids:
             dict_wallet_amounts[wallet_category_id.id] = wallet_category_id.get_wallet_amount(self)
         return dict_wallet_amounts
+
+    def action_open_wallet_history(self):
+        self.ensure_one()
+        action = self.env.ref("wallet.account_move_line_action_wallet_history").read()[0]
+        wallets = self.env["wallet.category"].search([])
+        products = wallets.mapped("product_id")
+        action["domain"] = [("partner_id","=",self.id),("product_id","in",products.ids)]
+        return action

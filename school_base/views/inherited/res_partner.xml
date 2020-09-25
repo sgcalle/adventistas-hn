@@ -30,14 +30,11 @@
                                ]}"/>
             </field>
 
-            <div name="button_box" position="before">
-                <field name="person_type" readonly="1" style="
-                       position: absolute;
-                       top: 0;
-                       font-size: xx-large;
-                       color: #875a7b;
-                       font-weight: bold; "/>
-            </div>
+            <field name="company_type" position="before">
+                <div>
+                    <field name="person_type" class="mt0 mb0" readonly="1" style="font-size: xx-large;color: #875a7b; font-weight: bold;"/>
+                </div>
+            </field>
 
             <notebook position="inside">
                 <page string="School">
