@@ -9,8 +9,8 @@ _logger = logging.getLogger(__name__)
 class WalletSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    wallet_default_account_id = fields.Many2one("account.account", string='Default wallet account', related='company_id.default_wallet_account_id', required=True, readonly=False,)
-    wallet_credit_limit = fields.Float(string='Wallet credit limit', related='company_id.default_wallet_credit_limit', required=True, readonly=False,)
+    wallet_default_account_id = fields.Many2one("account.account", string='Default wallet account', related='company_id.default_wallet_account_id', readonly=False,)
+    wallet_credit_limit = fields.Float(string='Wallet credit limit', related='company_id.default_wallet_credit_limit', readonly=False,)
 
     def execute(self):
         _logger.info("Updating default wallet account: %s" % (self.wallet_default_account_id.name_get()))
