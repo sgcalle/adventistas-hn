@@ -6,15 +6,20 @@ class WalletCategory(models.Model):
     _description = 'Wallet categories'
 
     name = fields.Char(required=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     journal_category_id = fields.Many2one("account.journal", domain="[('type', '=', 'sale')]")
-    account_id = fields.Many2one("account.account", "Account",
-                                 default=lambda self:
-                                     int(self.env["ir.config_parameter"].get_param('wallet.default_account_id')))
+    account_id = fields.Many2one("account.account", "Account", default=lambda self: int(self.env["ir.config_parameter"].get_param('wallet.default_account_id')))
     category_id = fields.Many2one("product.category", "Category", required=True)
     product_id = fields.Many2one("product.product", "Product", readonly=True)
     credit_limit = fields.Float("Credit limit", default=lambda self: float(
         self.env["ir.config_parameter"].get_param('wallet.wallet_credit_limit')))
     product_external_relation_id = fields.Char(related="product_id.categ_id.external_relation_id")
+
+    @api.model
+    def default_get(self, vals):
+        # company_id is added so that we are sure to fetch a default value from it to use in repartition lines, below
+        rslt = super().default_get(vals + ['company_id'])
+        return rslt
 
     def get_default_wallet(self):
         return self.env.ref("wallet.default_wallet_category")

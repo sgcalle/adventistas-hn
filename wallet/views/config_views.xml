@@ -19,7 +19,7 @@
                                     </div>
                                     <div class="content-group">
                                         <div class="mt16">
-                                            <field name="wallet_default_account_id" class="o_light_label"/>
+                                            <field name="wallet_default_account_id" options="{'no_create_edit': True, 'no_open': True}" context="{'active_test': False}" can_create="true" can_write="true" readonly="0" class="o_light_label"/>
                                         </div>
                                     </div>
                                 </div>
@@ -34,7 +34,7 @@
 <!--                                    </div>-->
                                     <div class="content-group">
                                         <div class="mt16">
-                                            <field name="wallet_credit_limit" class="o_light_label" widget="monetary"/>
+                                            <field name="wallet_credit_limit"  options="{'no_create_edit': True, 'no_open': True}" context="{'active_test': False}" can_create="true" can_write="true" readonly="0" class="o_light_label" widget="monetary"/>
                                         </div>
                                     </div>
                                 </div>
