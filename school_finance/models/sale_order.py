@@ -14,10 +14,14 @@ class SaleOrderForStudents(models.Model):
     # Invoice Date
     invoice_date_due = fields.Datetime(string='Due Date', readonly=True, states={'draft': [('readonly', False)]})
     invoice_date = fields.Datetime(string='Invoice Date', readonly=True, states={'draft': [('readonly', False)]})
+    period_start = fields.Date(string="Period Start", readonly=True, states={'draft': [('readonly', False)]})
+    period_end = fields.Date(string="Period End", readonly=True, states={'draft': [('readonly', False)]})
 
     # School fields
     student_id = fields.Many2one("res.partner", string="Student", domain=[('person_type', '=', 'student')])
     family_id = fields.Many2one("res.partner", string="Family", domain=[('is_family', '=', True)])
+
+    invoice_status_color = fields.Integer(string="Invoice Status Color", compute="compute_invoice_status_color")
 
     # @api.model
     # def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
@@ -35,6 +39,17 @@ class SaleOrderForStudents(models.Model):
     #
     #         res['arch'] = etree.tostring(doc, encoding='unicode')
     #     return res
+
+    def compute_invoice_status_color(self):
+        for order in self:
+            result = 0
+            if order.invoice_status == "no":
+                result = 1 #red
+            elif order.invoice_status == "to invoice":
+                result = 3 #yellow
+            elif order.invoice_status == "invoiced":
+                result = 10 #green
+            order.invoice_status_color = result
 
     def _student_receivable(self):
         self.ensure_one()
@@ -64,6 +79,12 @@ class SaleOrderForStudents(models.Model):
             invoice_vals["student_id"] = self.student_id.id
             invoice_vals["student_grade_level"] = self.student_id.grade_level_id.id
             invoice_vals["student_homeroom"] = self.student_id.homeroom
+        
+        if self.period_start:
+            invoice_vals["period_start"] = self.period_start
+
+        if self.period_end:
+            invoice_vals["period_end"] = self.period_end
 
         return invoice_vals
 

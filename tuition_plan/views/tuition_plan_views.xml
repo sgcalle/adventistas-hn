@@ -43,10 +43,11 @@
                             <field name="report_ids" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="period_type"/>
-                            <field name="reference_date"/>
+                            <field name="reference_date" attrs="{'invisible': [('period_type','=','manual')], 'required': [('period_type','!=','manual')]}"/>
                             <label for="period_date_from" string="Period"/>
                             <div>
-                                <field name="period_date_from" class="oe_inline"/> - <field name="period_date_to" class="oe_inline"/>
+                                <field name="period_date_from" class="oe_inline" attrs="{'readonly': [('period_type','!=','manual')]}" force_save="1"/>
+                                - <field name="period_date_to" class="oe_inline" attrs="{'readonly': [('period_type','!=','manual')]}" force_save="1"/>
                             </div>
                             <field name="first_charge_date"/>
                             <label for="payment_term_id" options="{'no_create_edit': 1, 'no_create':1}"/>
