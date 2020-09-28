@@ -16,18 +16,22 @@ class TuitionPlan(models.Model):
     period_type = fields.Selection(string="Period Type",
         selection=[
             ("fiscal_year","Fiscal Year"),
-            ("year_after","Year After")],
+            ("year_after","Year After"),
+            ("manual","Manual")],
         default="fiscal_year",
         required=True)
     reference_date = fields.Date(string="Reference Date",
-        required=True,
         help="Used to identify the period based on the selected period type")
     period_date_from = fields.Date(string="Period Start",
         compute="_compute_period_dates",
+        required=True,
+        readonly=False,
         store=True,
         help="Autocomputed based on the selected reference date and period type")
     period_date_to = fields.Date(string="Period End",
         compute="_compute_period_dates",
+        required=True,
+        readonly=False,
         store=True,
         help="Autocomputed based on the selected reference date and period type")
     category_id = fields.Many2one(string="Category",
@@ -129,17 +133,21 @@ class TuitionPlan(models.Model):
             plan.period_date_from = date_from
             plan.period_date_to = date_to
 
-    @api.constrains("first_charge_date")
+    @api.constrains("first_charge_date", "period_date_to")
     def _compute_installment_ids(self):
         for plan in self:
             plan.installment_ids.unlink()
             if not plan.first_charge_date:
                 continue
             installment_ids = []
-            for index in range(12):
+            months = 0
+            installment_date = plan.first_charge_date + relativedelta(months=months)
+            while installment_date <= plan.period_date_to:
                 installment_ids.append((0, 0, {
-                    "date": self.first_charge_date + relativedelta(months=index)
+                    "date": installment_date,
                 }))
+                months += 1
+                installment_date = plan.first_charge_date + relativedelta(months=months)
             plan.installment_ids = installment_ids
     
     def get_overlapping_plans(self):
@@ -147,8 +155,8 @@ class TuitionPlan(models.Model):
         return self.search([
             "&", ("category_id","=",self.category_id.id),
             "&", ("grade_level_ids","in",self.grade_level_ids.ids),
-            "|", ("period_date_from","=",self.period_date_from),
-                 ("period_date_to","=",self.period_date_to)
+            "!", "|", ("period_date_to","<",self.period_date_from),
+                      ("period_date_from",">",self.period_date_to)
         ])
     
     def _compute_default_partner_ids(self):

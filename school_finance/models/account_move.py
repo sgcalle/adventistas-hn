@@ -14,9 +14,23 @@ class AccountMove(models.Model):
     receivable_account_id = fields.Many2one("account.account", string="Receivable account", domain=[("user_type_id.type", "=", "receivable")])
 
     is_in_debug_mode = fields.Boolean(compute="compute_is_in_debug_mode")
+    period_start = fields.Date(string="Period Start")
+    period_end = fields.Date(string="Period End")
+    invoice_payment_state_color = fields.Integer(string="Payment Status Color", compute="compute_invoice_payment_state_color")
 
     def compute_is_in_debug_mode(self):
         self.is_in_debug_mode = self.env.user.has_group('base.group_no_one')
+
+    def compute_invoice_payment_state_color(self):
+        for move in self:
+            result = 0
+            if move.invoice_payment_state == "not_paid":
+                result = 1 #red
+            elif move.invoice_payment_state == "in_payment":
+                result = 3 #yellow
+            elif move.invoice_payment_state == "paid":
+                result = 10 #green
+            move.invoice_payment_state_color = result
 
     def get_receivable_account_ids(self):
         return self.get_receivable_line_ids().mapped("account_id")
