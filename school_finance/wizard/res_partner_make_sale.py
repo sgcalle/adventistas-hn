@@ -29,6 +29,8 @@ class ResPartnerMakeSale(models.TransientModel):
     # Invoice Date
     invoice_date_due = fields.Datetime(string='Due Date')
     invoice_date = fields.Datetime(string='Invoice Date')
+    period_start = fields.Date(string="Period Start")
+    period_end = fields.Date(string="Period End")
 
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist', check_company=True,  # No-required company
                                    domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
@@ -128,6 +130,8 @@ class ResPartnerMakeSale(models.TransientModel):
                             "invoice_date": values["invoice_date"],
                             "invoice_date_due": values["invoice_date_due"],
                             "payment_term_id": values["payment_term_id"],
+                            "period_start": values["period_start"],
+                            "period_end": values["period_end"],
                             "pricelist_id": sale_pricelist,
                         })
                         sales = sales + sale_id
@@ -141,6 +145,8 @@ class ResPartnerMakeSale(models.TransientModel):
                         "invoice_date": values["invoice_date"],
                         "invoice_date_due": values["invoice_date_due"],
                         "payment_term_id": values["payment_term_id"],
+                        "period_start": values["period_start"],
+                        "period_end": values["period_end"],
                         "pricelist_id": sale_pricelist,
                     })
                 sales = sales + sale_id

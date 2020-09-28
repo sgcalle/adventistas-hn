@@ -3,7 +3,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, MissingError
 
-class TuitionPlan(models.Model):
+class ResPartner(models.Model):
     _inherit = "res.partner"
 
     tuition_plan_ids = fields.Many2many(string="Tuition Plans",
