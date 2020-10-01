@@ -8,6 +8,7 @@
         <record id="product_default_wallets" model="product.product">
             <field name="name">Default wallet product</field>
             <field name="categ_id" ref="wallet.category_default_wallets"/>
+            <field name="company_id" eval="False"/>
             <field name="type">service</field>
             <field name="list_price">0.0</field>
             <field name="taxes_id" eval="False"/>

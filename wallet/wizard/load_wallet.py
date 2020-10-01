@@ -39,7 +39,7 @@ class LoadWallet(models.TransientModel):
 
     @api.onchange("wallet_id")
     def _remove_payments_without_selected_wallet_id(self):
-        wallet_id = self.wallet_id if self.wallet_id != self.wallet_id.get_default_wallet() else False
+        wallet_id = self.wallet_id if self.wallet_id != self.wallet_id.default_wallet_category_id else False
         self.payment_ids = self.payment_ids.filtered(lambda payment: payment.wallet_id == self.wallet_id or not payment.wallet_id)
 
     @api.depends('payment_ids')

@@ -13,7 +13,7 @@
     # Check https://github.com/odoo/odoo/blob/13.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Wallet',
-    'version': '1.0.1-beta2',
+    'version': '1.0.2-beta1',
 
     # any module necessary for this one to work correctly
     'depends': [
@@ -35,14 +35,16 @@
         'views/inherited/account_payment_views.xml',
         'views/inherited/account_move.xml',
         'views/inherited/account_move_line_views.xml',
-
         'views/partner_views.xml',
         'views/wallet_views.xml',
         'views/config_views.xml',
         'views/templates.xml',
 
+
         'data/add_assets.xml',
         'data/category_all_wallet.xml',
         'data/menu.xml',
     ],
+
+    'post_init_hook': 'default_settings_values',
 }

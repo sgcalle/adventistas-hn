@@ -52,7 +52,10 @@ def get_wallet_balances_json(wallet_ids: list) -> str:
     """ 
 ```
 There is also a computed field that will return the same json, this is
-used for example in *pos_pr_wallet*. The field is **json_dict_wallet_amounts**
+used for example in *pos_pr_wallet*.
+And there is a dict version of this: **get_wallet_balances_dict** 
+
+The field is **json_dict_wallet_amounts**
 ### account.move
 
 ```python  
