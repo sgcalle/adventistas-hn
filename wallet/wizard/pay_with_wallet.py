@@ -124,5 +124,5 @@ class WalletPaymentLine(models.TransientModel):
     pay_with_wallet_id = fields.Many2one("pay.with.wallet")
     wallet_id = fields.Many2one("wallet.category", required=True)
     amount = fields.Float()
-    partner_id = fields.Many2one("res.partner", required=True)
+    partner_id = fields.Many2one("res.partner")
     partner_amount = fields.Float("Partner amount", readonly=True, compute="_compute_partner_amount")
