@@ -6,7 +6,11 @@ class WalletCategory(models.Model):
     _description = 'Wallet categories'
 
     name = fields.Char(required=True)
+
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    default_wallet_category_id = fields.Many2one('wallet.category', related='company_id.default_wallet_category_id', store=True)
+    is_default_wallet = fields.Boolean(compute='_compute_is_default_wallet', store=True)
+
     journal_category_id = fields.Many2one("account.journal", domain="[('type', '=', 'sale')]")
     account_id = fields.Many2one("account.account", "Account", default=lambda self: int(self.env["ir.config_parameter"].get_param('wallet.default_account_id')))
     category_id = fields.Many2one("product.category", "Category", required=True)
@@ -15,14 +19,16 @@ class WalletCategory(models.Model):
         self.env["ir.config_parameter"].get_param('wallet.wallet_credit_limit')))
     product_external_relation_id = fields.Char(related="product_id.categ_id.external_relation_id")
 
+    @api.depends('default_wallet_category_id')
+    def _compute_is_default_wallet(self):
+        for wallet in self:
+            wallet.is_default_wallet = wallet.id == wallet.default_wallet_category_id.id
+
     @api.model
     def default_get(self, vals):
         # company_id is added so that we are sure to fetch a default value from it to use in repartition lines, below
         rslt = super().default_get(vals + ['company_id'])
         return rslt
-
-    def get_default_wallet(self):
-        return self.env.ref("wallet.default_wallet_category")
 
     def get_wallet_amount(self, partner_id, wallet_category_id=False):
 
@@ -66,9 +72,9 @@ class WalletCategory(models.Model):
 
     def get_wallet_by_category_id(self, category_id):
         if not category_id:
-            return self.get_default_wallet()
+            return self.env.company.default_wallet_category_id
 
-        wallet_id = self.env["wallet.category"].search([("category_id", "=", category_id.id)])
+        wallet_id = self.env["wallet.category"].search([("category_id", "=", category_id.id)])[0]
         if not wallet_id:
             wallet_id = self.get_wallet_by_category_id(category_id.parent_id)
         return wallet_id
@@ -80,16 +86,16 @@ class WalletCategory(models.Model):
             if category_id.parent_id:
                 wallet_id = self.find_next_available_wallet(partner_id, category_id.parent_id)
             else:
-                wallet_id = self.env.ref("wallet.default_wallet_category")
+                wallet_id = self.env.company.default_wallet_category_id
 
         if self.get_wallet_amount(partner_id, wallet_id) > -abs(wallet_id.credit_limit):
             return wallet_id
-        elif category_id == self.env.ref("wallet.default_wallet_category"):
+        elif category_id == self.env.company.default_wallet_category_id:
             return False
         else:
             if category_id.parent_id:
                 wallet_id = self.find_next_available_wallet(partner_id, category_id.parent_id)
             else:
-                wallet_id = self.env.ref("wallet.default_wallet_category")
+                wallet_id = self.env.company.default_wallet_category_id
             return wallet_id
 

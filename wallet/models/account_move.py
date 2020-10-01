@@ -14,7 +14,7 @@ WalletDict = typing.Dict[int, float]
 def sort_by_wallet_hierarchy(line_tuple):
     wallet_id = line_tuple[0]
     parent_count = wallet_id.category_id.parent_count
-    if wallet_id != wallet_id.get_default_wallet():
+    if wallet_id != wallet_id.default_wallet_category_id:
         parent_count += 1
     return parent_count
 
@@ -36,7 +36,7 @@ class AccountMove(models.Model):
     def get_wallet_paid_amounts(self):
         self.ensure_one()
         wallet_amount_to_apply = defaultdict(float)
-        default_wallet = self.env.ref("wallet.default_wallet_category")
+        default_wallet = self.env.company.default_wallet_category_id
         for reconcile_json in self._get_reconciled_info_JSON_values():
             reconcile_move_id = self.env["account.move"].browse([reconcile_json["move_id"]])
             if reconcile_json["account_payment_id"] or not reconcile_move_id.is_wallet_payment():
@@ -92,7 +92,7 @@ class AccountMove(models.Model):
                             amount = amount - wallet_remove_amount
 
                             wallet_due_amounts[wallet_id] = wallet_due_amounts[wallet_id] - wallet_remove_amount
-                        if looking_wallet == self.env.ref("wallet.default_wallet_category"):
+                        if looking_wallet.is_default_wallet:
                             break
                         looking_wallet = wallet_id.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
 
@@ -115,22 +115,22 @@ class AccountMove(models.Model):
         partner_id = self.mapped("partner_id")
         partner_id.ensure_one()
         partner_current_balances = partner_id.get_wallet_balances_dict([])
+
         for move_id in move_ids:
+            _logger.info('Paying %s with wallet: %s' % (move_id.name, wallet_payment_dict))
             amounts_to_pay = move_id.get_wallet_payment_distribution(wallet_payment_dict, partner_current_balances)
 
-            # If someone can find a shorter way to update wallet_payment_dict with the new values, plase, help me ;-;
+            # If someone can find a shorter way to update wallet_payment_dict with the new values, please, help me ;-;
             for wallet_id, amount in amounts_to_pay.items():
-                wallet_payment_dict[wallet_id] -= amount
                 partner_current_balances[wallet_id] -= amount
 
             amounts_to_pay = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
                               amounts_to_pay.items()}
-            journal_ids = wallet_ids.mapped("journal_category_id")
-
             if sum(amounts_to_pay.values()):
+                journal_ids = set(map(lambda w: w.journal_category_id, amounts_to_pay.keys()))
                 for journal_id in journal_ids:
                     filtered_wallet_line_ids = {wallet_id: amount for wallet_id, amount in amounts_to_pay.items() if
-                                                wallet_id.journal_category_id == journal_id}
+                                                wallet_id.journal_category_id == journal_id and amount}
 
                     if filtered_wallet_line_ids:
 
@@ -139,7 +139,7 @@ class AccountMove(models.Model):
 
                             # We check if there is available wallet
                             wallet_amount = wallet_id.get_wallet_amount(partner_id)
-                            if wallet_amount > -abs(wallet_id.credit_limit):
+                            if wallet_amount >= -abs(wallet_id.credit_limit):
 
                                 invoice_line_ids.append((0, 0, {
                                     "product_id": wallet_id.product_id.id,
@@ -149,7 +149,7 @@ class AccountMove(models.Model):
                                 }))
                             else:
                                 raise exceptions.ValidationError(
-                                    _("Your are trying to pay %s in %s when there is only %s available") % (
+                                    _("You are trying to pay %s in %s when there is only %s available") % (
                                         amount, wallet_id.name, wallet_amount))
 
                         credit_note_id = self.create({
@@ -174,6 +174,7 @@ class AccountMove(models.Model):
                                      (move_id.id, move_id.name, partner_id,
                                       credit_note_id.id, credit_note_id.name, credit_note_id.amount_total))
                         move_id.js_assign_outstanding_line(receivable_line_id.id)
+            _logger.info('Paid %s with wallet: %s' % (move_id.name, wallet_payment_dict))
 
         wallet_payment_dict = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
                                wallet_payment_dict.items()}
@@ -194,34 +195,40 @@ class AccountMove(models.Model):
     def get_wallet_payment_distribution(self, wallet_payment_dict: WalletDict, partner_current_balances=False) -> WalletDict:
         partner_id = self.mapped("partner_id")
         partner_id.ensure_one()
-        wallet_payment_dict = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
+        wallet_payment_dict_env = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
                                wallet_payment_dict.items()}
         wallet_due_amounts = {self.env['wallet.category'].browse([wallet_id]): amount for wallet_id, amount in
                               self.get_wallet_due_amounts().items()}
         sorted_wallet_due_amounts = sorted(wallet_due_amounts.items(), key=sort_by_wallet_hierarchy, reverse=True)
         partner_wallet_amounts = partner_current_balances or partner_id.get_wallet_balances_dict([])
 
-        amounts_to_pay_dict = {}
+        amounts_to_pay_dict = defaultdict(int)
         for wallet_id, due_amount in sorted_wallet_due_amounts:
             looking_wallet = wallet_id
+            looking_payment_wallet = wallet_id
             while due_amount > 0:
-                amount = wallet_payment_dict[wallet_id]
+                if looking_payment_wallet not in wallet_payment_dict_env:
+                    looking_payment_wallet = looking_wallet.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
+                    continue
+
+                amount = wallet_payment_dict_env[looking_payment_wallet]
 
                 # Here we check how much it can pay
                 partner_wallet_amount = partner_wallet_amounts[looking_wallet.id]
-                wallet_limit_payment_amount = abs(abs(partner_wallet_amount) - abs(looking_wallet.credit_limit))
+                wallet_limit_payment_amount = abs(-abs(looking_wallet.credit_limit)-partner_wallet_amount)
                 amount_to_pay = min(wallet_limit_payment_amount, amount, due_amount)
 
                 # Now we added to the dict
-                amounts_to_pay_dict[looking_wallet.id] = amount_to_pay
+                amounts_to_pay_dict[looking_wallet.id] += amount_to_pay
 
                 # And we reduce some value to "simulate" the payment
                 due_amount -= amount_to_pay
-                wallet_payment_dict[wallet_id] -= amount_to_pay
+                wallet_payment_dict_env[looking_payment_wallet] -= amount_to_pay
+                wallet_payment_dict[looking_payment_wallet.id] -= amount_to_pay
 
-                if looking_wallet == self.env.ref("wallet.default_wallet_category"):
+                if looking_wallet == self.env.company.default_wallet_category_id:
                     break
-                looking_wallet = wallet_id.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
+                looking_wallet = looking_wallet.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
         return amounts_to_pay_dict
 
     def get_available_wallet_amounts(self):
@@ -235,7 +242,7 @@ class AccountMove(models.Model):
         if self:
             partner_ids = self.mapped("partner_id")
             for partner_id in partner_ids:
-                move_ids = self.filtered(lambda move: move.partner_id == partner_id).sorted("invoice_date_due")
+                move_ids = self.filtered(lambda move: move.partner_id == partner_id).sorted(lambda m: m.invoice_date_due or m.invoice_date)
                 walletCategoryEnv = self.env["wallet.category"]
 
                 # Getting how much we can pay
@@ -284,7 +291,7 @@ class AccountMove(models.Model):
                         wallet_amount_to_apply[looking_wallet] = wallet_amount_to_apply[
                                                                      looking_wallet] + wallet_remove_amount
 
-                if looking_wallet == self.env.ref("wallet.default_wallet_category"):
+                if looking_wallet == self.env.company.default_wallet_category_id:
                     break
                 looking_wallet = wallet_id.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
         return dict(wallet_amount_to_apply)
