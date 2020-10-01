@@ -46,11 +46,7 @@ class TuitionPlanInstallment(models.Model):
                 invoice_due_date = installment.date + relativedelta(months=months, day=invoice_date_due_day)
             order_line_ids = [(6, 0, [])]
             for product in installment.product_ids:
-                order_line_ids.append((0, 0, {
-                    "product_id": product.product_id.id,
-                    "price_unit": product.amount,
-                    "display_type": False,
-                }))
+                order_line_ids.append((0, 0, product._prepare_order_line_vals()))
             vals = {
                 "company_id": plan.company_id.id,
                 "invoice_date": installment.date,
