@@ -40,3 +40,11 @@ class TuitionPlanProduct(models.Model):
         comodel_name="product.category",
         related="product_id.categ_id",
         store=True)
+
+    def _prepare_order_line_vals(self):
+        self.ensure_one()
+        return {
+            "product_id": self.product_id.id,
+            "price_unit": self.amount,
+            "display_type": False,
+        }
