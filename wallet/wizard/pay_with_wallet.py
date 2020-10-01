@@ -63,6 +63,11 @@ class PayWithWallet(models.TransientModel):
             for move_id in move_ids:
                 move_id.pay_with_wallet(wallet_payment_line_dict)
 
+    @api.onchange('partner_id')
+    def onchange_partner(self):
+        for record in self:
+            record.wallet_payment_line_ids = record._get_default_lines()
+
     def _get_default_lines(self):
         active_move_ids = self._context.get('active_ids', [])
         if active_move_ids:
@@ -78,6 +83,7 @@ class PayWithWallet(models.TransientModel):
 
             for wallet_id, amount in wallet_suggestion_amounts.items():
                 wallet_payment_line_id = self.wallet_payment_line_ids.create({
+                    'partner_id': self.partner_id.id,
                     "wallet_id": wallet_id.id,
                     "amount": amount
                 })
@@ -113,9 +119,10 @@ class WalletPaymentLine(models.TransientModel):
     def _compute_partner_amount(self):
         for record in self:
             if record.wallet_id:
-                record.partner_amount = record.wallet_id.get_wallet_amount(record.pay_with_wallet_id.partner_id) - record.amount
+                record.partner_amount = record.wallet_id.get_wallet_amount(record.partner_id) - record.amount
 
     pay_with_wallet_id = fields.Many2one("pay.with.wallet")
     wallet_id = fields.Many2one("wallet.category", required=True)
     amount = fields.Float()
+    partner_id = fields.Many2one("res.partner", required=True)
     partner_amount = fields.Float("Partner amount", readonly=True, compute="_compute_partner_amount")

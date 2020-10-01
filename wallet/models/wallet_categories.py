@@ -74,9 +74,11 @@ class WalletCategory(models.Model):
         if not category_id:
             return self.env.company.default_wallet_category_id
 
-        wallet_id = self.env["wallet.category"].search([("category_id", "=", category_id.id)])[0]
+        wallet_id = self.env["wallet.category"].search([("category_id", "=", category_id.id)])
         if not wallet_id:
             wallet_id = self.get_wallet_by_category_id(category_id.parent_id)
+
+        wallet_id = wallet_id[0]
         return wallet_id
 
     def find_next_available_wallet(self, partner_id, category_id):

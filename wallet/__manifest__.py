@@ -13,7 +13,7 @@
     # Check https://github.com/odoo/odoo/blob/13.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Wallet',
-    'version': '1.0.2-beta1',
+    'version': '1.0.2-beta2',
 
     # any module necessary for this one to work correctly
     'depends': [
