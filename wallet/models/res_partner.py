@@ -167,9 +167,9 @@ class ResPartner(models.Model):
         accountMoveEnv = self.env["account.move"]
         move_ids = self.env["account.move"]
 
-        company_id = self.company_id or self.env.user.company_id
+        company_id = self.env.company
         move_id = accountMoveEnv.create(
-            {"type": "out_invoice", "partner_id": self.id, "journal_id": o_wallet_id.journal_category_id.id, "invoice_line_ids": [(0, 0, {"product_id": o_wallet_id.product_id.id, "price_unit": amount, "quantity": 1, })],
+            {"type": "out_invoice", "partner_id": self.id, "journal_id": o_wallet_id.journal_category_id.id, "invoice_line_ids": [(0, 0, {"product_id": o_wallet_id.product_id.id, "price_unit": amount, "quantity": 1, 'company_id': company_id.id})],
              "company_id": company_id.id})
 
         move_id.post()
