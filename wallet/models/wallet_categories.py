@@ -1,4 +1,5 @@
 from odoo import fields, models, api
+from odoo.tools import float_round
 
 
 class WalletCategory(models.Model):
@@ -47,7 +48,7 @@ class WalletCategory(models.Model):
 
             if wallet_moves:
                 amount_total = sum(wallet_moves.mapped(lambda move_line: move_line.price_unit if move_line.move_id.type == 'out_invoice' else -move_line.price_unit))
-                return amount_total
+                return float_round(amount_total, precision_digits=self.company_id.currency_id.decimal_places)
 
         return 0
 

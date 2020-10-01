@@ -190,7 +190,7 @@ class AccountMove(models.Model):
 
     def sort_by_setting_field(self):
         """ :return The moves sorted by a field setted in setting view """
-        return self.sorted('invoice_date_due')
+        return self.sorted(lambda m: m.invoice_date_due or m.invoice_date)
 
     def get_wallet_payment_distribution(self, wallet_payment_dict: WalletDict, partner_current_balances=False) -> WalletDict:
         partner_id = self.mapped("partner_id")
