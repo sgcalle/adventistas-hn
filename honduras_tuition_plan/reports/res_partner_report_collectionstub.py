@@ -13,6 +13,8 @@ class ResPartnerReportCollectionStub(models.AbstractModel):
         partner_ids = self.env.context.get("active_ids", [])
         partners = partner_obj.browse(partner_ids or docids)
 
+        tuition_plans = {}
+        details = {}
         no_tuition_plan = partner_obj
         for partner in partners.filtered(lambda p: p.person_type == "student"):
             tuition_plan = partner.tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
@@ -20,37 +22,37 @@ class ResPartnerReportCollectionStub(models.AbstractModel):
                 tuition_plan = partner.default_tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
             if tuition_plan:
                 tuition_plan = tuition_plan[0]
+                tuition_plans.setdefault(tuition_plan, partner_obj)
+                tuition_plans[tuition_plan] |= partner
+                details[partner.id] = {
+                    "tuition_plan": tuition_plan,
+                    "start_year": tuition_plan.installment_ids[0].date.year,
+                    "installments": [],
+                }
             else:
                 no_tuition_plan |= partner
         
         if no_tuition_plan:
             raise MissingError("The following students have no valid tuition plan: %s" % ", ".join(no_tuition_plan.mapped("name")))
 
-        details = {}
-        for partner in partners.filtered(lambda p: p.person_type == "student"):
-            tuition_plan = partner.tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
-            if not tuition_plan:
-                tuition_plan = partner.default_tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
-            details[partner.id] = {
-                "tuition_plan": tuition_plan[0],
-                "start_year": tuition_plan.installment_ids[0].date.year,
-                "installments": [],
-            }
-            for installment in tuition_plan.installment_ids:
-                details[partner.id]["end_year"] = installment.date.year
-                if installment.product_ids:
-                    self._cr.execute("SAVEPOINT collectionstub")
-                    sales = installment.with_context(
-                        students=partner,
-                        override_sale_order_name="For Collection Stub",
-                        automation="quotation").execute()
-                    details[partner.id]["installments"].append((installment.date.month, sum(sales.mapped("amount_total"))))
-                    try:
-                        self._cr.execute("ROLLBACK TO SAVEPOINT collectionstub")
-                        self.pool.clear_caches()
-                        self.pool.reset_changes()
-                    except psycopg2.InternalError:
-                        pass
+        for tuition_plan, students in tuition_plans.items():
+            for installment in tuition_plan.installment_ids.filtered(lambda i: i.product_ids):
+                self._cr.execute("SAVEPOINT collectionstub")
+                sales = installment.with_context(
+                    students=students,
+                    override_sale_order_name="For Collection Stub",
+                    automation="quotation",
+                    optimize=True).execute()
+                for student in students:
+                    student_sales = sales.filtered(lambda s: s.student_id == student)
+                    details[student.id]["end_year"] = installment.date.year
+                    details[student.id]["installments"].append((installment.date.month, sum(student_sales.mapped("amount_total"))))
+                try:
+                    self._cr.execute("ROLLBACK TO SAVEPOINT collectionstub")
+                    self.pool.clear_caches()
+                    self.pool.reset_changes()
+                except psycopg2.InternalError:
+                    pass
 
         return {
             "doc_ids": partner_ids,
@@ -69,6 +71,8 @@ class ResPartnerReportCollectionStub2(models.AbstractModel):
         partner_ids = self.env.context.get("active_ids", [])
         partners = partner_obj.browse(partner_ids or docids)
 
+        tuition_plans = {}
+        details = {}
         no_tuition_plan = partner_obj
         for partner in partners.filtered(lambda p: p.person_type == "student"):
             tuition_plan = partner.tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
@@ -76,37 +80,37 @@ class ResPartnerReportCollectionStub2(models.AbstractModel):
                 tuition_plan = partner.default_tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
             if tuition_plan:
                 tuition_plan = tuition_plan[0]
+                tuition_plans.setdefault(tuition_plan, partner_obj)
+                tuition_plans[tuition_plan] |= partner
+                details[partner.id] = {
+                    "tuition_plan": tuition_plan,
+                    "start_year": tuition_plan.installment_ids[0].date.year,
+                    "installments": [],
+                }
             else:
                 no_tuition_plan |= partner
         
         if no_tuition_plan:
             raise MissingError("The following students have no valid tuition plan: %s" % ", ".join(no_tuition_plan.mapped("name")))
 
-        details = {}
-        for partner in partners.filtered(lambda p: p.person_type == "student"):
-            tuition_plan = partner.tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
-            if not tuition_plan:
-                tuition_plan = partner.default_tuition_plan_ids.filtered(lambda t: partner.grade_level_id.id in t.grade_level_ids.ids)
-            details[partner.id] = {
-                "tuition_plan": tuition_plan[0],
-                "start_year": tuition_plan.installment_ids[0].date.year,
-                "installments": [],
-            }
-            for installment in tuition_plan.installment_ids:
-                details[partner.id]["end_year"] = installment.date.year
-                if installment.product_ids:
-                    self._cr.execute("SAVEPOINT collectionstub")
-                    sales = installment.with_context(
-                        students=partner,
-                        override_sale_order_name="For Collection Stub",
-                        automation="quotation").execute()
-                    details[partner.id]["installments"].append((installment.date.month, sum(sales.mapped("amount_total"))))
-                    try:
-                        self._cr.execute("ROLLBACK TO SAVEPOINT collectionstub")
-                        self.pool.clear_caches()
-                        self.pool.reset_changes()
-                    except psycopg2.InternalError:
-                        pass
+        for tuition_plan, students in tuition_plans.items():
+            for installment in tuition_plan.installment_ids.filtered(lambda i: i.product_ids):
+                self._cr.execute("SAVEPOINT collectionstub")
+                sales = installment.with_context(
+                    students=students,
+                    override_sale_order_name="For Collection Stub",
+                    automation="quotation",
+                    optimize=True).execute()
+                for student in students:
+                    student_sales = sales.filtered(lambda s: s.student_id == student)
+                    details[student.id]["end_year"] = installment.date.year
+                    details[student.id]["installments"].append((installment.date.month, sum(student_sales.mapped("amount_total"))))
+                try:
+                    self._cr.execute("ROLLBACK TO SAVEPOINT collectionstub")
+                    self.pool.clear_caches()
+                    self.pool.reset_changes()
+                except psycopg2.InternalError:
+                    pass
 
         return {
             "doc_ids": partner_ids,
