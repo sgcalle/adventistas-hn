@@ -88,20 +88,18 @@
                         12: 'DICIEMBRE',
                     }"/>
                     <t t-foreach="details[o.id]['installments']" t-as="installment">
-                        <table class="w-100">
-                            <tr>
-                                <td class="w-50 border-right" style="padding-right:1rem;">
-                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
-                                        <t t-set="mode" t-value="'CONTABILIDAD'"/>
-                                    </t>
-                                </td>
-                                <td class="w-50 border-left" style="padding-left:1rem;">
-                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
-                                        <t t-set="mode" t-value="'BANCO'"/>
-                                    </t>
-                                </td> 
-                            </tr>
-                        </table>
+                        <div class="row" style="page-break-inside:avoid;">
+                            <div class="col-6 border-right" style="padding-right:1rem;">
+                                <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
+                                    <t t-set="mode" t-value="'CONTABILIDAD'"/>
+                                </t>
+                            </div>
+                            <div class="col-6 border-left" style="padding-left:1rem;">
+                                <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
+                                    <t t-set="mode" t-value="'BANCO'"/>
+                                </t>
+                            </div> 
+                        </div>
                         <hr/>
                     </t>
                 </t>
@@ -128,20 +126,18 @@
                         12: 'DICIEMBRE',
                     }"/>
                     <t t-foreach="details[o.id]['installments']" t-as="installment">
-                        <table class="w-100">
-                            <tr>
-                                <td class="w-50 border-right" style="padding-right:1rem;">
-                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
-                                        <t t-set="mode" t-value="'CONTABILIDAD'"/>
-                                    </t>
-                                </td>
-                                <td class="w-50 border-left" style="padding-left:1rem;">
-                                    <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
-                                        <t t-set="mode" t-value="'BANCO'"/>
-                                    </t>
-                                </td> 
-                            </tr>
-                        </table>
+                        <div class="row" style="page-break-inside:avoid;">
+                            <div class="col-6 border-right" style="padding-right:1rem;">
+                                <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
+                                    <t t-set="mode" t-value="'CONTABILIDAD'"/>
+                                </t>
+                            </div>
+                            <div class="col-6 border-left" style="padding-left:1rem;">
+                                <t t-call="honduras_tuition_plan.res_partner_report_collectionstub_half">
+                                    <t t-set="mode" t-value="'BANCO'"/>
+                                </t>
+                            </div> 
+                        </div>
                         <hr/>
                     </t>
                 </t>
