@@ -66,11 +66,11 @@ class AccountMove(models.Model):
     def set_receivable_account(self):
         """ It uses receivable_account_id field to set autoamtically the receivable account """
         for record in self:
-            receivable_line_id = record.line_ids.filtered(
-                lambda line: line.account_id.user_type_id.type == 'receivable')
-            receivable_line_id.ensure_one()
-            if receivable_line_id and record.receivable_account_id:
-                receivable_line_id.account_id = record.receivable_account_id.id
+            if record.receivable_account_id:
+                receivable_line_ids = record.line_ids.filtered(
+                    lambda line: line.account_id.user_type_id.type == 'receivable')
+                for receivable_line_id in receivable_line_ids:
+                    receivable_line_id.account_id = record.receivable_account_id.id
 
 
 
