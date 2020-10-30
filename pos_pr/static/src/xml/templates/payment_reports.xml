@@ -62,7 +62,7 @@
             <hr class="w-100"/>
             <div class="row">
                 <t t-if="widget.customer">
-                    <div class="col-6 h2">
+                    <div class="col-12 h2">
                         <strong>Customer:</strong>
                         <t t-esc="widget.customer.name"/>
                     </div>
@@ -73,7 +73,7 @@
             <div class="row mb-4 page-breakable-block" t-foreach="widget.invoices" t-as="invoice">
 
                 <!-- Variables per invoice -->
-                <t t-set="due_after_discount" t-value="invoice.amount_residual - invoice.discount_amount"/>
+                <t t-set="due_after_discount" t-value="invoice.last_amount_residual - invoice.last_discount_amount"/>
                 <t t-set="invoice_balance" t-value="due_after_discount"/>
 
                 <div class="col-12 invoice_payments">
@@ -85,7 +85,7 @@
                             <div class="col-3 h6 text-right"><strong>Amount total:</strong></div>
                             <div class="col-3 h6"><t t-esc="widget.format_currency(invoice.amount_total)"/></div>
                             <div class="col-3 h6 text-right"><strong>Amount due:</strong></div>
-                            <div class="col-3 h6"><t t-esc="widget.format_currency(invoice.amount_residual)"/></div>
+                            <div class="col-3 h6"><t t-esc="widget.format_currency(invoice.last_amount_residual)"/></div>
                         </div>
                         <div class="row">
                             <div class="col-3 h6 text-right"><strong>Invoice date:</strong></div>
@@ -102,7 +102,7 @@
 
                         <div class="row">
                             <div class="col-3 h6 text-right"><strong>Discount</strong></div>
-                            <div class="col-3 h6"><t t-esc="widget.format_currency(invoice.discount_amount)"/></div>
+                            <div class="col-3 h6"><t t-esc="widget.format_currency(invoice.last_discount_amount)"/></div>
 
                             <div class="col-3 h6 text-right"><strong>Amount due after discount</strong></div>
                             <div class="col-3 h6"><t t-esc="widget.format_currency(due_after_discount)"/></div>

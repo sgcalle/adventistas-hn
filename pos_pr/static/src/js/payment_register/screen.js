@@ -13,7 +13,7 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
     const QWeb = core.qweb;
 
     // Invoices screen
-    const PosInvoicePaymentRegisterWidget = screens.ScreenWidget.extend({
+    const PosPosPRWidget = screens.ScreenWidget.extend({
 
         events: {
             'click .back': '_go_to_back_screen',
@@ -705,7 +705,7 @@ odoo.define("pos_pr.payment_register.screen", function (require) {
         },
     });
 
-    gui.define_screen({name: 'pos_invoice_payment_register_widget', widget: PosInvoicePaymentRegisterWidget});
+    gui.define_screen({name: 'pos_invoice_payment_register_widget', widget: PosPosPRWidget});
 
-    return PosInvoicePaymentRegisterWidget;
+    return PosPosPRWidget;
 });

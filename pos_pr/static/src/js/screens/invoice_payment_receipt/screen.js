@@ -13,13 +13,14 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
         show: function (refresh, data) {
             this._super.apply(this, arguments);
             const paymentGroup = this.pos.gui.get_current_screen_param('paymentGroup');
+            const invoiceAddress = this.pos.gui.get_current_screen_param('invoiceAddress');
             this.receipt_template = new reports.InvoicePaymentReceiptment(this, {
                 paymentGroup: paymentGroup,
-                customer: this.pos.get_client()
+                customer: invoiceAddress || this.pos.get_client(),
             }, false);
             this.receipt_template_copy = new reports.InvoicePaymentReceiptment(this, {
                 paymentGroup: paymentGroup,
-                customer: this.pos.get_client(),
+                customer: invoiceAddress || this.pos.get_client(),
                 copy: true,
             });
 
@@ -160,4 +161,8 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
         }
     });
     gui.define_screen({name: 'invoicePaymentReceipt', widget: InvoicePaymentReceiptScreenWidget});
+
+    return {
+        InvoicePaymentReceiptScreenWidget
+    }
 });

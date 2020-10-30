@@ -4,7 +4,7 @@ from odoo import models, fields, api, _, exceptions
 
 
 # noinspection PyProtectedMember
-class InvoicePaymentRegister(models.Model):
+class PosPR(models.Model):
     """ This model will save payments to invoices
         So we can use it for pay them when the session
         is closed """
@@ -24,6 +24,8 @@ class InvoicePaymentRegister(models.Model):
     move_id = fields.Many2one("account.move", "Invoice", domain="[ ('type', '=', 'out_invoice') ]")
     partner_id = fields.Many2one("res.partner", 'Customer', related='move_id.partner_id')
 
+    invoice_address_id = fields.Many2one('res.partner', default=lambda self: self.partner_id)
+
     currency_id = fields.Many2one("res.currency", related="pos_session_id.currency_id")
     discount_amount = fields.Monetary()
 
@@ -33,13 +35,13 @@ class InvoicePaymentRegister(models.Model):
             payment.display_amount = payment.payment_amount + payment.discount_amount
 
     @api.model
-    def create(self, vals_list):
+    def create(self, vals):
 
-        if "name" not in vals_list:
+        if "name" not in vals:
             name = self.env["ir.sequence"].next_by_code('seq.pos.payment.register.invoice.payment')
-            vals_list["name"] = name
+            vals["name"] = name
 
-        return super().create(vals_list)
+        return super().create(vals)
 
     def pay_invoice(self):
         pos_session_ids = self.mapped("pos_session_id")
@@ -92,7 +94,6 @@ class InvoicePaymentRegister(models.Model):
                 "debit": amount,
                 "name": payment_method_id.name,
                 "move_id": move_id.id,
-                "pos_payment_method_id": payment_method_id.id,
                 "partner_id": False,
             })
         return journal_items
@@ -109,7 +110,6 @@ class InvoicePaymentRegister(models.Model):
                 "credit": payment_id.payment_amount,
                 "name": _('%s to %s') % (payment_id.payment_method_id.name, payment_id.move_id.name),
                 "move_id": move_id.id,
-                "pos_payment_method_id": payment_id.payment_method_id.id,
                 "pos_payment_id": payment_id.id,
             })
 

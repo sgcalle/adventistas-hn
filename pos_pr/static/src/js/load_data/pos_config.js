@@ -3,6 +3,7 @@ odoo.define('pos_pr.load_data.pos_config', function (require) {
     const models = require('point_of_sale.models');
     models.load_fields('pos.session', ['invoice_surcharge_ids', 'invoice_payment_ids', 'invoice_payment_groups_ids']);
     models.load_fields('res.company', ['city', 'street', 'parent_id']);
+    models.load_fields('res.partner', ['person_type', 'family_ids', 'member_ids', 'student_invoice_address_ids']);
 
     models.PosModel = models.PosModel.extend({
 

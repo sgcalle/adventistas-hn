@@ -148,7 +148,7 @@ class PosSession(models.Model):
                 total_cash_invoice_payment_amount = 0.0 if session.state == 'closed' else sum(
                     session.invoice_payment_ids.filtered("payment_method_id.is_cash_count").mapped("display_amount"))
 
-                cash_register_total_entry_encoding = self.cash_register_id.total_entry_encoding + transaction_total_amount + total_cash_invoice_payment_amount
+                cash_register_total_entry_encoding = session.cash_register_id.total_entry_encoding + transaction_total_amount + total_cash_invoice_payment_amount
 
                 session.cash_register_total_entry_encoding = cash_register_total_entry_encoding
                 session.invoice_payment_amount = sum(session.invoice_payment_ids.mapped("display_amount"))

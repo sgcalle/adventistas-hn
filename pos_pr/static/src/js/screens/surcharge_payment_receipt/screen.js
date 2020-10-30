@@ -13,9 +13,11 @@ odoo.define('pos_pr.screens.surcharge_payment_receipt', function (require) {
         show: function (refresh, data) {
             this._super.apply(this, arguments);
             const surcharge = this.pos.gui.get_current_screen_param('surcharge');
+            const invoiceAddress = this.pos.gui.get_current_screen_param('invoiceAddress');
+
             this.receipt_template = new reports.SurchargePaymentReceiptment(this, {
                 surcharge: surcharge,
-                customer: this.pos.get_client(),
+                customer: invoiceAddress || this.pos.get_client(),
             });
             this.receipt_template.renderElement();
             this.cssPageRuleElement = this._create_css_page_rule();

@@ -75,6 +75,7 @@ odoo.define('pos_pr.models', function (require) {
             {name: 'payment_method_id', type: 'many2one'},
             {name: 'pos_session_id', type: 'many2one'},
             {name: 'move_id', type: 'many2one'},
+            {name: 'invoice_address_id', type: 'many2one'},
         ],
     });
 

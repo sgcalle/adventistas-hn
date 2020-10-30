@@ -161,13 +161,203 @@ odoo.define('eduweb_utils.Class', function (require) {
 
 });
 
+odoo.define('eduweb_utils.AutoCompleteInput', function (require) {
+    return function (inputElement, suggestionList) {
+        const autocompleteCssClass = "autocomplete__container";
+        const autocompleteItemCssClass = "autocomplete__container__item";
+        const suggestionItemActiveCssClass = "autocomplete__container__item-active";
+
+        // let inputContainer = null;
+        let currentFocusIndex = -1;
+        const suggestionContainerEl = document.createElement("DIV");
+        this.globalCurrentScrollTop = 0;
+
+        // inputContainer = document.createElement("DIV");
+        // inputElement.parentNode.replaceChild(inputContainer, inputElement);
+        // inputContainer.appendChild(inputElement);
+
+        const closeAllSuggestionLists = function (suggestionListContainerEl) {
+
+            const suggestionContainerElList = document.getElementsByClassName(autocompleteCssClass);
+
+            for (const suggestionContainerEl of suggestionContainerElList) {
+                if (suggestionContainerEl !== suggestionListContainerEl) {
+                    suggestionContainerEl.parentNode.removeChild(suggestionContainerEl);
+                }
+            }
+        }
+
+        const applySuggestionToInput = event => {
+            inputElement.value = event.currentTarget.textContent;
+        };
+
+        const createSuggestionElementList = function (inputValue) {
+            let suggestionElementList = [];
+            for (let i = 0; i < suggestionList.length; i++) {
+
+                const suggestionItemObject = suggestionList[i];
+
+                if (suggestionItemObject.search.toLowerCase().includes(inputValue.toLowerCase())) {
+                    const suggestionItemEl = document.createElement("LI");
+                    suggestionItemEl.textContent = suggestionItemObject.label;
+                    suggestionItemEl.classList.add(autocompleteItemCssClass);
+
+                    const dataset = suggestionItemObject.dataset;
+                    for (const dataKey in dataset) {
+                        if (Object.hasOwnProperty.call(dataset, dataKey)) {
+                            suggestionItemEl.dataset[dataKey] = dataset[dataKey]
+                        }
+                    }
+
+                    suggestionItemEl.addEventListener("click", event => {
+                        applySuggestionToInput(event);
+                        if (suggestionItemObject.onclick && typeof (suggestionItemObject.onclick) === 'function') {
+                            suggestionItemObject.onclick(event);
+                        }
+                    });
+
+                    suggestionElementList.push(suggestionItemEl);
+                }
+            }
+
+            return suggestionElementList;
+
+        };
+
+        const showSuggestions = event => {
+            suggestionContainerEl.innerHTML = '';
+            closeAllSuggestionLists();
+            const suggestionElementList = createSuggestionElementList(inputElement.value);
+            suggestionElementList.forEach(suggestionEl => suggestionContainerEl.appendChild(suggestionEl));
+
+            suggestionContainerEl.classList.add(autocompleteCssClass);
+            // inputContainer.classList.add("autocomplete");
+            console.log('shown in scroll: ' + suggestionContainerEl.scrollTop);
+            inputElement.insertAdjacentElement("afterend", suggestionContainerEl);
+            suggestionContainerEl.scrollTop = this.globalCurrentScrollTop;
+        };
+
+        inputElement.addEventListener("keydown", e => {
+            const suggestionItems = suggestionContainerEl.getElementsByClassName(autocompleteItemCssClass);
+            if (e.keyCode === 40) {
+                currentFocusIndex++;
+                this.addActive();
+            } else if (e.keyCode === 38) {
+                currentFocusIndex--;
+                this.addActive();
+            } else if (e.keyCode === 13) {
+                /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                e.preventDefault();
+                if (currentFocusIndex > -1) {
+                    /*and simulate a click on the "active" item:*/
+                    if (suggestionItems) suggestionItems[currentFocusIndex].click();
+                    currentFocusIndex = -1;
+                }
+            }
+        });
+
+        this.addActive = function () {
+
+            const suggestionItems = suggestionContainerEl.getElementsByClassName(autocompleteItemCssClass);
+
+            if (!suggestionItems) return false;
+
+            for (let suggestionItem of suggestionItems) {
+                suggestionItem.classList.remove(suggestionItemActiveCssClass);
+            }
+
+            if (currentFocusIndex >= suggestionItems.length) currentFocusIndex = 0;
+            if (currentFocusIndex < 0) currentFocusIndex = (suggestionItems.length - 1);
+
+            const minScrollTop = suggestionContainerEl.scrollTop;
+            const suggestionItemHeight = suggestionItems[0].offsetHeight;
+            const maxScrollTop = suggestionContainerEl.scrollTop + suggestionContainerEl.offsetHeight - suggestionItemHeight;
+            const maxScrollHeight = suggestionContainerEl.offsetHeight - suggestionItemHeight;
+            const nextScrollTop = (currentFocusIndex) * suggestionItems[0].offsetHeight
+            if (nextScrollTop < minScrollTop) {
+                suggestionContainerEl.scrollTop = nextScrollTop;
+            } else if (nextScrollTop >= maxScrollTop) {
+                const newScrollTop = nextScrollTop - maxScrollHeight
+                suggestionContainerEl.scrollTop = newScrollTop;
+            }
+            console.log({
+                nextScrollTop,
+                suggestionItemHeight,
+                maxScrollTop,
+                'New top': nextScrollTop - suggestionContainerEl.offsetHeight - suggestionItemHeight
+            });
+            suggestionItems[currentFocusIndex].classList.add(suggestionItemActiveCssClass);
+            this.globalCurrentScrollTop = suggestionContainerEl.scrollTop;
+        }
+
+        const clickOutInput = event => {
+
+            let element = event.target;
+            if (element === inputElement && suggestionContainerEl) {
+                element = suggestionContainerEl;
+            }
+            closeAllSuggestionLists(element);
+
+        };
+
+        inputElement.addEventListener("input", showSuggestions);
+        inputElement.addEventListener("click", showSuggestions);
+        document.addEventListener("click", clickOutInput);
+    };
+});
+
+odoo.define('eduweb_utils.numbers', require => {
+
+    /**
+     *
+     * @param {HTMLInputElement|EventTarget} inputNumberEl
+     * @param {Number} decimal
+     * @returns {number}
+     */
+    function verifyInputNumber(inputNumberEl, decimal) {
+
+        // store current positions in variables
+        const start = inputNumberEl.selectionStart, end = inputNumberEl.selectionEnd;
+
+        // If the user just delete all, we need to reset it to zero
+        if (!inputNumberEl.value) {
+            inputNumberEl.value = 0;
+        }
+
+        let inputNumberElParsedValue = parseFloat(inputNumberEl.value);
+
+        const regexp = new RegExp(`^\\d*\\.?\\d{0,${decimal || 0}}$`);
+        if (regexp.test(inputNumberEl.value)) {
+            // No negative validation
+            if (inputNumberElParsedValue < 0) {
+                // We just convert the number to positive, we don't want negative values here
+                inputNumberElParsedValue *= -1;
+                // inputNumberEl.value = inputNumberElParsedValue;
+            }
+            inputNumberEl.beforeValue = inputNumberEl.value;
+        } else {
+            inputNumberEl.value = inputNumberEl.beforeValue || 0;
+            inputNumberElParsedValue = parseFloat(inputNumberEl.value);
+        }
+        // restore from variables...
+        inputNumberEl.setSelectionRange(start, end);
+        return inputNumberElParsedValue;
+    }
+
+    return {
+        verifyInputNumber
+    }
+});
+
 odoo.define('eduweb_utils', function (require) {
 
     const NumberInput = require('eduweb_utils.NumberInput');
     const EduwebClass = require('eduweb_utils.Class');
+    const AutoCompleteInput = require('eduweb_utils.AutoCompleteInput');
 
     return {
-        'NumberInput': NumberInput,
+        NumberInput,
         'Class': EduwebClass,
+        AutoCompleteInput,
     };
 });
