@@ -19,6 +19,8 @@ class PosPaymentMethod(models.Model):
 class WalletCategory(models.Model):
     _inherit = 'wallet.category'
 
+    pos_payment_method_id = fields.Many2one('pos.payment.method', store=True, compute='_compute_pos_payment_method_id')
+
     @api.depends('name', 'account_id', 'company_id')
     def _compute_pos_payment_method_id(self):
         for wallet_category_id in self:
@@ -39,8 +41,6 @@ class WalletCategory(models.Model):
                     'receivable_account_id': wallet_category_id.account_id.id,
                     'company_id': wallet_category_id.company_id.id,
                     })
-
-    pos_payment_method_id = fields.Many2one('pos.payment.method', required=True, store=True, compute='_compute_pos_payment_method_id')
 
     def get_wallet_amount(self, partner_id, wallet_category_id=False):
         wallet_amount = super(WalletCategory, self).get_wallet_amount(partner_id, wallet_category_id)
