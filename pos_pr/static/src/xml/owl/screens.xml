@@ -58,7 +58,7 @@
             </section>
             <!-- Body -->
             <section class="full-content">
-                
+
                 <!-- Left -->
                 <PosPRScreenLeftSide
                         pos="props.pos"
@@ -72,6 +72,7 @@
                 <!-- Right -->
                 <PosPRScreenRightSide pos="props.pos"
                                       paymentRegister="props.paymentRegister"
+                                      changeAmount="changeAmount"
                                       surchargeAmount="surchargeAmount"
                                       posPrState="state"/>
             </section>
@@ -187,6 +188,8 @@
                 <hr style="width: 100%;"/>
             </t>
             <PosPRPaymentList pos="props.pos" paymentRegister="props.paymentRegister" posPrState="props.posPrState"/>
+            <hr style="width: 100%;"/>
+            <h2>Change: <t t-esc="props.paymentRegister.format_currency(props.changeAmount)"/></h2>
         </section>
     </div>
 
@@ -283,7 +286,7 @@
     </table>
 
     <!-- Invoice Payment List -->
-    <section t-name="PosPRPaymentList">
+    <section t-name="PosPRPaymentList" class="invoice-payment-section">
         <h2>Payments</h2>
         <table class="payment-method-list">
             <thead>

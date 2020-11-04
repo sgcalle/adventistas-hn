@@ -110,7 +110,13 @@ odoo.define('pos_pr.models', function (require) {
             {name: 'id', type: 'integer'},
             {name: 'name', type: 'char'},
             {name: 'invoice_payment_ids', type: 'one2many'},
-            {name: 'payment_amount_total', type: 'compute', method: '_getPaymentAmountTotal'}
+
+            {name: 'payment_amount_total', type: 'compute', method: '_getPaymentAmountTotal'},
+            {name: 'payment_change', type: 'float'},
+            {name: 'date', type: 'char'},
+
+            {name: 'pos_session_id', type: 'many2one'},
+            {name: 'partner_id', type: 'many2one'},
         ],
 
         _getPaymentAmountTotal: function () {

@@ -253,6 +253,11 @@
 .pos .pos-payment-register .invoice-details .footer .button {
   background-color: #f0eeee !important;
 }
+.pos .pos-payment-register section.invoice-payment-section {
+  display: inline-block;
+  width: 100%;
+  padding-bottom: 1em;
+}
 .pos .pos-payment-register .toggle-screen-filter-group {
   position: fixed;
   display: flex;

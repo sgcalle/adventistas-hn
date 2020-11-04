@@ -228,13 +228,36 @@ odoo.define('pos_pr.owl.components', function (require) {
             return surchargeAmount;
         }
 
-        getExpectedAmountDue(invoice) {
-            let amount_paid = 0;
-            // Just a shorter name for this x3 ;)
-            const paymentsList = this.state.invoicePayments[invoice.id];
-            if (paymentsList) {
-                amount_paid = _.reduce(paymentsList, (memo, value) => memo + (value || 0), 0);
+        get changeAmount() {
+            const changeAmount = _.reduce(this.filteredInvoiceList, (memo, inv) => {
+                // let invoiceChangeAmount = memo;
+                // const invoiceExpectedDueAmount = inv.amount_residual - this.getInvoiceTotalPayment(inv);
+                // if (invoiceExpectedDueAmount && invoiceExpectedDueAmount < 0) {
+                //     invoiceChangeAmount += -invoiceExpectedDueAmount;
+                // }
+                return memo + this.getInvoiceChange(inv);
+            }, 0) || 0;
+            return changeAmount;
+        }
+
+        getInvoiceChange(invoice) {
+            const invoiceExpectedDueAmount = invoice.amount_residual - this.getInvoiceTotalPayment(invoice);
+            return invoiceExpectedDueAmount < 0 ? -invoiceExpectedDueAmount : 0;
+        }
+
+        getInvoiceTotalPayment(invoice) {
+            if (invoice) {
+                const paymentsList = this.state.invoicePayments[invoice.id];
+                if (paymentsList) {
+                    console.log('Total Payments: ' + paymentsList);
+                    return _.reduce(paymentsList, (memo, value) => memo + (value || 0), 0);
+                }
             }
+            return 0;
+        }
+
+        getExpectedAmountDue(invoice) {
+            const amount_paid = this.getInvoiceTotalPayment(invoice);
 
             return (invoice.amount_residual || 0) - amount_paid - (invoice.discount_amount || 0);
         }
@@ -290,17 +313,26 @@ odoo.define('pos_pr.owl.components', function (require) {
         validatePayments() {
             const invoicePayments = this._createInvoicePayments();
 
-            this._updateInvoicesAmounts(invoicePayments);
-
             if (invoicePayments && invoicePayments.length > 0) {
+
+                const paymentClone = _.clone(invoicePayments);
+                this._appendChangesToInvoicePayments(paymentClone);
+
                 const paymentGroup = new PaymentGroup({
                     'name': this.props.pos.generateNextPaymentGroupNumber(),
-                    'invoice_payment_ids': invoicePayments
+                    'invoice_payment_ids': paymentClone,
+                    'payment_change': this.changeAmount,
+                    'partner_id': this.state.partner.person_type === 'student' ? this.props.pos.db.partner_by_id[this.state.selectedInvoiceAddressId] : this.state.partner,
+                    'pos_session_id': this.props.pos.pos_session,
+                    'date': moment().format('YYYY-MM-DD HH:mm:ss'),
                 });
+
+                this._updateInvoicesAmounts(invoicePayments);
 
                 this.props.pos.gui.show_screen('invoicePaymentReceipt', {
                     paymentGroup,
                     invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
+                    changeAmount: this.changeAmount,
                 });
                 this.state.extraPayments = [];
                 this.props.pos.synch_invoive_payment_and_surcharges(paymentGroup, []);
@@ -324,6 +356,28 @@ odoo.define('pos_pr.owl.components', function (require) {
                 invoiceAddress: this.state.selectedInvoiceAddress
             });
             this.props.pos.synch_invoive_payment_and_surcharges([], [surcharge]);
+        }
+
+        _appendChangesToInvoicePayments(invoicePayments) {
+            const cash_method = _.chain(this.props.pos.payment_methods).filter(pm => pm.is_cash_count).first().value()
+            _.each(this.invoiceList, (invoice) => {
+                const change = this.getInvoiceChange(invoice);
+                if (change) {
+
+                    const invoicePayment = this._createInvoicePaymentObject({
+                        invoice,
+                        paymentMethod: cash_method,
+                        paymentAmount: -change,
+                        invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
+
+                    });
+
+                    invoicePayment.is_change = true;
+                    // And we feed the return array with the new created InvoicePayment Object
+                    invoicePayments.push(invoicePayment);
+
+                }
+            });
         }
 
         /**

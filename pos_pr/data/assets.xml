@@ -12,7 +12,6 @@
                 <script type="text/javascript" src="/pos_pr/static/src/js/owl/init_owl.js"/>
                 <script type="text/javascript" src="/pos_pr/static/src/js/owl/components.js"/>
 
-                <script type="text/javascript" src="/pos_pr/static/src/js/util/tools.js"/>
 
                 <script type="text/javascript" src="/pos_pr/static/src/js/models/model.js"/>
 
@@ -31,10 +30,6 @@
                 <script type="text/javascript" src="/pos_pr/static/src/js/screens/surcharge_payment_receipt/screen.js"/>
 
                 <script type="text/javascript" src="/pos_pr/static/src/js/screens/payment_register/screen.js"/>
-                <script type="text/javascript"
-                        src="/pos_pr/static/src/js/screens/payment_register/components/invoice_list/screen.js"/>
-                <script type="text/javascript"
-                        src="/pos_pr/static/src/js/screens/payment_register/components/dashboard/screen.js"/>
                 <script type="text/javascript" src="/pos_pr/static/src/js/components/pos_button_widgets.js"/>
                 <script type="text/javascript" src="/pos_pr/static/src/js/components/reports.js"/>
 

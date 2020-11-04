@@ -4,6 +4,7 @@
          <div class='surcharge-receipt-screen screen'>
             <div class='screen-content'>
                 <div class='top-content'>
+                    <h1>Change: <span class="change-value"><t t-esc="widget.format_currency(0)"/></span></h1>
                     <span class='button next'>
                         Next Order
                         <i class='fa fa-angle-double-right'></i>

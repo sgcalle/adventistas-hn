@@ -57,10 +57,16 @@ odoo.define('eduweb_utils.Class', function (require) {
                                 break;
                             case 'many2one':
                                 if (jsonFieldValue) {
-                                    this[fieldName] = {
-                                        id: parseInt(jsonFieldValue[0]),
-                                        name: jsonFieldValue[1],
-                                    };
+                                    // It will be a Array if it has the form [id, fields]
+                                    // And will be an object if it has {id, ...fields}
+                                    if (_.isArray(jsonFieldValue)) {
+                                        this[fieldName] = {
+                                            id: parseInt(jsonFieldValue[0]),
+                                            name: jsonFieldValue[1],
+                                        };
+                                    } else {
+                                        this[fieldName] = jsonFieldValue;
+                                    }
                                 } else {
                                     this[fieldName] = null;
                                 }
