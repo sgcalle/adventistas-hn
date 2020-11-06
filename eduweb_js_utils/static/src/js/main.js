@@ -168,19 +168,53 @@ odoo.define('eduweb_utils.Class', function (require) {
 });
 
 odoo.define('eduweb_utils.AutoCompleteInput', function (require) {
-    return function (inputElement, suggestionList) {
+    return function (parameters) {
+        // Style classes
         const autocompleteCssClass = "autocomplete__container";
         const autocompleteItemCssClass = "autocomplete__container__item";
         const suggestionItemActiveCssClass = "autocomplete__container__item-active";
 
-        // let inputContainer = null;
+        // Other variables
         let currentFocusIndex = -1;
         const suggestionContainerEl = document.createElement("DIV");
-        this.globalCurrentScrollTop = 0;
+        let globalCurrentScrollTop = 0;
+        this.filterList = [];
+        this.filters = parameters.filters || {};
+        const inputElement = parameters.inputElement;
+        const suggestionList = parameters.suggestionList;
 
-        // inputContainer = document.createElement("DIV");
-        // inputElement.parentNode.replaceChild(inputContainer, inputElement);
-        // inputContainer.appendChild(inputElement);
+        /**
+         * @param {string} filter
+         * **/
+        this.toggleFilter = (filter) => {
+            const index = this.filterList.indexOf(filter)
+            if (index === -1) {
+                this.filterList.push(filter);
+            } else {
+                this.filterList.splice(index, 1);
+            }
+            showSuggestions();
+        }
+
+        const applyFilterToSuggestionItemObject = (suggestionItemObject) => {
+            let check = true;
+            for (let i = 0; i < this.filterList.length; i++) {
+                const filterName = this.filterList[i];
+                if (Object.hasOwnProperty.call(this.filters, filterName)) {
+                    const filter = this.filters[filterName];
+                    if (typeof filter === 'function') {
+                        check = check && filter(suggestionItemObject);
+                    } else {
+                        check = check && filter;
+                    }
+                }
+            }
+            return check
+        }
+
+        const applySearchToSuggestionItemObject = (suggestionItemObject, inputValue) => {
+            return suggestionItemObject.search.toLowerCase().includes(inputValue.toLowerCase());
+        }
 
         const closeAllSuggestionLists = function (suggestionListContainerEl) {
 
@@ -203,7 +237,7 @@ odoo.define('eduweb_utils.AutoCompleteInput', function (require) {
 
                 const suggestionItemObject = suggestionList[i];
 
-                if (suggestionItemObject.search.toLowerCase().includes(inputValue.toLowerCase())) {
+                if (applyFilterToSuggestionItemObject(suggestionItemObject) && applySearchToSuggestionItemObject(suggestionItemObject, inputValue)) {
                     const suggestionItemEl = document.createElement("LI");
                     suggestionItemEl.textContent = suggestionItemObject.label;
                     suggestionItemEl.classList.add(autocompleteItemCssClass);
@@ -237,20 +271,18 @@ odoo.define('eduweb_utils.AutoCompleteInput', function (require) {
             suggestionElementList.forEach(suggestionEl => suggestionContainerEl.appendChild(suggestionEl));
 
             suggestionContainerEl.classList.add(autocompleteCssClass);
-            // inputContainer.classList.add("autocomplete");
-            console.log('shown in scroll: ' + suggestionContainerEl.scrollTop);
             inputElement.insertAdjacentElement("afterend", suggestionContainerEl);
-            suggestionContainerEl.scrollTop = this.globalCurrentScrollTop;
+            suggestionContainerEl.scrollTop = globalCurrentScrollTop;
         };
 
         inputElement.addEventListener("keydown", e => {
             const suggestionItems = suggestionContainerEl.getElementsByClassName(autocompleteItemCssClass);
             if (e.keyCode === 40) {
                 currentFocusIndex++;
-                this.addActive();
+                addActive();
             } else if (e.keyCode === 38) {
                 currentFocusIndex--;
-                this.addActive();
+                addActive();
             } else if (e.keyCode === 13) {
                 /*If the ENTER key is pressed, prevent the form from being submitted,*/
                 e.preventDefault();
@@ -262,7 +294,7 @@ odoo.define('eduweb_utils.AutoCompleteInput', function (require) {
             }
         });
 
-        this.addActive = function () {
+        const addActive = function () {
 
             const suggestionItems = suggestionContainerEl.getElementsByClassName(autocompleteItemCssClass);
 
@@ -293,7 +325,7 @@ odoo.define('eduweb_utils.AutoCompleteInput', function (require) {
                 'New top': nextScrollTop - suggestionContainerEl.offsetHeight - suggestionItemHeight
             });
             suggestionItems[currentFocusIndex].classList.add(suggestionItemActiveCssClass);
-            this.globalCurrentScrollTop = suggestionContainerEl.scrollTop;
+            globalCurrentScrollTop = suggestionContainerEl.scrollTop;
         }
 
         const clickOutInput = event => {
@@ -309,7 +341,7 @@ odoo.define('eduweb_utils.AutoCompleteInput', function (require) {
         inputElement.addEventListener("input", showSuggestions);
         inputElement.addEventListener("click", showSuggestions);
         document.addEventListener("click", clickOutInput);
-    };
+    }
 });
 
 odoo.define('eduweb_utils.numbers', require => {
