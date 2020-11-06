@@ -23,15 +23,12 @@ class WalletCategory(models.Model):
 
     @api.depends('name', 'account_id', 'company_id')
     def _compute_pos_payment_method_id(self):
-        wallet_without_accounts = self.search([('account_id', '=', False)])
-        if wallet_without_accounts:
-            raise ValidationError(_('You need to set up an account to the next wallet before installing pos_wallet: %') %
-                                  wallet_without_accounts.mapped(lambda wl: _('Wallet[%s]: %s, Company[%]: %s') % (wl.id, wl.name, wl.company_id.id, wl.company_id.name)))
         for wallet_category_id in self:
+            receivable_account_id = wallet_category_id.account_id or wallet_category_id.company_id.account_default_pos_receivable_account_id
             if not wallet_category_id.pos_payment_method_id:
                 wallet_category_id.pos_payment_method_id = self.env['pos.payment.method'].create({
                     'name': wallet_category_id.name,
-                    'receivable_account_id': wallet_category_id.account_id.id,
+                    'receivable_account_id': receivable_account_id.id,
                     'company_id': wallet_category_id.company_id.id,
 
                     'is_cash_count': False,
@@ -42,7 +39,7 @@ class WalletCategory(models.Model):
             else:
                 wallet_category_id.pos_payment_method_id.update({
                     'name': wallet_category_id.name,
-                    'receivable_account_id': wallet_category_id.account_id.id,
+                    'receivable_account_id': receivable_account_id.id,
                     'company_id': wallet_category_id.company_id.id,
                     })
 
