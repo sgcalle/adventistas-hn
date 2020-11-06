@@ -26,7 +26,6 @@ odoo.define('pos_wallet.owl.components', function (require) {
         mounted() {
             super.mounted();
 
-
             const partnerSuggestions = []
             _.each(this.props.pos.db.partner_by_id, partner_id => {
                 partnerSuggestions.push({
@@ -78,6 +77,7 @@ odoo.define('pos_wallet.owl.components', function (require) {
 
     // Payment
     class WalletPaymentCardCompoment extends Component {
+
         constructor(parent, props) {
             super(parent, props);
             console.log('Constructor WalletPaymentCardCompoment');
@@ -88,27 +88,64 @@ odoo.define('pos_wallet.owl.components', function (require) {
                 id: walletCategory.id,
                 name: walletCategory.name,
                 payment_amount: 0,
+                categoryList: [],
             });
 
             this.walletCategory = useState(walletCategory);
         }
 
+        walletInput = useRef("walletInput");
         dispatch = useDispatch(store);
         todos = useStore(state => state.todos, {store});
         client_wallet_balances = useStore(state => state.client_wallet_balances, {store});
 
+        get matchCategory() {
+            const orderCategoryIds = _.chain(this.state.categoryList).map(categ => {
+                const categoryIds = this.getCategParents(categ);
+                return categoryIds;
+            }).reduce((memo, newArray) => memo.concat(newArray), []).value();
+            return this.props.walletCategory.is_default_wallet || (orderCategoryIds.indexOf(this.props.walletCategory.category.id) !== -1);
+        }
+
+        getCategParents(categ) {
+            return (categ.parent ? this.getCategParents(categ.parent) : []).concat([categ.id])
+        }
+
+        patched(snapshot) {
+            const res = super.patched(snapshot)
+            if (!this.matchCategory) {
+                const paymentAmount = 0;
+                this.state.payment_amount = paymentAmount;
+                this.trigger('pos-wallet-card-input', {
+                    paymentAmount,
+                    walletCategory: this.walletCategory,
+                });
+            }
+            return res
+        }
+
         triggerInputAction(event) {
-            const paymentAmount = parseFloat(event.currentTarget.value);
-            this.state.payment_amount = paymentAmount;
-            this.trigger('pos-wallet-card-input', {
-                paymentAmount,
-                walletCategory: this.walletCategory,
-            });
+            const decimals = ((window.posmodel && window.posmodel.currency) ? window.posmodel.currency.decimals : 2) || 2;
+            let paymentAmount = verifyInputNumber(this.walletInput.el, decimals);
+
+            if (this.client_wallet_balances[this.state.id] - paymentAmount < -Math.abs(this.props.walletCategory.credit_limit)) {
+                paymentAmount = this.client_wallet_balances[this.state.id] - Math.abs(this.props.walletCategory.credit_limit);
+            }
+            if (this.matchCategory) {
+                this.state.payment_amount = paymentAmount;
+                this.walletInput.el.value = paymentAmount
+                this.trigger('pos-wallet-card-input', {
+                    paymentAmount,
+                    walletCategory: this.walletCategory,
+                });
+            } else {
+                this.state.payment_amount = 0;
+            }
         }
     }
 
     class PosWalletPaymentSTComponent extends Component {
-        static props = ['pos', 'height'];
+        static props = ['pos', 'height', 'categoryList'];
 
         spaceTree = useRef('spaceTree');
 
@@ -121,10 +158,26 @@ odoo.define('pos_wallet.owl.components', function (require) {
                 const walletCategory = this.props.pos.chrome.call('WalletService', 'getWalletById', walletId);
                 wallets.push(walletCategory);
             });
+
             this.state = useState({
                 wallets,
             });
+        }
 
+        willUpdateProps(nextProps) {
+            const result = super.willUpdateProps(nextProps);
+
+            if (Object.hasOwnProperty.call(nextProps, 'categoryList')) {
+                const categoryList = nextProps.categoryList;
+                for (const children in this.__owl__.children) {
+                    if (Object.hasOwnProperty.call(this.__owl__.children, children)) {
+                        this.__owl__.children[children].state.categoryList = categoryList;
+                    }
+                }
+            }
+
+            console.log(result)
+            return result;
         }
 
         getOrderWalletPayment() {
@@ -250,7 +303,10 @@ odoo.define('pos_wallet.owl.components', function (require) {
                 onCreateLabel: (label, node) => {
                     label.id = node.id;
                     const walletCategory = this.props.pos.chrome.call('WalletService', 'getWalletById', node.data.id);
-                    const walletPaymentCard = new WalletPaymentCardCompoment(this, {walletCategory});
+                    const walletPaymentCard = new WalletPaymentCardCompoment(this, {
+                        walletCategory,
+                        categoryList: this.props.categoryList
+                    });
 
                     this.wallet_cards.push(walletPaymentCard);
 
@@ -293,6 +349,7 @@ odoo.define('pos_wallet.owl.components', function (require) {
         state = useState({
             show: false,
             button_label: this.button_labels.show,
+            categoryList: [],
         });
 
         payWithWallet(orderWalletPayments) {
@@ -341,10 +398,16 @@ odoo.define('pos_wallet.owl.components', function (require) {
             this.state.button_label = this.state.show ? this.button_labels.hide : this.button_labels.show;
 
             if (this.state.show) {
+                this.updateCategoryList();
                 this.el.classList.remove('payment-wallet-dashboard--hidden');
             } else {
+                this.state.categoryList = [];
                 this.el.classList.add('payment-wallet-dashboard--hidden');
             }
+        }
+
+        updateCategoryList() {
+            this.state.categoryList = _.map(this.props.pos.get_order().orderlines.models, ol => ol.product.categ);
         }
     }
 

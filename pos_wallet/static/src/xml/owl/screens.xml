@@ -7,8 +7,10 @@
         <div class="body">
             <div class="label">Amount:</div>
             <input class="payment-amount"
-                   type="number"
-                   t-model.number="state.payment_amount"
+                   type="text"
+                   t-att-value="state.payment_amount"
+                   t-att-disabled="!matchCategory"
+                   t-ref="walletInput"
                    t-on-input="triggerInputAction"/>
             <table class="wallet-balances">
                 <tr>
@@ -32,11 +34,12 @@
             <h1>Wallet payment dashboard</h1>
             <button t-on-click="toggleShow(!state.show)"><t t-esc="state.button_label"/></button>
         </div>
-        <PosWalletPaymentSTComponent pos="props.pos"/>
+        <PosWalletPaymentSTComponent pos="props.pos" categoryList="state.categoryList"/>
     </div>
 
     <div t-name="PosWalletPaymentSTComponent">
         <div>
+            <h1>categories: <t t-esc="props.categoryList"/></h1>
             <button t-on-click="payWithWallet">Make payment</button>
         </div>
         <div class="pos_wallet_payment_space_tree" t-attf-id="pos_wallet_payment_space_tree-{{ __owl__.id }}"
@@ -54,9 +57,15 @@
                 </div>
 
                 <div>
-                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('student')" id="input_select_pos_filter--student"/><label for="input_select_pos_filter--student">Students</label>
-                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_invoices')" id="input_select_pos_filter--invoices"/><label for="input_select_pos_filter--invoices">Invoices</label>
-                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_unpaid_invoices')" id="input_select_pos_filter--due-invoices"/><label for="input_select_pos_filter--due-invoices">Due invoices</label>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('student')"
+                           id="input_select_pos_filter--student"/><label for="input_select_pos_filter--student">
+                    Students</label>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_invoices')"
+                           id="input_select_pos_filter--invoices"/><label for="input_select_pos_filter--invoices">
+                    Invoices</label>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_unpaid_invoices')"
+                           id="input_select_pos_filter--due-invoices"/><label
+                        for="input_select_pos_filter--due-invoices">Due invoices</label>
                 </div>
 
                 <t t-if="partner.id">
