@@ -53,6 +53,12 @@
                            placeholder="Client name, id, email, barcode..."/>
                 </div>
 
+                <div>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('student')" id="input_select_pos_filter--student"/><label for="input_select_pos_filter--student">Students</label>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_invoices')" id="input_select_pos_filter--invoices"/><label for="input_select_pos_filter--invoices">Invoices</label>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_unpaid_invoices')" id="input_select_pos_filter--due-invoices"/><label for="input_select_pos_filter--due-invoices">Due invoices</label>
+                </div>
+
                 <t t-if="partner.id">
                     <div class="clientlist-screen">
                         <div class="client-picture">

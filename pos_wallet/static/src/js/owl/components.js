@@ -18,26 +18,51 @@ odoo.define('pos_wallet.owl.components', function (require) {
     class PosWalletPartnerScreenComponent extends Component {
         static props = ['pos'];
 
+        state = useState({
+            autoCompleteInput: {}
+        })
         partner = useStore(state => state.current_client, {store});
 
         mounted() {
             super.mounted();
 
-            const testSuggestions = []
+
+            const partnerSuggestions = []
             _.each(this.props.pos.db.partner_by_id, partner_id => {
-                testSuggestions.push({
+                partnerSuggestions.push({
                     search: this.props.pos.db._partner_search_string(partner_id),
                     label: partner_id.name,
+                    data: {
+                        partner: partner_id
+                    },
                     dataset: {
                         'id': partner_id.id,
                     },
                     onclick: event => {
                         this.props.pos.get_order().set_client(partner_id);
-                    }
+                    },
                 })
             })
 
-            new AutoCompleteInput(this.el.querySelector('.client_selection__input'), testSuggestions);
+            this.state.autoCompleteInput = new AutoCompleteInput({
+                inputElement: this.el.querySelector('.client_selection__input'),
+                suggestionList: partnerSuggestions,
+                filters: {
+                    'student': function (content) {
+                        return content.data.partner.person_type === 'student';
+                    },
+                    'has_invoices': function (content) {
+                        return content.data.partner.pos_wallet_has_invoice;
+                    },
+                    'has_unpaid_invoices': function (content) {
+                        return content.data.partner.pos_wallet_has_unpaid_invoice;
+                    },
+                }
+            });
+        }
+
+        toggleStudentFilter() {
+            this.state.autoCompleteInput.toggleFilter('student');
         }
 
         btnLoadWalletPopup() {

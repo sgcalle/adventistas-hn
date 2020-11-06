@@ -15,6 +15,17 @@ class ResPartner(models.Model):
     pos_session_wallet_load_ids = fields.One2many('pos_wallet.wallet.load', 'partner_id')
     pos_session_wallet_payment_ids = fields.One2many('pos_wallet.wallet.payment', 'partner_id')
 
+    # It's just a prefix pos_wallet to avoid conflict with other modules
+    pos_wallet_has_invoice = fields.Boolean(store=True, compute='_compute_wallet_boolean_fields', default=False)
+    pos_wallet_has_unpaid_invoice = fields.Boolean(store=True, compute='_compute_wallet_boolean_fields', default=False)
+
+    @api.depends('invoice_ids')
+    def _compute_wallet_boolean_fields(self):
+        for partner_id in self.filtered(lambda partner: partner.invoice_ids.filtered(lambda inv: inv.state == 'posted')):
+            invoices = partner_id.invoice_ids.filtered(lambda inv: inv.state == 'posted')
+            partner_id.pos_wallet_has_invoice = bool(invoices)
+            partner_id.pos_wallet_has_unpaid_invoice = bool(invoices.filtered(lambda inv: inv.invoice_payment_state and inv.invoice_payment_state != 'paid' or inv.amount_residual > 0))
+
     @api.depends('invoice_ids', 'pos_session_wallet_load_ids', 'pos_session_wallet_payment_ids', 'pos_order_ids')
     def _compute_json_dict_wallet_amounts(self):
         super(ResPartner, self)._compute_json_dict_wallet_amounts()
