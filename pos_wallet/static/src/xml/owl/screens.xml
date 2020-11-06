@@ -76,7 +76,7 @@
                         </div>
                     </div>
                     <div class="clientlist-screen">
-                        <div class="client-name">
+                        <div class="client-name font-small-client-title">
                             <t t-if="partner" t-esc="partner.name"/>
                             <t t-else="">Customer</t>
                         </div>
