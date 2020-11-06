@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from odoo import fields, models, api
+from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 import json
 import typing
@@ -23,6 +23,10 @@ class WalletCategory(models.Model):
 
     @api.depends('name', 'account_id', 'company_id')
     def _compute_pos_payment_method_id(self):
+        wallet_without_accounts = self.search([('account_id', '=', False)])
+        if wallet_without_accounts:
+            raise ValidationError(_('You need to set up an account to the next wallet before installing pos_wallet: %') %
+                                  wallet_without_accounts.mapped(lambda wl: _('Wallet[%s]: %s, Company[%]: %s') % (wl.id, wl.name, wl.company_id.id, wl.company_id.name)))
         for wallet_category_id in self:
             if not wallet_category_id.pos_payment_method_id:
                 wallet_category_id.pos_payment_method_id = self.env['pos.payment.method'].create({
