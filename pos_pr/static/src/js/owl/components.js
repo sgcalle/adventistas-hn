@@ -93,6 +93,11 @@ odoo.define('pos_pr.owl.components', function (require) {
 
     class PosPRDiscountRow extends Component {
         static props = ['pos', 'paymentRegister', 'posPrState'];
+
+        updateDiscount(event) {
+            const decimals = ((this.pos && this.pos.currency) ? this.pos.currency.decimals : 2) || 2;
+            this.props.posPrState.selectedInvoice.discount_amount = verifyInputNumber(event.currentTarget, decimals);
+        }
     }
 
     class PosPRPaymentList extends Component {

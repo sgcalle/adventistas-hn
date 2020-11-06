@@ -375,7 +375,8 @@
                     <input class=" form-select w-100 numeric-input"
                            type="text" step="0.01" mix="0"
                            name="input_payment_discount"
-                           t-model.trim.number="props.posPrState.selectedInvoice.discount_amount"
+                           t-att-value="props.posPrState.selectedInvoice.discount_amount"
+                           t-on-input="updateDiscount"
                     />
                 </div>
             </td>
