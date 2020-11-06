@@ -242,15 +242,14 @@ odoo.define('pos_pr.owl.components', function (require) {
 
         getInvoiceChange(invoice) {
             const invoiceExpectedDueAmount = invoice.amount_residual - this.getInvoiceTotalPayment(invoice);
-            invoice.discount_amount = invoice.discount_amount || 0;
-            return (invoiceExpectedDueAmount - invoice.discount_amount) < 0 ? -(invoiceExpectedDueAmount - invoice.discount_amount) : 0;
+            const discount_amount = invoice.discount_amount || invoice.last_discount_amount || 0;
+            return (invoiceExpectedDueAmount - discount_amount) < 0 ? -(invoiceExpectedDueAmount - discount_amount) : 0;
         }
 
         getInvoiceTotalPayment(invoice) {
             if (invoice) {
                 const paymentsList = this.state.invoicePayments[invoice.id];
                 if (paymentsList) {
-                    console.log('Total Payments: ' + paymentsList);
                     return _.reduce(paymentsList, (memo, value) => memo + (value || 0), 0);
                 }
             }
@@ -278,7 +277,6 @@ odoo.define('pos_pr.owl.components', function (require) {
                 this.state.selectedInvoiceAddress = this.invoiceAddressList.length ? this.invoiceAddressList[0] : {};
                 this.previousPartner = this.state.partner;
             }
-            console.log('this.state.partner.name: ' + this.state.partner.name);
         }
 
         // Methods
