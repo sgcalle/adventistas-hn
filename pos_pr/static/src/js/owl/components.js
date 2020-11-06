@@ -322,7 +322,7 @@ odoo.define('pos_pr.owl.components', function (require) {
                     'name': this.props.pos.generateNextPaymentGroupNumber(),
                     'invoice_payment_ids': paymentClone,
                     'payment_change': this.changeAmount,
-                    'partner_id': this.state.partner.person_type === 'student' ? this.props.pos.db.partner_by_id[this.state.selectedInvoiceAddressId] : this.state.partner,
+                    'partner_id': this.state.partner.person_type === 'student' ? this.state.selectedInvoiceAddress : this.state.partner,
                     'pos_session_id': this.props.pos.pos_session,
                     'date': moment().format('YYYY-MM-DD HH:mm:ss'),
                 });
@@ -475,7 +475,7 @@ odoo.define('pos_pr.owl.components', function (require) {
             const surcharge = new SurchargeInvoice;
             surcharge.date = moment().format('YYYY-MM-DD HH:mm:ss');
             surcharge.pos_session_id = this.props.pos.pos_session.id;
-            surcharge.partner_id = this.state.partner.person_type === 'student' ? this.props.pos.db.partner_by_id[this.state.selectedInvoiceAddressId] : this.state.partner;
+            surcharge.partner_id = this.state.partner.person_type === 'student' ? this.state.selectedInvoiceAddress : this.state.partner;
             surcharge.free_of_surcharge = 0;
             surcharge.amount = 0;
             // surcharge.free_of_surcharge = (this.free_of_surcharge[this.partner_id.id] || 0) || 0;
