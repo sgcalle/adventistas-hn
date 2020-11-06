@@ -129,11 +129,14 @@ class TestWallet(TransactionCase):
             'journal_id': default_journal_id,
             'partner_id': self.test_partner.id,
             'payment_type': 'inbound',
+            'partner_type': 'customer',
             'wallet_id': wallet_categ_id,
         }
 
     def _create_payment(self, payment_amount: float = 0.0, wallet_categ_id: int = False):
-        return self.env['account.payment'].create(self._build_payment_params(payment_amount, wallet_categ_id))
+        payment_id = self.env['account.payment'].create(self._build_payment_params(payment_amount, wallet_categ_id))
+        payment_id.post()
+        return payment_id
 
     def _get_partner_wallet_balances_dict(self):
         return self.test_partner.get_wallet_balances_dict(self.wallet_list.ids)
