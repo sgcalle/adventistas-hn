@@ -51,7 +51,7 @@
         <div class='subwindow-container'>
             <div class='subwindow-container-fix pos_wallet'>
                 <div class="autocomplete">
-                    <input type="text" class="client_selection__input"
+                    <input type="text" id="client_selection__input" class="client_selection__input"
                            placeholder="Client name, id, email, barcode..."/>
                 </div>
 
