@@ -19,6 +19,7 @@ odoo.define('wallet.services.WalletService', function (require) {
             'parent_wallet_count',
             'child_wallet_ids',
             'is_default_wallet',
+            'credit_limit'
         ],
         domain: []
     }).then(wallets => {
@@ -40,6 +41,7 @@ odoo.define('wallet.services.WalletService', function (require) {
                         .setParentWalletCount(walletOdoo.parent_wallet_count)
                         .setChildWallets(walletOdoo.child_wallet_ids)
                         .setIsDefaultWallet(walletOdoo.is_default_wallet)
+                        .setCreditLimit(walletOdoo.credit_limit)
                         .build();
                     this.wallets.push(wallet);
                     this.wallets_by_id[wallet.id] = wallet;

@@ -12,6 +12,7 @@ odoo.define('wallet.models', function (require) {
             parent_wallet_count,
             child_wallet_ids,
             is_default_wallet,
+            credit_limit,
         ) {
             this.id = id;
             this.name = name;
@@ -20,6 +21,7 @@ odoo.define('wallet.models', function (require) {
             this.parent_wallet_count = parent_wallet_count;
             this.child_wallet_ids = child_wallet_ids;
             this.is_default_wallet = is_default_wallet;
+            this.credit_limit = credit_limit;
         }
     });
 
@@ -73,6 +75,11 @@ odoo.define('wallet.models', function (require) {
             return this;
         },
 
+        setCreditLimit: function (credit_limit) {
+            this.credit_limit = credit_limit;
+            return this;
+        },
+
         build: function() {
             return new WalletCategory(
                 this.id,
@@ -82,6 +89,7 @@ odoo.define('wallet.models', function (require) {
                 this.parent_wallet_count,
                 this.child_wallet_ids,
                 this.is_default_wallet,
+                this.credit_limit
             )
         }
     });
