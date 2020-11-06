@@ -13,7 +13,7 @@ class WalletCategory(models.Model):
     is_default_wallet = fields.Boolean(compute='_compute_is_default_wallet', store=True)
 
     journal_category_id = fields.Many2one("account.journal", domain="[('type', '=', 'sale')]")
-    account_id = fields.Many2one("account.account", "Account", required=True, default=lambda self: int(self.env["ir.config_parameter"].get_param('wallet.default_account_id')))
+    account_id = fields.Many2one("account.account", "Account")
     category_id = fields.Many2one("product.category", "Category", required=True)
     product_id = fields.Many2one("product.product", "Product", readonly=True)
     credit_limit = fields.Float("Credit limit", default=lambda self: float(self.env["ir.config_parameter"].get_param('wallet.wallet_credit_limit')))
