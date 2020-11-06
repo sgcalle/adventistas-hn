@@ -39,7 +39,6 @@
 
     <div t-name="PosWalletPaymentSTComponent">
         <div>
-            <h1>categories: <t t-esc="props.categoryList"/></h1>
             <button t-on-click="payWithWallet">Make payment</button>
         </div>
         <div class="pos_wallet_payment_space_tree" t-attf-id="pos_wallet_payment_space_tree-{{ __owl__.id }}"
