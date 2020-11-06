@@ -454,7 +454,8 @@ odoo.define('pos_pr.owl.components', function (require) {
                                 invoice,
                                 paymentMethod,
                                 paymentAmount: 0,
-                                paymentDiscount: parseFloat(invoice.discount_amount)
+                                paymentDiscount: parseFloat(invoice.discount_amount),
+                                invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
                             }
                         );
                         // invoice.amount_residual -= invoice.discount_amount;
