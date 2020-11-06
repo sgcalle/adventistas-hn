@@ -242,7 +242,8 @@ odoo.define('pos_pr.owl.components', function (require) {
 
         getInvoiceChange(invoice) {
             const invoiceExpectedDueAmount = invoice.amount_residual - this.getInvoiceTotalPayment(invoice);
-            return invoiceExpectedDueAmount < 0 ? -invoiceExpectedDueAmount : 0;
+            invoice.discount_amount = invoice.discount_amount || 0;
+            return (invoiceExpectedDueAmount - invoice.discount_amount) < 0 ? -(invoiceExpectedDueAmount - invoice.discount_amount) : 0;
         }
 
         getInvoiceTotalPayment(invoice) {
@@ -312,6 +313,7 @@ odoo.define('pos_pr.owl.components', function (require) {
 
         validatePayments() {
             const invoicePayments = this._createInvoicePayments();
+            this.state.selectedInvoice = {};
 
             if (invoicePayments && invoicePayments.length > 0) {
 
