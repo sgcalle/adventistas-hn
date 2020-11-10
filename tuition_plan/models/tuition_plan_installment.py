@@ -48,7 +48,6 @@ class TuitionPlanInstallment(models.Model):
             for product in installment.product_ids:
                 order_line_ids.append((0, 0, product._prepare_order_line_vals()))
             vals = {
-                "company_id": plan.company_id.id,
                 "invoice_date": installment.date,
                 "invoice_date_due": invoice_due_date,
                 "separate_by_financial_responsability": True,
@@ -60,7 +59,7 @@ class TuitionPlanInstallment(models.Model):
                 "period_end": installment._get_end_date(),
                 "use_student_payment_term": plan.use_student_payment_term,
             }
-            make_sale = make_sale_obj.with_context(active_ids=students.ids).create(vals)
+            make_sale = make_sale_obj.with_context(allowed_company_ids=[plan.company_id.id], active_ids=students.ids).create(vals)
             for sale in make_sale.sales_ids:
                 if plan.discount_ids:
                     children = sale.family_id.member_ids\
