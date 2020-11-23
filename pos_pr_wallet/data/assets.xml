@@ -7,7 +7,6 @@
                 <link rel="stylesheet" href="/pos_pr_wallet/static/src/css/pos_pr_wallet.css"/>
 
                 <!-- OWl -->
-                <script type="text/javascript" src="/pos_pr_wallet/static/src/js/owl/init_owl.js" />
                 <script type="text/javascript" src="/pos_pr_wallet/static/src/js/owl/components.js" />
 
                 <!--Script-->

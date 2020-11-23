@@ -10,7 +10,7 @@
     'website': "http://www.Eduwebgroup.com",
 
     'category': 'Invoicing',
-    'version': '0.15',
+    'version': '0.15.1',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'school_base', 'sale', ],

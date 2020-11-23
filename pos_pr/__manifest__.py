@@ -54,7 +54,10 @@
 
         'static/src/xml/pos_view.xml',
         'static/src/xml/payment_register/components/invoice_list.xml',
-        'static/src/xml/payment_register/components/dashboard.xml',
+        # 'static/src/xml/payment_register/components/dashboard.xml',
+
+        # owl Views
+        'static/src/xml/owl/screens.xml'
     ],
 
     'post_init_hook': 'default_settings_values',

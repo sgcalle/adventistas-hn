@@ -160,32 +160,41 @@ class ResPartner(models.Model):
 
         return move_ids
 
-    def load_wallet_with_payments(self, payment_ids: list, wallet_id: int, amount: float):
+    def load_wallet_with_payments(self, payment_ids: list, wallet_id: int, amount: float, **kwargs):
         self.ensure_one()
         o_payment_ids = self.env["account.payment"].browse(payment_ids)
         payments_receivable_line_ids = o_payment_ids.move_line_ids.filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
-        move_id = self.load_wallet_with_line_ids(payments_receivable_line_ids.ids, wallet_id, amount)
+        move_id = self.load_wallet_with_line_ids(**{
+            'line_ids': payments_receivable_line_ids.ids,
+            'wallet_id': wallet_id,
+            'amount': amount,
+            **kwargs
+            })
         return move_id
 
-    def load_wallet_with_line_ids(self, line_ids: list, wallet_id: int, amount: float):
+    def load_wallet_with_line_ids(self, line_ids, wallet_id, amount, **kwargs):
         self.ensure_one()
+
+        kwargs['partner_id'] = kwargs['partner_id'] if 'partner_id' in kwargs and kwargs['partner_id'] else self
+        kwargs['move_params'] = kwargs['move_params'] if 'move_params' in kwargs and kwargs['move_params'] else {}
 
         if line_ids:
             o_line_ids = self.env["account.move.line"].browse(line_ids).filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
             o_wallet_id = self.env["wallet.category"].browse([wallet_id])
             company_id = self.env.company
-            move_id = self._create_wallet_move(o_wallet_id, amount, company_id)
+            move_id = self._create_wallet_move(o_wallet_id, amount, company_id, **kwargs)
             move_id.post()
             move_id.js_assign_outstanding_line(o_line_ids.ids)
             return move_id
 
-    def _create_wallet_move(self, wallet_id, amount, company_id):
-        return self.env['account.move'].create(self._build_wallet_move_params(amount, company_id, wallet_id))
+    def _create_wallet_move(self, *args, **kwargs):
+        return self.env['account.move'].create(self._build_wallet_move_params(*args, **kwargs))
 
-    def _build_wallet_move_params(self, amount, company_id, wallet_id):
+    @api.model
+    def _build_wallet_move_params(self, wallet_id, amount, company_id, **kwargs):
         return {
             "type": "out_invoice",
-            "partner_id": self.id,
+            "partner_id": kwargs['partner_id'].id,
             "journal_id": wallet_id.journal_category_id.id,
             "invoice_line_ids": [(0, 0, {
                 "product_id": wallet_id.product_id.id,
@@ -193,7 +202,7 @@ class ResPartner(models.Model):
                 "quantity": 1,
                 'company_id': company_id.id
                 })],
-            "company_id": company_id.id
+            "company_id": company_id.id, **kwargs['move_params']
             }
 
     def _compute_total_wallet_balance(self):

@@ -4,7 +4,6 @@ odoo.define('pos_pr.owl.components', function (require) {
     /*
     * This is used to create all OWL components
     * */
-    require('pos_pr.owl.init');
     const {InvoicePayment, PaymentGroup, SurchargeInvoice} = require("pos_pr.models");
 
     // const {PosWalletPaymentSTComponent, WalletPaymentCardCompoment} = require('pos_wallet.owl.components');

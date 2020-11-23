@@ -8,7 +8,6 @@
 
                 <!-- OWL Assets -->
                 <script type="text/javascript" src="/pos_wallet/static/src/js/owl/store.js"/>
-                <script type="text/javascript" src="/pos_wallet/static/src/js/owl/init_owl.js"/>
                 <script type="text/javascript" src="/pos_wallet/static/src/js/owl/components.js"/>
 
                 <!--Style-->

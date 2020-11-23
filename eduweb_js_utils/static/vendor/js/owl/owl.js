@@ -2666,7 +2666,8 @@
         priority: 80,
         atNodeEncounter({ ctx, value, node, qweb }) {
             const slotKey = ctx.generateID();
-            ctx.addLine(`const slot${slotKey} = this.constructor.slots[context.__owl__.slotId + '_' + '${value}'];`);
+            const valueExpr = value.match(INTERP_REGEXP) ? ctx.interpolate(value) : `'${value}'`;
+            ctx.addLine(`const slot${slotKey} = this.constructor.slots[context.__owl__.slotId + '_' + ${valueExpr}];`);
             ctx.addIf(`slot${slotKey}`);
             let parentNode = `c${ctx.parentNode}`;
             if (!ctx.parentNode) {
@@ -4439,6 +4440,23 @@
         Component.scheduler = scheduler;
         return Component;
     })();
+    async function mount(C, params) {
+        const { env, props, target } = params;
+        let origEnv = C.hasOwnProperty("env") ? C.env : null;
+        if (env) {
+            C.env = env;
+        }
+        const component = new C(null, props);
+        if (origEnv) {
+            C.env = origEnv;
+        }
+        else {
+            delete C.env;
+        }
+        const position = params.position || "last-child";
+        await component.mount(target, { position });
+        return component;
+    }
 
     /**
      * The `Context` object provides a way to share data between an arbitrary number
@@ -5333,15 +5351,16 @@
     exports.core = core;
     exports.hooks = hooks$1;
     exports.misc = misc;
+    exports.mount = mount;
     exports.router = router;
     exports.tags = tags;
     exports.useState = useState$1;
     exports.utils = utils;
 
 
-    __info__.version = '1.0.13';
-    __info__.date = '2020-10-26T07:32:11.977Z';
-    __info__.hash = 'd615ffd';
+    __info__.version = '1.1.0';
+    __info__.date = '2020-10-31T10:20:25.242Z';
+    __info__.hash = '8920139';
     __info__.url = 'https://github.com/odoo/owl';
 
 

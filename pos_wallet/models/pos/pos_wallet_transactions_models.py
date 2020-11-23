@@ -142,19 +142,3 @@ class PosWalletWalletLoad(models.Model):
             line_ids = wallet_line_ids.filtered(lambda line_id: line_id.pos_wallet_category_id == wallet_category_id)
             amount = sum(self.filtered(lambda wallet_load_id: wallet_load_id.wallet_category_id == wallet_category_id).mapped('amount'))
             partner_id.load_wallet_with_line_ids(line_ids=line_ids.ids, wallet_id=wallet_category_id.id, amount=amount)
-
-
-class PosWalletWalletPayment(models.Model):
-    _name = 'pos_wallet.wallet.payment'
-
-    name = fields.Char()
-    date = fields.Datetime()
-    amount = fields.Float()
-    reconciled = fields.Boolean()
-
-    partner_id = fields.Many2one('res.partner', required=True)
-    wallet_category_id = fields.Many2one('wallet.category', required=True)
-    payment_method_id = fields.Many2one('pos.payment.method', required=True)
-
-    pos_session_id = fields.Many2one('pos.session', required=True)
-    currency_id = fields.Many2one('res.currency', required=True, related='pos_session_id.currency_id')

@@ -2,7 +2,7 @@
 <templates>
 
     <!-- Payment Screen -->
-    <div t-name="WalletPaymentCardCompoment" class="wallet-payment-card">
+    <div owl="1" t-name="WalletPaymentCardCompoment" class="wallet-payment-card">
         <div class="header"><t t-esc="state.name"/></div>
         <div class="body">
             <div class="label">Amount:</div>
@@ -25,19 +25,20 @@
             </table>
         </div>
     </div>
-    <div t-name="PosWalletPaymentScreenComponent"
+    <div owl="1" t-name="PosWalletPaymentScreenComponent"
          class="pos_wallet payment-wallet-dashboard--hidden payment-wallet-dashboard"
          t-on-pos-wallet-make-payment="payWithWallet"
          t-on-show="toggleShow"
     >
         <div style="height: 150px;">
             <h1>Wallet payment dashboard</h1>
+<!--            <Queso/>-->
             <button t-on-click="toggleShow(!state.show)"><t t-esc="state.button_label"/></button>
         </div>
         <PosWalletPaymentSTComponent pos="props.pos" categoryList="state.categoryList"/>
     </div>
 
-    <div t-name="PosWalletPaymentSTComponent">
+    <div owl="1" t-name="PosWalletPaymentSTComponent">
         <div>
             <button t-on-click="payWithWallet">Make payment</button>
         </div>
@@ -47,7 +48,7 @@
 
 
     <!-- Partner Screen -->
-    <div t-name="PosWalletPartnerScreenComponent" class='subwindow collapsed'>
+    <div owl="1" t-name="PosWalletPartnerScreenComponent" class='subwindow collapsed'>
         <div class='subwindow-container'>
             <div class='subwindow-container-fix pos_wallet'>
                 <div class="autocomplete">

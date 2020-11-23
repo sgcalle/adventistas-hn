@@ -2,7 +2,6 @@ odoo.define("pos_pr_wallet.owl.components", function (require) {
     /*
     * This is used to create all OWL components
     * */
-    require('pos_pr_wallet.owl.init');
 
     const {PosWalletPaymentSTComponent, WalletPaymentCardCompoment} = require('pos_wallet.owl.components');
     const {Component, useState} = owl;

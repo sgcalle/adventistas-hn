@@ -1,6 +1,6 @@
 <templates>
 
-    <div t-name="LoadWalletWithChangePopupApp" class="wallet-change-popup-container">
+    <div owl="1" t-name="LoadWalletWithChangePopupApp" class="wallet-change-popup-container">
         <table class="wallet-change-table">
             <thead>
                 <tr>
@@ -44,7 +44,7 @@
 
         </table>
     </div>
-    <tr t-name="LoadWalletWithChangePopupRow" class="wallet-row">
+    <tr owl="1" t-name="LoadWalletWithChangePopupRow" class="wallet-row">
         <td>
             <select>
                 <!--                    <option t-foreach="widget.wallets" t-as="wallet"><t t-esc="wallet.name"/></option>-->
@@ -81,7 +81,7 @@
     </tr>
 
     <!-- Load wallet -->
-    <div t-name="PayInvoiceWithWalletPopupApp">
+    <div owl="1" t-name="PayInvoiceWithWalletPopupApp">
         <t t-set="walletPaymentTotal" t-value="0"/>
         <h1> Amount due: <t t-if="paymentRegister.invoicePaymentRegisterScreen and paymentRegister.invoicePaymentRegisterScreen.getExpectedAmountDue"
                             t-esc="paymentRegister.format_currency(paymentRegister.invoicePaymentRegisterScreen.getExpectedAmountDue(paymentState.invoice) - walletPaymentTotal)"/></h1>
@@ -92,7 +92,7 @@
                 height="630"/>
     </div>
 
-    <t t-name="PayWithWalletButton">
+    <t owl="1" t-name="PayWithWalletButton">
         <button class="button" t-on-click="payWithWalletPopup">Pay with wallet</button>
     </t>
 

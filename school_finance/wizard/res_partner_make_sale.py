@@ -15,16 +15,11 @@ class ResPartnerMakeSale(models.TransientModel):
     _name = "res.partner.make.sale"
     _description = "Make a sale for a partner"
 
-    order_line_ids = fields.Many2many(
-        "sale.order.line", string="Order Lines", ondelete="cascade")
-    journal_id = fields.Many2one("account.journal", string="Journal", domain=[
-        ("type", "=", "sale")])
-    company_id = fields.Many2one(
-        'res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
-    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account',
-                                          check_company=True,  # Unrequired company
-                                          domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
-                                          help="The analytic account related to a sales order.")
+    order_line_ids = fields.Many2many("sale.order.line", string="Order Lines", ondelete="cascade")
+    journal_id = fields.Many2one("account.journal", string="Journal", domain=[("type", "=", "sale")])
+    company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
+    analytic_account_id = fields.Many2one('account.analytic.account', 'Analytic Account', check_company=True,  # Unrequired company
+                                          domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="The analytic account related to a sales order.")
 
     # Invoice Date
     invoice_date_due = fields.Datetime(string='Due Date')
@@ -38,21 +33,17 @@ class ResPartnerMakeSale(models.TransientModel):
 
     separate_by_financial_responsability = fields.Boolean(default=True)
     sales_ids = fields.Many2many('sale.order')
-    payment_term_id = fields.Many2one(string="Payment Terms",
-                                      comodel_name="account.payment.term",
-                                      help="Payment term for the generated order.")
-    use_student_payment_term = fields.Boolean(string="Use Student Payment Terms",
-                                              help="If checked, the sale order payment terms is taken from the student if any.")
+    payment_term_id = fields.Many2one(string="Payment Terms", comodel_name="account.payment.term", help="Payment term for the generated order.")
+    use_student_payment_term = fields.Boolean(string="Use Student Payment Terms", help="If checked, the sale order payment terms is taken from the student if any.")
 
     # partner_ids
     @api.model
     def create(self, values):
-        if not "sales_ids" in values:
+        if "sales_ids" not in values:
             values["sales_ids"] = list()
 
         if type(values) == dict and "order_line_ids" in values:
-            partner_ids = self.env["res.partner"].browse(
-                self.env.context.get("active_ids", []))
+            partner_ids = self.env["res.partner"].browse(self.env.context.get("active_ids", []))
 
             SaleOrderEnv = self.env["sale.order"]
             sale_id = self.env["sale.order"]
@@ -68,33 +59,20 @@ class ResPartnerMakeSale(models.TransientModel):
                 sale_pricelist = pricelist_id if pricelist_id else partner_pricelist
                 partner_responsible_categ = {category.category_id for category in partner_id.family_res_finance_ids}
 
-                for line in line_ids:
-                    if line[0] == 0:
-                        line_dict = line[2]
-
-                        product_id = ProductEnv.browse([line_dict["product_id"]])
-                        parent_category_id = product_id.categ_id
-
-                        while parent_category_id:
-                            if parent_category_id in partner_responsible_categ:
-                                break
-                            parent_category_id = parent_category_id.parent_id
-
-                        if not parent_category_id:
-                            raise UserError(_("%s doesn't have a responsible family for %s")
-                                            % (partner_id.name, product_id.categ_id.complete_name))
-
                 if partner_id.person_type == 'student' and values["separate_by_financial_responsability"]:
 
                     # We build several sale order depending on
-
                     for family_id in partner_id.family_ids:
                         sale_dict = dict()
+
+                        if not family_id.invoice_address_id:
+                            raise UserError(_("The student (%s[%s])'s family %s[%s] doesn't have an invoice address!") % (partner_id.name, partner_id.id, family_id.name, family_id.id))
+
                         sale_dict["partner_id"] = family_id.invoice_address_id.id
                         sale_dict["student_id"] = partner_id.id
                         sale_dict["family_id"] = family_id.id
 
-                        order_line = list()
+                        order_line = []
 
                         for line in line_ids:
                             if line[0] == 0:
@@ -102,13 +80,19 @@ class ResPartnerMakeSale(models.TransientModel):
                                 # We just clone it
                                 line_dict = dict(line[2])
 
-                                if line_dict["display_type"] == 'line_section':
-                                    order_line.append((0, 0, line_dict))
-                                    continue
+                                product_id = ProductEnv.browse([line_dict["product_id"]])
+                                parent_category_id = product_id.categ_id
 
-                                percent_sum = sum(
-                                    [category.percent for category in partner_id.family_res_finance_ids if
-                                     category.category_id == parent_category_id and category.family_id == family_id])
+                                while parent_category_id:
+                                    if parent_category_id in partner_responsible_categ:
+                                        break
+                                    parent_category_id = parent_category_id.parent_id
+
+                                if not parent_category_id:
+                                    raise UserError(_("%s[%s] doesn't have a responsible family for %s") % (partner_id.name, partner_id.id, product_id.categ_id.complete_name))
+
+                                percent_sum = sum([category.percent for category in partner_id.family_res_finance_ids if
+                                                   category.category_id == parent_category_id and category.family_id == family_id])
                                 percent_sum /= 100
 
                                 line_dict["price_unit"] *= percent_sum
@@ -133,7 +117,7 @@ class ResPartnerMakeSale(models.TransientModel):
                             "period_start": values["period_start"],
                             "period_end": values["period_end"],
                             "pricelist_id": sale_pricelist,
-                        })
+                            })
                         sales = sales + sale_id
                 else:
                     sale_id = SaleOrderEnv.create({
@@ -148,17 +132,15 @@ class ResPartnerMakeSale(models.TransientModel):
                         "period_start": values["period_start"],
                         "period_end": values["period_end"],
                         "pricelist_id": sale_pricelist,
-                    })
+                        })
                 sales = sales + sale_id
 
             if sales:
                 for sale in sales:
-                    if values[
-                        "use_student_payment_term"] and sale.student_id and sale.student_id.property_payment_term_id:
+                    if values["use_student_payment_term"] and sale.student_id and sale.student_id.property_payment_term_id:
                         sale.payment_term_id = sale.student_id.property_payment_term_id.id
                         sale.invoice_date_due = False
-                values["sales_ids"].append((6, 0, sales.ids))
-            # del values["order_line_ids"]
+                values["sales_ids"].append((6, 0, sales.ids))  # del values["order_line_ids"]
 
         # We need to stop order_lines from being created
         # because it give us error, they need a sale.order to be created
@@ -178,4 +160,4 @@ class ResPartnerMakeSale(models.TransientModel):
             'type': 'ir.actions.act_window',
             "domain": [("id", "in", self.sales_ids.ids)],
             'target': 'current',
-        }
+            }

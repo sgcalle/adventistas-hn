@@ -16,7 +16,7 @@
 
     'data': ['data/assets.xml', ],
 
-    'qweb': ['static/src/xml/screens.xml', ],
+    'qweb': ['static/src/xml/screens.xml', 'static/src/xml/owl/screens.xml'],
 
     'installable': True,
     'auto_install': True,

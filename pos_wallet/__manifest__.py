@@ -29,6 +29,7 @@
         'static/src/xml/notification_bar_templates.xml',
 
         'static/src/xml/pos/reports/load_wallet_reports.xml',
+        'static/src/xml/owl/screens.xml',
     ],
 
     'installable': True,

@@ -5,8 +5,8 @@
   right: 0;
   bottom: 0;
   margin: auto;
-  width: 1000px;
-  height: 800px;
+  width: calc(100% - 4em);
+  height: calc(100% - 4em);
   text-align: center;
   font-size: 20px;
   font-weight: bold;

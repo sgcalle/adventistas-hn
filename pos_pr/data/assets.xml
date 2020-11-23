@@ -9,7 +9,6 @@
 
                 <!--///////////Scripts///////////-->
                 <!-- Owl -->
-                <script type="text/javascript" src="/pos_pr/static/src/js/owl/init_owl.js"/>
                 <script type="text/javascript" src="/pos_pr/static/src/js/owl/components.js"/>
 
 

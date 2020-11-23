@@ -19,7 +19,7 @@ class WalletCategory(models.Model):
     credit_limit = fields.Float("Credit limit", default=lambda self: float(self.env["ir.config_parameter"].get_param('wallet.wallet_credit_limit')))
     product_external_relation_id = fields.Char(related="product_id.categ_id.external_relation_id")
     parent_wallet_id = fields.Many2one('wallet.category', compute='_compute_parent_wallet', compute_sudo=True, store=True)
-    child_wallet_ids = fields.One2many('wallet.category', 'parent_wallet_id',store=True)
+    child_wallet_ids = fields.One2many('wallet.category', 'parent_wallet_id', store=True)
     parent_wallet_count = fields.Integer(compute='_compute_parent_wallet', compute_sudo=True)
 
     @api.depends('category_id', 'company_id')
@@ -48,25 +48,39 @@ class WalletCategory(models.Model):
         rslt = super().default_get(vals + ['company_id'])
         return rslt
 
-    def get_wallet_amount(self, partner_id, wallet_category_id=False):
-
+    # Used for API compatibility
+    def _parse_get_wallet_amount_params(self, partner_id, wallet_category_id):
         if type(partner_id) == int:
             partner_id = self.env["res.partner"].browse(partner_id)
-
         if type(wallet_category_id) == int:
             wallet_category_id = self.env["wallet.category"].browse([wallet_category_id])
         elif not wallet_category_id:
             wallet_category_id = self
+        return partner_id, wallet_category_id
 
+    def get_wallet_amount(self, partner_id, wallet_category_id=False):
+        partner_id, wallet_category_id = self._parse_get_wallet_amount_params(partner_id, wallet_category_id)
+        return self._get_wallet_amount(partner_id, wallet_category_id)
+
+    def _get_wallet_amount(self, partner_id, wallet_category_id):
         if wallet_category_id:
-            wallet_moves = self.env["account.move"].search([("partner_id", "=", partner_id.id), ('state', '=', 'posted')]).invoice_line_ids.filtered(
-                lambda line_id: line_id.product_id in wallet_category_id.product_id)
+
+            wallet_moves = self._get_related_partner_wallet_moves(partner_id, wallet_category_id)
 
             if wallet_moves:
                 amount_total = sum(wallet_moves.mapped(lambda move_line: move_line.price_unit if move_line.move_id.type == 'out_invoice' else -move_line.price_unit))
                 return float_round(amount_total, precision_digits=self.company_id.currency_id.decimal_places)
 
         return 0
+
+    def _get_related_partner_wallet_moves(self, partner_id, wallet_category_id):
+        return self.env["account.move"].search(self._get_related_partner_wallet_moves_domain(partner_id)).invoice_line_ids.filtered(lambda line_id: line_id.product_id in wallet_category_id.product_id)
+
+    def _get_related_partner_wallet_moves_domain(self, partner_id):
+        return [
+            ("partner_id", "=", partner_id.id),
+            ('state', '=', 'posted'),
+        ]
 
     @api.model
     def create(self, values):

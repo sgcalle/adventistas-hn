@@ -38,8 +38,10 @@ class SchoolFinance(models.Model):
                                       compute="compute_sc_invoice_ids", store=True,
                                       string='Invoice lines', readonly=True, domain=[('type', '=', 'out_refund')])
 
+    related_families_by_inv_address_ids = fields.One2many('res.partner', 'invoice_address_id')
+
     @api.onchange('family_ids')
-    @api.depends('family_ids')
+    @api.depends('family_ids', 'family_ids.invoice_address_id')
     def compute_student_invoice_address_ids(self):
         for partner in self:
             partner.student_invoice_address_ids = partner.family_ids.mapped('invoice_address_id')

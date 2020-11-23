@@ -1,6 +1,5 @@
 odoo.define('pos_wallet.owl.components', function (require) {
 
-    require('pos_wallet.owl.init');
 
     // OWL
     const {Component} = owl;
@@ -274,7 +273,7 @@ odoo.define('pos_wallet.owl.components', function (require) {
 
                 // To center the whole thing
                 offsetX: offsetX,
-                offsetY: this.header_heigth / 2,
+                offsetY: (this.header_heigth / 2) - 50,
 
                 constrained: false,
                 //set node and edge styles
