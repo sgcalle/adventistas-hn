@@ -36,8 +36,10 @@ class CustomerPortal(CustomerPortal):
             "plaintext2html": plaintext2html,
         }
         res = self._get_page_view_values(canteen_order, access_token, values, "my_canteen_orders_history", True, **kwargs)
-        res["prev_record"] = res["prev_record"] and res["prev_record"].replace("/orders/","/canteen_order/")
-        res["next_record"] = res["next_record"] and res["next_record"].replace("/orders/","/canteen_order/")
+        if res.get("prev_record"):
+            res["prev_record"] = res["prev_record"] and res["prev_record"].replace("/orders/","/canteen_order/")
+        if res.get("next_record"):
+            res["next_record"] = res["next_record"] and res["next_record"].replace("/orders/","/canteen_order/")
         return res
 
     @http.route(["/my/canteen_order/", "/my/canteen_order/page/<int:page>"], type="http", auth="user", website=True)
