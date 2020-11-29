@@ -8,8 +8,8 @@
         <field name="arch" type="xml">
 
             <button name='action_show_payments_list' position="before">
-                <field name="id" invisible="1"/>
                 <field name="invoice_payment_move_id" invisible="1"/>
+                <field name="id" invisible="1"/>
                 <button name='%(action_invoice_payment)d' type="action" class="oe_stat_button" icon="fa-dollar"
                         context="{'search_default_pos_session_id': id, 'search_default_group_by_payment_method_id': 1}">
                     <field name="invoice_payment_amount" widget="statinfo" string="Inv. Payments"/>
@@ -28,11 +28,11 @@
         <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
         <field name="arch" type="xml">
             <button name='action_show_payments_list' position="before">
-                <field name="id" invisible="1"/>
                 <button name='%(action_invoice_payment)d' type="action" class="oe_stat_button" icon="fa-dollar"
                         context="{'search_default_pos_session_id': id, 'search_default_group_by_payment_method_id': 1}">
                     <field name="invoice_payment_amount" widget="statinfo" string="Inv. Payments"/>
                 </button>
+                <field name="id" invisible="1"/>
             </button>
         </field>
     </record>
