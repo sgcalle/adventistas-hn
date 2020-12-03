@@ -9,7 +9,7 @@ class AccountBankStmtCashWizard(models.Model):
 
     @api.model
     def default_get(self, fields):
-        """ Pass payment_method and computed_amunt to the new lines """
+        """ Pass payment_method and computed_amount to the new lines """
         vals = super().default_get(fields)
 
         if "cashbox_lines_ids" in vals:

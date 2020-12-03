@@ -28,9 +28,8 @@ def sort_invoice_line_by_wallet_hierarchy(invoice_line_id):
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    json_dict_wallet_amounts = fields.Char(compute="_compute_json_dict_wallet_amounts")
-    total_wallet_balance = fields.Monetary(string="Total Wallet Balance",
-        compute="_compute_total_wallet_balance")
+    json_dict_wallet_amounts = fields.Char(compute="_compute_json_dict_wallet_amounts", store=True)
+    total_wallet_balance = fields.Monetary(string="Total Wallet Balance", compute="_compute_total_wallet_balance")
 
     def execute_autoclear(self):
         """ Just simulate a facts autoclear """
@@ -45,9 +44,12 @@ class ResPartner(models.Model):
 
         partner_ids_list = self.mapped('id')
 
-        partner_ids_with_payments = self.env["account.payment"].search([("partner_id", 'in', partner_ids_list), ("unpaid_amount", ">", 0), ("state", "in", ["posted", "sent", "reconciled"])]).mapped('partner_id.id')
-        partner_ids_with_credit_notes = self.env["account.move"].search([("partner_id", 'in', partner_ids_list), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_refund")]).mapped('partner_id.id')
-        partner_ids_with_invoices = self.env["account.move"].search([("partner_id", 'in', partner_ids_list), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_invoice")]).mapped('partner_id.id')
+        partner_ids_with_payments = self.env["account.payment"].search(
+            [("partner_id", 'in', partner_ids_list), ("unpaid_amount", ">", 0), ("state", "in", ["posted", "sent", "reconciled"])]).mapped('partner_id.id')
+        partner_ids_with_credit_notes = self.env["account.move"].search(
+            [("partner_id", 'in', partner_ids_list), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_refund")]).mapped('partner_id.id')
+        partner_ids_with_invoices = self.env["account.move"].search(
+            [("partner_id", 'in', partner_ids_list), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_invoice")]).mapped('partner_id.id')
 
         partner_ids_to_apply_autoclear = self.browse(set(partner_ids_with_payments + partner_ids_with_credit_notes + partner_ids_with_invoices))
         # partner_ids_to_apply_autoclear = self.browse(set(partner_ids_with_credit_notes))
@@ -72,14 +74,16 @@ class ResPartner(models.Model):
 
     def get_unreconciled_credit_notes(self):
         self.ensure_one()
-        credit_note_ids = self.env["account.move"].search([("partner_id", "=", self.id), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_refund")])
+        credit_note_ids = self.env["account.move"].search(
+            [("partner_id", "=", self.id), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_refund")])
         return credit_note_ids
 
     def autopay_invoices_with_wallet(self):
         # Yes, I KNOW THAT I CAN USE INVOICE_IDS! But, in the future, we are going to make
         # the domain more complex and even with invoices that haven't their partner as customer
         for partner_id in self:
-            move_ids = self.env["account.move"].search([("partner_id", "=", partner_id.id), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_invoice")])
+            move_ids = self.env["account.move"].search(
+                [("partner_id", "=", partner_id.id), ("invoice_payment_state", "!=", "paid"), ("state", "=", "posted"), ("type", "=", "out_invoice")])
             move_ids_wallet_amounts = move_ids.get_available_wallet_amounts()
             if move_ids_wallet_amounts:
                 partner_wallet_amounts = move_ids_wallet_amounts[partner_id]
@@ -98,7 +102,8 @@ class ResPartner(models.Model):
                 domain_payment_wallet_id = wallet_id.id
                 if wallet_id == default_wallet_id:
                     domain_payment_wallet_id = False
-                payment_ids = self.env["account.payment"].search([("partner_id", "=", self.id), ("unpaid_amount", ">", 0), ("wallet_id", "=", domain_payment_wallet_id), ("state", "in", ["posted", "sent", "reconciled"]), ])
+                payment_ids = self.env["account.payment"].search(
+                    [("partner_id", "=", self.id), ("unpaid_amount", ">", 0), ("wallet_id", "=", domain_payment_wallet_id), ("state", "in", ["posted", "sent", "reconciled"]), ])
                 if payment_ids:
                     payment_grouped[wallet_id] = payment_ids
 
@@ -138,18 +143,15 @@ class ResPartner(models.Model):
             if credit_note_amount_to_pay:
                 company_id = self.company_id or self.env.user.company_id
 
-                move_id = self.env["account.move"].create({"type": "out_invoice", "partner_id": self.id, "journal_id": wallet_id.journal_category_id.id,
-                                                           "invoice_line_ids": [(0, 0, {"product_id": wallet_id.product_id.id, "price_unit": credit_note_amount_to_pay, "quantity": 1, })], "company_id": company_id.id})
-
+                move_id = self._create_wallet_move(wallet_id=wallet_id, amount=credit_note_amount_to_pay, company_id=company_id)
                 move_id.post()
+
                 move_receivable_line_id = move_id.line_ids.filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
 
                 credit_note_receivable_line_id = credit_note_id.line_ids.filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
 
                 move_receivable_line_id.account_id = credit_note_receivable_line_id.account_id
-
-                for receivable_line_id in credit_note_receivable_line_id:
-                    move_id.js_assign_outstanding_line(receivable_line_id.id)
+                move_id.js_assign_outstanding_line(credit_note_receivable_line_id.ids)
 
                 # We do round(round(amount, 2) - round(credit_note_amounts, 2), 2)
                 # to avoid 0.1 + 0.2 = 0.30000000000000004
@@ -158,30 +160,51 @@ class ResPartner(models.Model):
 
         return move_ids
 
-    def load_wallet_with_payments(self, payment_ids: list, wallet_id: int, amount: float):
+    def load_wallet_with_payments(self, payment_ids: list, wallet_id: int, amount: float, **kwargs):
+        self.ensure_one()
+        o_payment_ids = self.env["account.payment"].browse(payment_ids)
+        payments_receivable_line_ids = o_payment_ids.move_line_ids.filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
+        move_id = self.load_wallet_with_line_ids(**{
+            'line_ids': payments_receivable_line_ids.ids,
+            'wallet_id': wallet_id,
+            'amount': amount,
+            **kwargs
+            })
+        return move_id
+
+    def load_wallet_with_line_ids(self, line_ids, wallet_id, amount, **kwargs):
         self.ensure_one()
 
-        o_payment_ids = self.env["account.payment"].browse(payment_ids)
-        o_wallet_id = self.env["wallet.category"].browse([wallet_id])
+        kwargs['partner_id'] = kwargs['partner_id'] if 'partner_id' in kwargs and kwargs['partner_id'] else self
+        kwargs['move_params'] = kwargs['move_params'] if 'move_params' in kwargs and kwargs['move_params'] else {}
 
-        accountMoveEnv = self.env["account.move"]
-        move_ids = self.env["account.move"]
+        if line_ids:
+            o_line_ids = self.env["account.move.line"].browse(line_ids).filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
+            o_wallet_id = self.env["wallet.category"].browse([wallet_id])
+            company_id = self.env.company
+            move_id = self._create_wallet_move(o_wallet_id, amount, company_id, **kwargs)
+            move_id.post()
+            move_id.js_assign_outstanding_line(o_line_ids.ids)
+            return move_id
 
-        company_id = self.env.company
-        move_id = accountMoveEnv.create(
-            {"type": "out_invoice", "partner_id": self.id, "journal_id": o_wallet_id.journal_category_id.id, "invoice_line_ids": [(0, 0, {"product_id": o_wallet_id.product_id.id, "price_unit": amount, "quantity": 1, 'company_id': company_id.id})],
-             "company_id": company_id.id})
+    def _create_wallet_move(self, *args, **kwargs):
+        return self.env['account.move'].create(self._build_wallet_move_params(*args, **kwargs))
 
-        move_id.post()
+    @api.model
+    def _build_wallet_move_params(self, wallet_id, amount, company_id, **kwargs):
+        return {
+            "type": "out_invoice",
+            "partner_id": kwargs['partner_id'].id,
+            "journal_id": wallet_id.journal_category_id.id,
+            "invoice_line_ids": [(0, 0, {
+                "product_id": wallet_id.product_id.id,
+                "price_unit": amount,
+                "quantity": 1,
+                'company_id': company_id.id
+                })],
+            "company_id": company_id.id, **kwargs['move_params']
+            }
 
-        payments_receivable_line_ids = o_payment_ids.move_line_ids.filtered(lambda move_line_id: move_line_id.account_id.user_type_id.type == 'receivable')
-
-        for receivable_line_id in payments_receivable_line_ids:
-            move_id.js_assign_outstanding_line(receivable_line_id.id)
-
-        move_ids += move_id
-
-        return move_ids
     def _compute_total_wallet_balance(self):
         for partner in self:
             result = 0
@@ -189,6 +212,7 @@ class ResPartner(models.Model):
                 result += value
             partner.total_wallet_balance = result
 
+    @api.depends('invoice_ids')
     def _compute_json_dict_wallet_amounts(self):
         for partner_id in self:
             partner_id.json_dict_wallet_amounts = partner_id.get_wallet_balances_json([])
@@ -209,10 +233,11 @@ class ResPartner(models.Model):
         for wallet_category_id in wallet_category_ids:
             dict_wallet_amounts[wallet_category_id.id] = wallet_category_id.get_wallet_amount(self)
         return dict_wallet_amounts
+
     def action_open_wallet_history(self):
         self.ensure_one()
         action = self.env.ref("wallet.account_move_line_action_wallet_history").read()[0]
         wallets = self.env["wallet.category"].search([])
         products = wallets.mapped("product_id")
-        action["domain"] = [("partner_id","=",self.id),("product_id","in",products.ids)]
+        action["domain"] = [("partner_id", "=", self.id), ("product_id", "in", products.ids)]
         return action

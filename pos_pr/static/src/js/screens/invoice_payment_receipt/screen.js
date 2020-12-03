@@ -12,22 +12,37 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
         template: 'PosPr.InvoicePaymentReceiptScreenWidget',
         show: function (refresh, data) {
             this._super.apply(this, arguments);
+
+            this._render_change();
+
             const paymentGroup = this.pos.gui.get_current_screen_param('paymentGroup');
+            const invoiceAddress = this.pos.gui.get_current_screen_param('invoiceAddress');
+
             this.receipt_template = new reports.InvoicePaymentReceiptment(this, {
                 paymentGroup: paymentGroup,
-                customer: this.pos.get_client()
+                customer: invoiceAddress || this.pos.get_client(),
             }, false);
             this.receipt_template_copy = new reports.InvoicePaymentReceiptment(this, {
                 paymentGroup: paymentGroup,
-                customer: this.pos.get_client(),
+                customer: invoiceAddress || this.pos.get_client(),
                 copy: true,
             });
+
+            const changeValueEl = this.el.querySelector('.change-value');
+            if (changeValueEl) {
+                changeValueEl.innerText = this.format_currency(paymentGroup.payment_change);
+            }
 
             this.receipt_template.renderElement();
             this.receipt_template_copy.renderElement();
             this.cssPageRuleElement = this._create_css_page_rule();
             this.render_receipt();
             this.handle_auto_print();
+        },
+
+        _render_change: function (){
+            const change = this.pos.gui.get_current_screen_param('changeAmount') || 0;
+            this.el.querySelector('.change-value').innerText = this.format_currency(change);
         },
 
         hide: function () {
@@ -160,4 +175,8 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
         }
     });
     gui.define_screen({name: 'invoicePaymentReceipt', widget: InvoicePaymentReceiptScreenWidget});
+
+    return {
+        InvoicePaymentReceiptScreenWidget
+    }
 });

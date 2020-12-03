@@ -6,6 +6,18 @@
     width: 100%;
     line-height: 40px;
 
+    thead {
+        tr {
+            position: sticky;
+            top: 0;
+            height: 60px;
+
+            &.js_change {
+                top: 60px;
+            }
+        }
+    }
+
     th, td {
         padding: 0 8px;
     }
@@ -61,6 +73,7 @@
 
     .invoice-list__column-names {
         background: rgb(247, 247, 247);
+        box-shadow: 0 -10px 50px black;
     }
 
 }

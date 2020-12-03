@@ -43,20 +43,14 @@ odoo.define('pos_pr.components.reports', function (require) {
             this._super.apply(this, arguments);
 
             if (this.copy) {
-                const svg = document.createElement('div');
                 const copyText = _t('COPY');
-
-                svg.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="595.28px"' +
-                    'height="841.89px" viewBox="0 0 595.28 841.89" enable-background="new 0 0 595.28 841.89" xml:space="preserve">' +
-                    '<text fill="#009DE0" font-weight="bold" font-size="200" text-anchor="middle" transform="translate(350, 480) rotate(-45)">' + copyText + '</text>' +
-                    '</svg>';
-
-                const backgroundCopyImageSVG = `url(data:image/svg+xml;utf8,${svg.innerHTML})`;
-                console.log('backgroundCopyImageSVG: ' + backgroundCopyImageSVG);
-
-                this.$el.css({
-                    'background-url': backgroundCopyImageSVG
-                });
+                const svgTextImage = `<svg xmlns='http://www.w3.org/2000/svg' version='1.1'  x='0px' y='0px' width='595.28px' height='841.89px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><text fill='#009DE0' font-weight='bold' font-size='200' font-family="Arial, Helvetica, sans-serif" text-anchor='middle' transform='translate(350, 480) rotate(-45)'>${copyText}</text></svg>`;
+                const backgroundCopyImageSVG = `url(data:image/svg+xml;base64,${btoa(svgTextImage)})`;
+                this.el.style.setProperty('background-image', backgroundCopyImageSVG, 'important');
+                //
+                // this.$el.css({
+                //     'background-image': backgroundCopyImageSVG
+                // });
             }
         },
 
@@ -151,17 +145,9 @@ odoo.define('pos_pr.components.reports', function (require) {
         renderElement: function () {
             this._super.apply(this, arguments);
 
-            const svg = document.createElement('div');
             const copyText = _t('COPY');
-            svg.innerHTML = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="595.28px"' +
-                'height="841.89px" viewBox="0 0 595.28 841.89" enable-background="new 0 0 595.28 841.89" xml:space="preserve">' +
-                '<text fill="#009DE0" font-weight="bold" font-size="200" text-anchor="middle" transform="translate(350, 480) rotate(-45)">' + copyText + '</text>' +
-                '</svg>';
-            const backgroundCopyImageSVG = `url(data:image/svg+xml;utf8,${svg.innerHTML})`;
-            console.log('backgroundCopyImageSVG: ' + backgroundCopyImageSVG);
-            this.$el.find('.markwater').css({
-                'background-url': backgroundCopyImageSVG
-            });
+            const backgroundCopyImageSVG = `url(data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1'  x='0px' y='0px' width='595.28px' height='841.89px' viewBox='0 0 595.28 841.89' enable-background='new 0 0 595.28 841.89' xml:space='preserve'><text fill='#009DE0' font-weight='bold' font-size='200' text-anchor='middle' transform='translate(350, 480) rotate(-45)'>${copyText}</text></svg>)`;
+            this.el.style.setProperty('background-image', backgroundCopyImageSVG, 'important');
         }
 
         // _compute_invoice: function () {

@@ -43,9 +43,7 @@ class AccountCashboxLine(models.Model):
         """ Re Compute the converted currency """
         self.compute_currency()
         for cashbox_line in self:
-            cashbox_line.converted_amount = cashbox_line.currency_id.compute(cashbox_line.subtotal,
-                                                                             cashbox_line.cashbox_id.currency_id)\
-                                            or 0.0
+            cashbox_line.converted_amount = cashbox_line.currency_id.compute(cashbox_line.subtotal, cashbox_line.cashbox_id.currency_id) or 0.0
 
     @api.onchange("payment_method_id")
     def _onchange_payment_method_id(self):

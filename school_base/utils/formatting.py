@@ -1,8 +1,8 @@
-'''
+"""
 Created on Jan 28, 2020
 
 @author: LuisMora
-'''
+"""
 
 def format_name(first_name, middle_name, last_name):
 

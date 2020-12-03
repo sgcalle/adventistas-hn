@@ -8,6 +8,14 @@
         @import "layout/screen";
         @import "layout/invoice-list";
         @import "layout/payment-dashboard";
+        @import "layout/filter_screen";
+
+        @for $i from 1 through 100 {
+            .w-#{$i} {
+               width: percentage($i);
+            }
+        }
+
     }
 
     .invoice-receipt-screen, .surcharge-receipt-screen {

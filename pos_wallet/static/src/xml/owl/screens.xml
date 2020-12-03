@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+
+    <!-- Payment Screen -->
+    <div owl="1" t-name="WalletPaymentCardCompoment" class="wallet-payment-card">
+        <div class="header"><t t-esc="state.name"/></div>
+        <div class="body">
+            <div class="label">Amount:</div>
+            <input class="payment-amount"
+                   type="text"
+                   t-att-value="state.payment_amount"
+                   t-att-disabled="!matchCategory"
+                   t-ref="walletInput"
+                   t-on-input="triggerInputAction"/>
+            <table class="wallet-balances">
+                <tr>
+                    <td class="label">Final balance: </td>
+                    <td class="amount balance-amount"><t
+                            t-esc="client_wallet_balances[state.id] - state.payment_amount"/></td>
+                </tr>
+                <tr>
+                    <td class="label">Current balance: </td>
+                    <td class="amount current-amount"><t t-esc="client_wallet_balances[state.id]"/></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div owl="1" t-name="PosWalletPaymentScreenComponent"
+         class="pos_wallet payment-wallet-dashboard--hidden payment-wallet-dashboard"
+         t-on-pos-wallet-make-payment="payWithWallet"
+         t-on-show="toggleShow"
+    >
+        <div style="height: 150px;">
+            <h1>Wallet payment dashboard</h1>
+<!--            <Queso/>-->
+            <button t-on-click="toggleShow(!state.show)"><t t-esc="state.button_label"/></button>
+        </div>
+        <PosWalletPaymentSTComponent pos="props.pos" categoryList="state.categoryList"/>
+    </div>
+
+    <div owl="1" t-name="PosWalletPaymentSTComponent">
+        <div>
+            <button t-on-click="payWithWallet">Make payment</button>
+        </div>
+        <div class="pos_wallet_payment_space_tree" t-attf-id="pos_wallet_payment_space_tree-{{ __owl__.id }}"
+             t-ref="spaceTree"></div>
+    </div>
+
+
+    <!-- Partner Screen -->
+    <div owl="1" t-name="PosWalletPartnerScreenComponent" class='subwindow collapsed'>
+        <div class='subwindow-container'>
+            <div class='subwindow-container-fix pos_wallet'>
+                <div class="autocomplete">
+                    <input type="text" id="client_selection__input" class="client_selection__input"
+                           placeholder="Client name, id, email, barcode..."/>
+                </div>
+
+                <div>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('student')"
+                           id="input_select_pos_filter--student"/><label for="input_select_pos_filter--student">
+                    Students</label>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_invoices')"
+                           id="input_select_pos_filter--invoices"/><label for="input_select_pos_filter--invoices">
+                    Invoices</label>
+                    <input type="checkbox" t-on-click="state.autoCompleteInput.toggleFilter('has_unpaid_invoices')"
+                           id="input_select_pos_filter--due-invoices"/><label
+                        for="input_select_pos_filter--due-invoices">Due invoices</label>
+                </div>
+
+                <t t-if="partner.id">
+                    <div class="clientlist-screen">
+                        <div class="client-picture">
+                            <img alt="Partner logo" class="js-partner-image"
+                                 style="width: 64px; height: 64px; object-fit: cover;"
+                                 t-attf-src="/web/image?model=res.partner&amp;id={{ partner ? partner.id : ''}}&amp;field=image_128"/>
+                        </div>
+                    </div>
+                    <div class="clientlist-screen">
+                        <div class="client-name font-small-client-title">
+                            <t t-if="partner" t-esc="partner.name"/>
+                            <t t-else="">Customer</t>
+                        </div>
+                    </div>
+
+                    <button class="button-load-wallet" t-on-click="btnLoadWalletPopup">Load wallet</button>
+                </t>
+                <h2 t-else="">
+                    No customer selected
+                </h2>
+            </div>
+        </div>
+    </div>
+
+</templates>

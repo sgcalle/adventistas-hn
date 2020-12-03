@@ -58,7 +58,7 @@
             </header>
             <div class="row">
                 <t t-if="widget.customer">
-                    <div class="col-6 h2">
+                    <div class="col-12 h2">
                         <strong>Customer:</strong>
                         <t t-esc="widget.customer.name"/>
                     </div>
