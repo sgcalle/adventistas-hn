@@ -39,6 +39,7 @@ odoo.define("pos_pr.load_data.invoices", function (require) {
                 ["type", "=", "out_invoice"],
                 ["invoice_payment_state", "!=", "paid"],
                 ["state", "=", "posted"],
+                ["partner_id", "!=", false],
             ],
             order: [{name: 'invoice_date_due', asc: true}], //, function (name) { return {name: name}; }),
             loaded: function (self, invoices) {
