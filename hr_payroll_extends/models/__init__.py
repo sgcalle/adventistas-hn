@@ -14,3 +14,4 @@ from . import hr_savings_payment
 from . import hr_salary_rule
 from . import hr_contribution_bracket
 from . import hr_contribution_table
+from . import hr_payslip_employees
