@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="wallet_school.load_wallet_form" model="ir.ui.view">
+    <record id="load_wallet_form" model="ir.ui.view">
         <field name="name">load.wallet.wizard.inherit.school</field>
         <field name="model">load.wallet</field>
         <field name="inherit_id" ref="wallet.load_wallet_form"/>
@@ -16,7 +16,7 @@
 
             <field name="wallet_id" position="after">
                     <field name="student_invoice_address_ids" invisible="1"/>
-                    <field name="partner_person_type"/>
+                    <field name="partner_person_type" invisible="1"/>
                     <field name="invoice_address_id"
                            attrs="{'invisible': ['|', ('partner_person_type', '!=', 'student'), ('wallet_id', '=', False)],
                                    'required': ['|', ('partner_person_type', '==', 'student')]}"

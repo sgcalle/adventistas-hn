@@ -1,4 +1,4 @@
-odoo.define('pos_wallet_school.pos_model', function (require) {
+odoo.define('pos_school_wallet.pos_model', function (require) {
 
     const models = require("point_of_sale.models");
     // const rpc = require('web.rpc');

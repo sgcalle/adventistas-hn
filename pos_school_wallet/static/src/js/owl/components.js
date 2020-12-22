@@ -1,4 +1,4 @@
-odoo.define("pos_wallet_school.components", function (require) {
+odoo.define("pos_school_wallet.components", function (require) {
 
     const {PosWalletLoadWalletComponent, LoadWalletPopup} = require('pos_wallet.popups');
     const {useState, Component} = owl;
