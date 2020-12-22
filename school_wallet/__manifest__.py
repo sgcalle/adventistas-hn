@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Wallet School",
+    'name': "School Wallet",
 
     'summary': """Wallet to students""",
 
