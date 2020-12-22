@@ -24,7 +24,7 @@
 
     # always loaded
     'data': [
-
+        'views/account_move_views.xml',
         'wizard/load_wallet.xml',
         # 'wizard/pay_with_wallet.xml',
     ],

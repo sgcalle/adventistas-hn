@@ -152,12 +152,12 @@ class AccountMove(models.Model):
                                     _("You are trying to pay %s in %s when there is only %s available") % (
                                         amount, wallet_id.name, wallet_amount))
 
-                        credit_note_id = self.create({
-                            "type": "out_refund",
-                            "partner_id": partner_id,
-                            "journal_id": journal_id.id,
-                            "invoice_line_ids": invoice_line_ids,
-                        })
+                        credit_note_id = self.create(
+                            move_id.get_wallet_credit_note_values(
+                                partner_id,
+                                journal_id,
+                                invoice_line_ids)
+                            )
 
                         # We need to ensure that the credit note has the same receivable than the invoice
                         # So we force it
@@ -188,6 +188,16 @@ class AccountMove(models.Model):
                     _("[%s] Wallet will have a final amount of [%s]!. Credit limit: %s") % (
                         wallet_id.name, wallet_amount, wallet_id.credit_limit))
 
+
+    def get_wallet_credit_note_values(self, partner_id, journal_id, invoice_line_ids):
+        self.ensure_one()
+        return {
+            "type": "out_refund",
+            "partner_id": partner_id,
+            "journal_id": journal_id.id,
+            "invoice_line_ids": invoice_line_ids,
+        }
+
     def sort_by_setting_field(self):
         """ :return The moves sorted by a field setted in setting view """
         return self.sorted(lambda m: m.invoice_date_due or m.invoice_date)
@@ -208,7 +218,7 @@ class AccountMove(models.Model):
             looking_payment_wallet = wallet_id
             while due_amount > 0:
                 if looking_payment_wallet not in wallet_payment_dict_env:
-                    looking_payment_wallet = looking_wallet.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
+                    looking_payment_wallet = looking_wallet.get_wallet_by_category_id(looking_payment_wallet.category_id.parent_id)
                     continue
 
                 amount = wallet_payment_dict_env[looking_payment_wallet]
@@ -295,3 +305,8 @@ class AccountMove(models.Model):
                     break
                 looking_wallet = wallet_id.get_wallet_by_category_id(looking_wallet.category_id.parent_id)
         return dict(wallet_amount_to_apply)
+
+    def get_wallet_partner(self):
+        """ This is used to be inherited by school_walllet module """
+        self.ensure_one()
+        return self.partner_id

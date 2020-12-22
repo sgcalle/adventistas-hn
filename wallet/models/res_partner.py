@@ -207,10 +207,10 @@ class ResPartner(models.Model):
 
     def _compute_total_wallet_balance(self):
         for partner in self:
-            result = 0
-            for key, value in partner.get_wallet_balances_dict([]).items():
-                result += value
-            partner.total_wallet_balance = result
+            partner.total_wallet_balance = sum(partner
+                                               .get_wallet_balances_dict([])
+                                               .values()
+                                               )
 
     @api.depends('invoice_ids')
     def _compute_json_dict_wallet_amounts(self):
