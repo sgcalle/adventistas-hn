@@ -1,3 +1,14 @@
+/**
+ * 2020/12/23
+ * Note for this version
+ * This is a modified version taken from the ideas in
+ * the github issue #794: https://github.com/odoo/owl/issues/794
+ *
+ * The idea is to simulate a include, maybe someday I would make a pull request in the owl github
+ * But I need this ready now, so, I do not have time... Sorry Owl team.
+ * Modified by: Luis Malavé
+ */
+
 (function (exports) {
     'use strict';
 
@@ -1243,6 +1254,7 @@
 
     const patch = init([eventListenersModule, attrsModule, propsModule, classModule]);
 
+    let localStorage = null;
     const browser = {
         setTimeout: window.setTimeout.bind(window),
         clearTimeout: window.clearTimeout.bind(window),
@@ -1252,7 +1264,12 @@
         random: Math.random,
         Date: window.Date,
         fetch: (window.fetch || (() => { })).bind(window),
-        localStorage: window.localStorage,
+        get localStorage() {
+            return localStorage || window.localStorage;
+        },
+        set localStorage(newLocalStorage) {
+            localStorage = newLocalStorage;
+        },
     };
 
     /**
@@ -1367,6 +1384,7 @@
     const TRANSLATABLE_ATTRS = ["label", "title", "placeholder", "alt"];
     const lineBreakRE = /[\r\n]/;
     const whitespaceRE = /\s+/g;
+    const translationRE = /^(\s*)([\s\S]+?)(\s*)$/;
     const NODE_HOOKS_PARAMS = {
         create: "(_, n)",
         insert: "vn",
@@ -1722,7 +1740,8 @@
                     }
                     if (this.translateFn) {
                         if (node.parentNode.getAttribute("t-translation") !== "off") {
-                            text = this.translateFn(text);
+                            const match = translationRE.exec(text);
+                            text = match[1] + this.translateFn(match[2]) + match[3];
                         }
                     }
                     if (ctx.parentNode) {
@@ -3883,6 +3902,7 @@
                     if (!this.env.qweb) {
                         this.env.qweb = new QWeb();
                     }
+                    // TODO: remove this in owl 2.0
                     if (!this.env.browser) {
                         this.env.browser = browser;
                     }
@@ -3931,7 +3951,16 @@
                 if (constr.style) {
                     this.__applyStyles(constr);
                 }
+
+                // Setup suggested in git https://github.com/odoo/owl/issues/794
+                // Modified in 2020/23/12 By Luis Malavé
+                this.setup();
             }
+
+            // Setup suggested in git https://github.com/odoo/owl/issues/794
+            // Modified in 2020/23/12 By Luis Malavé
+            setup() { }
+
             /**
              * The `el` is the root element of the component.  Note that it could be null:
              * this is the case if the component is not mounted yet, or is destroyed.
@@ -4047,7 +4076,7 @@
                     message += `\nMaybe the DOM is not ready yet? (in that case, you can use owl.utils.whenReady)`;
                     throw new Error(message);
                 }
-                const fiber = new Fiber(null, this, false, target, position);
+                const fiber = new Fiber(null, this, true, target, position);
                 fiber.shouldPatch = false;
                 if (!__owl__.vnode) {
                     this.__prepareAndRender(fiber, () => { });
@@ -4563,16 +4592,6 @@
             __owl__.observer = new Observer();
             __owl__.observer.notifyCB = component.render.bind(component);
         }
-        const currentCB = __owl__.observer.notifyCB;
-        __owl__.observer.notifyCB = function () {
-            if (ctx.rev > mapping[id]) {
-                // in this case, the context has been updated since we were rendering
-                // last, and we do not need to render here with the observer. A
-                // rendering is coming anyway, with the correct props.
-                return;
-            }
-            currentCB();
-        };
         mapping[id] = 0;
         const renderFn = __owl__.renderFn;
         __owl__.renderFn = function (comp, params) {
@@ -4696,6 +4715,23 @@
         };
     }
     // -----------------------------------------------------------------------------
+    // "Builder" hooks
+    // -----------------------------------------------------------------------------
+    /**
+     * This hook is useful as a building block for some customized hooks, that may
+     * need a reference to the component calling them.
+     */
+    function useComponent() {
+        return Component.current;
+    }
+    /**
+     * This hook is useful as a building block for some customized hooks, that may
+     * need a reference to the env of the component calling them.
+     */
+    function useEnv() {
+        return Component.current.env;
+    }
+    // -----------------------------------------------------------------------------
     // useSubEnv
     // -----------------------------------------------------------------------------
     /**
@@ -4739,6 +4775,8 @@
         onWillStart: onWillStart,
         onWillUpdateProps: onWillUpdateProps,
         useRef: useRef,
+        useComponent: useComponent,
+        useEnv: useEnv,
         useSubEnv: useSubEnv,
         useExternalListener: useExternalListener
     });
@@ -5342,11 +5380,36 @@
     });
     const __info__ = {};
 
+
+    // Patch method suggested in git https://github.com/odoo/owl/issues/794 by the user ged-odoo
+    // Added in 2020/23/12 By Luis Malavé
+    // Code by ged-odoo
+    exports.patch = function (C, mixin) {
+        for (let k in mixin) {
+            const prevVal = C.prototype[k];
+            const newVal = mixin[k]
+            if (typeof newVal === "function") {
+                if (prevVal) {
+                    C.prototype[k] = function(...args) {
+                        this._super = prevVal.bind(this);
+                        return newVal.call(this, ...args);
+                    }
+                } else {
+                    C.prototype[k] = newVal
+                }
+            } else {
+                C[k] = newVal;
+            }
+        }
+    }
+
+
     exports.Component = Component;
     exports.Context = Context$1;
     exports.QWeb = QWeb;
     exports.Store = Store$1;
     exports.__info__ = __info__;
+    exports.browser = browser;
     exports.config = config;
     exports.core = core;
     exports.hooks = hooks$1;
@@ -5358,9 +5421,9 @@
     exports.utils = utils;
 
 
-    __info__.version = '1.1.0';
-    __info__.date = '2020-10-31T10:20:25.242Z';
-    __info__.hash = '8920139';
+    __info__.version = '1.2.0-eduweb_custom';
+    __info__.date = '2020-12-14T12:23:51.870Z';
+    __info__.hash = '144b323';
     __info__.url = 'https://github.com/odoo/owl';
 
 

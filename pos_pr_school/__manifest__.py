@@ -1,9 +1,9 @@
 {
-    'name': "Pos pr wallet",
+    'name': "Pos pr school",
 
-    'summary': """ Pos pr wallet """,
+    'summary': """ Pos pr school implementation""",
 
-    'description': """ Pos pr wallet implementation """,
+    'description': """ Pos pr school implementation """,
 
     'author': "Eduwebgroup",
 
@@ -12,7 +12,7 @@
     'category': 'Hidden',
     'version': '1.0.0',
 
-    'depends': ['pos_pr', 'pos_wallet', 'eduweb_js_utils'],
+    'depends': ['pos_pr', 'school_finance', 'eduweb_js_utils'],
 
     'data': ['data/assets.xml', ],
 

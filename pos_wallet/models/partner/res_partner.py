@@ -22,7 +22,7 @@ class ResPartner(models.Model):
     @api.depends('pos_session_rel_wallet_load_ids')
     def _compute_pos_wallet_rels(self):
         for partner in self:
-            partner.pos_session_rel_wallet_load_ids = partner.pos_session_rel_wallet_load_ids
+            partner.pos_session_rel_wallet_load_ids = partner.pos_session_wallet_load_ids
 
     @api.depends('invoice_ids')
     def _compute_wallet_boolean_fields(self):
@@ -39,7 +39,10 @@ class ResPartner(models.Model):
         wallet_balances_dict = super().get_wallet_balances_dict(wallet_id_list)
 
         for wallet_id, balance in wallet_balances_dict.items():
-            wallet_loads = self.pos_session_rel_wallet_load_ids.filtered(lambda wallet_load: wallet_load.pos_session_id.state in ['opened', 'closing_control'] and wallet_load.wallet_category_id.id == wallet_id)
+            wallet_loads = self.pos_session_rel_wallet_load_ids.filtered(
+                lambda wallet_load:
+                    wallet_load.pos_session_id.state != 'closed'
+                    and wallet_load.wallet_category_id.id == wallet_id)
 
             real_final_balance = balance + sum(wallet_loads.mapped('amount'))
             wallet_balances_dict[wallet_id] = real_final_balance

@@ -95,7 +95,6 @@ odoo.define('pos_wallet.owl.components', function (require) {
 
         walletInput = useRef("walletInput");
         dispatch = useDispatch(store);
-        todos = useStore(state => state.todos, {store});
         client_wallet_balances = useStore(state => state.client_wallet_balances, {store});
 
         get matchCategory() {
@@ -143,25 +142,42 @@ odoo.define('pos_wallet.owl.components', function (require) {
         }
     }
 
+    class WalletPaymentCardListComponent extends Component {
+        static props = ["walletCategory", "walletPaymentAmounts"]
+        static components = { WalletPaymentCardListComponent, WalletPaymentCardCompoment }
+
+        updateWalletPaymentAmount (walletPayment) {
+            const walletPaymentDetail = walletPayment.detail;
+            this.props.walletPaymentAmounts[walletPaymentDetail.walletCategory.id] = walletPaymentDetail.paymentAmount;
+        }
+
+    }
+
     class PosWalletPaymentSTComponent extends Component {
         static props = ['pos', 'height', 'categoryList'];
+        static components = { WalletPaymentCardListComponent, WalletPaymentCardCompoment }
 
         spaceTree = useRef('spaceTree');
 
         constructor(parent, props) {
             super(...arguments);
 
-            const posWalletsIds = this.props.pos.config.wallet_category_ids;
             const wallets = [];
-            _.each(posWalletsIds, walletId => {
-                const walletCategory = this.props.pos.chrome.call('WalletService', 'getWalletById', walletId);
-                wallets.push(walletCategory);
-            });
+            // _.each(posWalletsIds, walletId => {
+            //     const walletCategory = this.props.pos.chrome.call('WalletService', 'getWalletById', walletId);
+            //     wallets.push(walletCategory);
+            // });
 
+            const walletDefault = this.props.pos.chrome.call('WalletService', 'getDefaultWalletWithChildren');
+            this._removeNoPosWalletChildren(walletDefault);
             this.state = useState({
-                wallets,
+                walletChildren: walletDefault.children,
+                walletDefault: walletDefault,
+                wallets: wallets,
+                walletPaymentAmounts: {},
             });
         }
+
 
         willUpdateProps(nextProps) {
             const result = super.willUpdateProps(nextProps);
@@ -174,8 +190,6 @@ odoo.define('pos_wallet.owl.components', function (require) {
                     }
                 }
             }
-
-            console.log(result)
             return result;
         }
 
@@ -192,145 +206,26 @@ odoo.define('pos_wallet.owl.components', function (require) {
             return walletPaymentAmounts;
         }
 
-        mounted() {
-            super.mounted();
-
-            if (this.wallet_cards) {
-                _.each(this.wallet_cards, wallet_card => wallet_card.unmount());
-            }
-
-            this.wallet_cards = [];
-
-            if (this.props.height) {
-                const posWalletPaymentSpaceTree = this.spaceTree.el;
-                posWalletPaymentSpaceTree.style.height = (Number(this.props.height) || 0) + 'px';
-            }
-
-            this._generateSpaceTree();
-            this._refreshSpaceTree()
-        }
 
         payWithWallet() {
-            this.trigger('pos-wallet-make-payment', this.getOrderWalletPayment());
+            this.trigger('pos-wallet-make-payment', this.state.walletPaymentAmounts);
         }
 
-        /**
-         * @param {Number} height
-         */
-        resizeSpaceTreeHeight(height) {
-            this.st.canvas.resize(this.st.canvas.element.offsetWidth, height || 0)
-        }
-
-        /**
-         * @param walletId
-         * @private
-         */
-        _getWalletCategorySpaceTreeJSON(walletId) {
-
-            const walletCategory = this.props.pos.chrome.call('WalletService', 'getWalletById', walletId);
-
-            const walletCategoryJSON = {
-                id: `node-wallet-${this.__owl__.id}-${walletId}`,
-                name: walletCategory.name,
-                data: {
-                    id: walletId
-                }
-            };
-
-
-            if (walletCategory.child_wallet_ids) {
-                walletCategoryJSON.children = [];
-                _.each(walletCategory.child_wallet_ids, childWalletId => {
-                    if (_.find(this.props.pos.config.wallet_category_ids, id => id === childWalletId)) {
-                        walletCategoryJSON.children.push(this._getWalletCategorySpaceTreeJSON(childWalletId))
+        _removeNoPosWalletChildren(wallet) {
+            const posWalletsIds = this.props.pos.config.wallet_category_ids;
+            if (wallet.children) {
+                const newChildred = [];
+                for (let i = 0; i < wallet.children.length; i++) {
+                    const childWallet = wallet.children[i];
+                    if (posWalletsIds.indexOf(childWallet.id) !== -1) {
+                        newChildred.push(this._removeNoPosWalletChildren(childWallet));
                     }
-                });
+                }
+                wallet.children = newChildred;
             }
-
-            return walletCategoryJSON;
+            return wallet;
         }
 
-        /**
-         * @private
-         */
-        _generateSpaceTree() {
-            const posWalletPaymentSpaceTree = this.spaceTree.el;
-            $(posWalletPaymentSpaceTree).empty();
-
-            const level_count = Math.max.apply(Math, this.state.wallets.map(wallet => wallet.parent_wallet_count)) + 1
-
-            const nodeWidth = 250;
-            const levelDistance = 50;
-            const offsetX = ((level_count * nodeWidth)) / 2;
-
-            this.st = new $jit.ST({
-                //id of viz container element
-                injectInto: posWalletPaymentSpaceTree,
-                //set duration for the animation
-                duration: 0,
-                ////set distance between node and its children
-                levelDistance: levelDistance,
-
-                // To center the whole thing
-                offsetX: offsetX,
-                offsetY: (this.header_heigth / 2) - 50,
-
-                constrained: false,
-                //set node and edge styles
-                //set overridable=true for styling individual
-                //nodes or edges
-                Node: {
-                    width: nodeWidth,
-                    height: 140,
-                    type: 'rectangle',
-                    overridable: true
-                },
-
-                Edge: {
-                    type: 'line',
-                    overridable: true
-                },
-
-                /**
-                 * This method is called on DOM label creation.
-                 * Use this method to add event handlers and styles to
-                 * your node.
-                 * @param {HTMLElement} label
-                 * @param {Object} node
-                 * @private
-                 */
-                onCreateLabel: (label, node) => {
-                    label.id = node.id;
-                    const walletCategory = this.props.pos.chrome.call('WalletService', 'getWalletById', node.data.id);
-                    const walletPaymentCard = new WalletPaymentCardCompoment(this, {
-                        walletCategory,
-                        categoryList: this.props.categoryList
-                    });
-
-                    this.wallet_cards.push(walletPaymentCard);
-
-                    walletPaymentCard.env.store = store;
-                    walletPaymentCard.mount(label);
-                },
-            });
-            //load json data
-            this.st.loadJSON(this._getWalletsSpaceTreeJSON());
-        }
-
-        /**
-         * @private
-         */
-        _getWalletsSpaceTreeJSON() {
-            const defaultWallet = this.props.pos.chrome.call('WalletService', 'getDefaultWallet');
-            return this._getWalletCategorySpaceTreeJSON(defaultWallet.id);
-        }
-
-        _refreshSpaceTree() {
-            //compute node positions and layout
-            this.st.compute();
-            //optional: make a translation of the tree
-            this.st.select(this.st.root);
-        }
     }
 
     class PosWalletPaymentScreenComponent extends Component {
@@ -381,10 +276,10 @@ odoo.define('pos_wallet.owl.components', function (require) {
          */
         mounted() {
             super.mounted();
-            const spaceTreeHeight = document.querySelector('.product-list-scroller.touch-scrollable').offsetHeight
-            _.each(this.__owl__.children, child => {
-                child.resizeSpaceTreeHeight(spaceTreeHeight);
-            });
+            // const spaceTreeHeight = document.querySelector('.product-list-scroller.touch-scrollable').offsetHeight
+            // _.each(this.__owl__.children, child => {
+            //     child.resizeSpaceTreeHeight(spaceTreeHeight);
+            // });
         }
 
         /**
@@ -410,6 +305,30 @@ odoo.define('pos_wallet.owl.components', function (require) {
         }
     }
 
+    class PosWalletLoadWalletComponent extends Component {
+        static props = ['walletPopup', 'pos']
+
+        walletAmount = useRef("walletAmount");
+        state = useState({
+            paymentAmount: 0,
+            walletCategory: 0,
+            paymentMethod: 0,
+            currentPartner: {},
+        });
+
+        triggerInputAction(event) {
+            const decimals = ((window.posmodel && window.posmodel.currency) ? window.posmodel.currency.decimals : 2) || 2;
+            let paymentAmount = verifyInputNumber(this.walletAmount.el, decimals);
+            this.state.paymentAmount = paymentAmount;
+            event.currentTarget.value = paymentAmount;
+        }
+
+        get formIsValid() {
+            return this.state.paymentAmount && this.state.walletCategory && this.state.paymentMethod
+        }
+
+    }
+
     return {
         // Partner Screen
         WalletPaymentCardCompoment,
@@ -418,5 +337,7 @@ odoo.define('pos_wallet.owl.components', function (require) {
         // Payment Screen
         PosWalletPaymentSTComponent,
         PosWalletPaymentScreenComponent,
+        WalletPaymentCardListComponent,
+        PosWalletLoadWalletComponent,
     }
 });

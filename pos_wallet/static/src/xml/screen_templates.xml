@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template">
 
+    <t t-inherit="point_of_sale.ProductScreenWidget" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('subwindow-container-fix', 'pads')]/*[1]" position="before">
+            <div class="placeholder-LoadWalletWidget"/>
+        </xpath>
+    </t>
+
+    <t t-name="LoadWalletPadWidget">
+        <div class="o_pos_wallet_load_pad">
+            <button class="o_pos_wallet_load_button">Load wallet</button>
+        </div>
+    </t>
+
     <t t-name="PosWalletCustomerScreenWidget">
         <!--        <div class='subwindow collapsed'>-->
         <!--            <div class='subwindow-container'>-->
@@ -60,8 +72,8 @@
 
             <div class="input-with-label">
                 <label>Payment method</label>
-                <select class="form-select js_payment_method" t-model="state.paymentMethod">
-                    <t t-foreach="props.pos.payment_methods" t-as="payment_method">
+                <select class="form-select js_payment_method" t-model="state.paymentMethod" >
+                    <t t-foreach="props.pos.payment_methods" t-as="payment_method" t-key="'option-walletPopup-payment_method-'+payment_method.id">
                         <option t-att-value="payment_method.id"><t t-esc="payment_method.name"/></option>
                     </t>
                 </select>

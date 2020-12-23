@@ -12,7 +12,7 @@
     'category': 'Hidden',
     'version': '1.0.0',
 
-    'depends': ['school_wallet', 'pos_wallet', 'school_finance'],
+    'depends': ['school_wallet', 'pos_wallet', 'pos_school'],
 
     'data': ['data/assets.xml', ],
 

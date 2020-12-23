@@ -14,7 +14,7 @@ class AccountMove(models.Model):
             if self.family_id:
                 return self.family_id
             else:
-                super(AccountMove, self).get_wallet_partner()
+                return super(AccountMove, self).get_wallet_partner()
 
     def get_wallet_credit_note_values(self, partner_id, journal_id,
                                       invoice_line_ids):

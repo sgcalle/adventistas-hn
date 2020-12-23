@@ -12,10 +12,6 @@ odoo.define('pos_wallet.pos_wallet_methods', function (require) {
     models.load_fields('pos.session', ['pos_wallet_load_ids']);
     models.load_fields('res.company', ['city', 'street', 'parent_id']);
 
-    // const pendingWalletLoads = this.pos.db.load('pending_wallets_load', []);
-    // const pendingWalletLoads =
-    // const pendingWalletPayments = this.pos.db.load('pending_wallets_payments', []);
-
     models.PosModel = models.PosModel.extend({
         initialize: function () {
             PosModelSuper.prototype.initialize.apply(this, arguments);

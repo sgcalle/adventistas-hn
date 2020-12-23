@@ -54,6 +54,10 @@ odoo.define('wallet.services.WalletService', function (require) {
                 console.log(this.wallets);
             },
 
+            getDefaultWalletWithChildren: function () {
+                return this._getWalletWithChildren(this.default_wallet);
+            },
+
             getWallets: function () {
                 return this.wallets;
             },
@@ -72,6 +76,16 @@ odoo.define('wallet.services.WalletService', function (require) {
                 } else {
                     throw Error(_.str.sprintf(_t("Wallet with id: %s not found", wallet_id)));
                 }
+            },
+
+            _getWalletWithChildren: function (wallet) {
+                wallet.children = [];
+                _.each(wallet.child_wallet_ids, childWalletId => {
+                    const walletChild = this._getWalletWithChildren(this.getWalletById(childWalletId));
+                    wallet.children.push(walletChild)
+                });
+
+                return wallet;
             }
         });
 

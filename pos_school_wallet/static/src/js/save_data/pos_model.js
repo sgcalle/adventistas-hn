@@ -21,11 +21,11 @@ odoo.define('pos_school_wallet.pos_model', function (require) {
         _build_pos_wallet_wallet_load_params: function (params) {
             let paymentBuiltParams = PosModelSuper.prototype._build_pos_wallet_wallet_load_params.apply(this, arguments);
 
-            if (params.student.id) {
+            if (params.student && params.student.id) {
                 paymentBuiltParams.student_id = params.student.id
             }
 
-            if (params.family.id) {
+            if (params.family && params.family.id) {
                 paymentBuiltParams.family_id = params.family.id
             }
 
