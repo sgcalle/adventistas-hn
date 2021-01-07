@@ -106,7 +106,7 @@ odoo.define('pos_wallet.owl.components', function (require) {
             //     wallets.push(walletCategory);
             // });
 
-            const walletDefault = this.props.pos.chrome.call('WalletService', 'getDefaultWalletWithChildren');
+            const walletDefault = this.props.pos.chrome.call('WalletService', 'getDefaultWalletWithChildren', this.props.pos.company.id);
             this._removeNoPosWalletChildren(walletDefault);
             this.state = useState({
                 walletChildren: walletDefault.children,

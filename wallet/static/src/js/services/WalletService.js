@@ -19,7 +19,8 @@ odoo.define('wallet.services.WalletService', function (require) {
             'parent_wallet_count',
             'child_wallet_ids',
             'is_default_wallet',
-            'credit_limit'
+            'credit_limit',
+            'company_id',
         ],
         domain: []
     }).then(wallets => {
@@ -31,6 +32,7 @@ odoo.define('wallet.services.WalletService', function (require) {
                 this.wallets = [];
                 this.wallets_by_id = {};
                 this.default_wallet = {};
+                this.default_wallet_by_company = {};
 
                 _.each(wallets, walletOdoo => {
                     const wallet = new walletModels.WalletCategoryBuilder()
@@ -42,20 +44,22 @@ odoo.define('wallet.services.WalletService', function (require) {
                         .setChildWallets(walletOdoo.child_wallet_ids)
                         .setIsDefaultWallet(walletOdoo.is_default_wallet)
                         .setCreditLimit(walletOdoo.credit_limit)
+                        .setCompany({id: walletOdoo.company_id[0], name: walletOdoo.company_id[1]})
                         .build();
                     this.wallets.push(wallet);
                     this.wallets_by_id[wallet.id] = wallet;
 
                     if (wallet.is_default_wallet) {
                         this.default_wallet = wallet;
+                        this.default_wallet_by_company[wallet.company.id] = wallet;
                     }
 
                 });
                 console.log(this.wallets);
             },
 
-            getDefaultWalletWithChildren: function () {
-                return this._getWalletWithChildren(this.default_wallet);
+            getDefaultWalletWithChildren: function (company_id) {
+                return this._getWalletWithChildren((company_id && this.default_wallet_by_company[company_id]) || this.default_wallet);
             },
 
             getWallets: function () {
