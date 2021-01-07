@@ -27,6 +27,7 @@ odoo.define("pos_school_wallet.components", function (require) {
         selectInvoiceAddress(event) {
             const selectInvoiceAddressId = parseInt(event.currentTarget.value) || 0;
             this.schoolState.selectedInvoiceAddress = _.find(this.invoiceAddressList, invAddress => invAddress.id === selectInvoiceAddressId);
+            this.schoolState.selectedFamily = this.familyRelatedByInvoiceAddressList.length ? this.familyRelatedByInvoiceAddressList[0] : {};
         },
         selectFamily(event) {
             const selectedFamilyId = parseInt(event.currentTarget.value) || 0;

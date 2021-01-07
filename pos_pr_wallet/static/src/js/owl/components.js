@@ -2,6 +2,7 @@ odoo.define("pos_pr_wallet.owl.components", function (require) {
     /*
     * This is used to create all OWL components
     * */
+    const store = require('pos_wallet.owl.store');
 
     const {PosWalletPaymentSTComponent, WalletPaymentCardCompoment} = require('pos_wallet.owl.components');
     const {Component, useState} = owl;
@@ -60,15 +61,18 @@ odoo.define("pos_pr_wallet.owl.components", function (require) {
 
             // We create and add the payment line
             _.each(walletInvoicePayments, (paymentAmount, walletId) => {
-                const paymentMethod = this.props.pos.db.payment_method_by_wallet_id[parseInt(walletId)];
-                // this.paymentRegister._update_invoice_payment_amount(this.paymentState.invoice.id, paymentMethod.id, paymentAmount)
-                const payment = invoicePaymentRegisterScreen._createInvoicePaymentObject( {
-                    invoice: this.paymentState.invoice,
-                    paymentMethod,
-                    paymentAmount,
-                    invoiceAddress: invoicePaymentRegisterScreen.state.selectedInvoiceAddress || invoicePaymentRegisterScreen.state.partner,
-                });
-                invoicePaymentRegisterScreen.state.extraPayments.push(payment);
+                if (paymentAmount) {
+                    const paymentMethod = this.props.pos.db.payment_method_by_wallet_id[parseInt(walletId)];
+                    // this.paymentRegister._update_invoice_payment_amount(this.paymentState.invoice.id, paymentMethod.id, paymentAmount)
+                    const payment = invoicePaymentRegisterScreen._createInvoicePaymentObject({
+                        invoice: this.paymentState.invoice,
+                        paymentMethod,
+                        paymentAmount,
+                        invoiceAddress: this.paymentRegister.invoicePaymentRegisterScreen._getPartner()
+                    });
+                    invoicePaymentRegisterScreen.state.extraPayments.push(payment);
+                    store.dispatch('substractWalletAmount', walletId, paymentAmount);
+                }
             });
 
             invoicePaymentRegisterScreen.validatePayments();

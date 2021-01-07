@@ -52,9 +52,6 @@ class PosPR(models.Model):
             if payment_with_moves:
                 invoice_payment_ids = payment_with_moves.filtered('payment_amount')
                 discount_invoice_payment_ids = payment_with_moves.filtered('discount_amount')
-
-
-
         pass
 
     #

@@ -12,11 +12,11 @@
     'category': 'Hidden',
     'version': '1.0.0',
 
-    'depends': ['pos_pr', 'school_finance', 'eduweb_js_utils'],
+    'depends': ['pos_pr', 'pos_school'],
 
-    'data': ['data/assets.xml', ],
+    'data': ['views/assets.xml', ],
 
-    'qweb': ['static/src/xml/screens.xml', 'static/src/xml/owl/screens.xml'],
+    'qweb': ['static/src/xml/screens.xml'],
 
     'installable': True,
     'auto_install': True,

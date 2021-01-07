@@ -1,7 +1,5 @@
 <odoo>
-    <data>
-
-        <template id="pos_pr.pos_assets" inherit_id="point_of_sale.assets">
+    <template id="pos_assets" inherit_id="point_of_sale.assets">
             <xpath expr="." position="inside">
                 <!--///////////Styles///////////-->
                 <link rel="stylesheet" href="/pos_pr/static/src/css/pos_invoices.css"/>
@@ -36,6 +34,4 @@
 
             </xpath>
         </template>
-
-    </data>
 </odoo>

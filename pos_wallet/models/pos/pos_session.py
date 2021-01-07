@@ -16,7 +16,8 @@ class PosSession(models.Model):
         action = super()._validate_session()
 
         if self.pos_wallet_load_ids:
-            self.pos_wallet_load_ids.apply_loads()
+            self.pos_wallet_load_ids.filtered(lambda load: not load.reconciled).apply_loads()
+            self.pos_wallet_load_ids.mapped('partner_id')._compute_json_dict_wallet_amounts()
 
         return action
 

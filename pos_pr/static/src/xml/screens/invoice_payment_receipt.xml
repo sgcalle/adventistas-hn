@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
-    <t t-name="PosPr.InvoicePaymentReceiptScreenWidget">
+    <t t-name="InvoicePaymentReceiptScreenWidget">
          <div class='surcharge-receipt-screen screen'>
             <div class='screen-content'>
                 <div class='top-content'>

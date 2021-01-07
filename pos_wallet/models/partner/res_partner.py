@@ -19,7 +19,7 @@ class ResPartner(models.Model):
     pos_wallet_has_invoice = fields.Boolean(store=True, compute='_compute_wallet_boolean_fields', default=False)
     pos_wallet_has_unpaid_invoice = fields.Boolean(store=True, compute='_compute_wallet_boolean_fields', default=False)
 
-    @api.depends('pos_session_rel_wallet_load_ids')
+    @api.depends('pos_session_wallet_load_ids')
     def _compute_pos_wallet_rels(self):
         for partner in self:
             partner.pos_session_rel_wallet_load_ids = partner.pos_session_wallet_load_ids

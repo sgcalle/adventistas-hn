@@ -12,20 +12,25 @@ class PosWalletWalletLoad(models.Model):
     reconciled = fields.Boolean(default=False)
 
     partner_id = fields.Many2one('res.partner', required=True)
+    load_partner_id = fields.Many2one('res.partner', compute='_compute_load_partner_id', required=True)
     payment_method_id = fields.Many2one('pos.payment.method', required=True)
     wallet_category_id = fields.Many2one('wallet.category', required=True)
 
     pos_session_id = fields.Many2one('pos.session', required=True)
     currency_id = fields.Many2one('res.currency', required=True, related='pos_session_id.currency_id')
 
+    def _compute_load_partner_id(self):
+        for record in self:
+            record.load_partner_id = record._get_load_partner()
+
     def apply_loads(self):
-        partnerList = self.mapped('partner_id')
-        loadsByPartner = {partner: self.filtered(lambda load: load.partner_id == partner) for partner in partnerList}
+        loadPartnerList = self.mapped('load_partner_id')
+        loadsByLoadPartner = {partner: self.filtered(lambda load: load.load_partner_id == partner) for partner in loadPartnerList}
         pos_session_id = self.mapped('pos_session_id')
         pos_session_id.ensure_one()
         journal_id = pos_session_id.config_id.journal_id
 
-        for partner_id, walletLoads in loadsByPartner.items():
+        for partner_id, walletLoads in loadsByLoadPartner.items():
             move_id = walletLoads._create_miscellaneous_move(journal_id)
             wallet_lines = move_id.line_ids.filtered("pos_wallet_category_id")
             if not wallet_lines:
@@ -80,27 +85,29 @@ class PosWalletWalletLoad(models.Model):
     def _generate_wallet_receivable_lines(self):
         line_params = []
 
-        partner_id = self.mapped("partner_id")
-        partner_receivable_id = self.mapped("pos_session_id").get_partner_receivable(partner_id.id)
+        partner_ids = self.mapped("partner_id")
+        for partner_id in partner_ids:
+            partner_load_ids = self.filtered(lambda load: load.partner_id == partner_id)
+            partner_receivable_id = partner_load_ids.mapped("pos_session_id").get_partner_receivable(partner_id.id)
 
-        wallet_category_ids = self.mapped("wallet_category_id")
-        payment_method_ids = self.mapped("payment_method_id")
+            wallet_category_ids = partner_load_ids.mapped("wallet_category_id")
+            payment_method_ids = partner_load_ids.mapped("payment_method_id")
 
-        amount_by_category_and_method = []
-        for wallet_category_id in wallet_category_ids:
-            for payment_method_id in payment_method_ids:
-                wallet_load_ids = self.filtered(lambda wl: wl.wallet_category_id == wallet_category_id and wl.payment_method_id == payment_method_id)
-                if wallet_load_ids:
-                    amount_by_category_and_method.append((wallet_category_id, payment_method_id, sum(wallet_load_ids.mapped("amount"))))
+            amount_by_category_and_method = []
+            for wallet_category_id in wallet_category_ids:
+                for payment_method_id in payment_method_ids:
+                    wallet_load_ids = partner_load_ids.filtered(lambda wl: wl.wallet_category_id == wallet_category_id and wl.payment_method_id == payment_method_id)
+                    if wallet_load_ids:
+                        amount_by_category_and_method.append((wallet_category_id, payment_method_id, sum(wallet_load_ids.mapped("amount"))))
 
-        for wallet_category_id, payment_method_id, amount in amount_by_category_and_method:
-            line_params.append((0, 0, {
-                'partner_id': partner_id.id,
-                'account_id': partner_receivable_id.id,
-                'credit': amount,
-                'name': _('Wallet "%s" loaded with payment method "%s"') % (wallet_category_id.name, payment_method_id.name),
-                'pos_wallet_category_id': wallet_category_id.id
-                }))
+            for wallet_category_id, payment_method_id, amount in amount_by_category_and_method:
+                line_params.append((0, 0, {
+                    'partner_id': partner_id.id,
+                    'account_id': partner_receivable_id.id,
+                    'credit': amount,
+                    'name': _('Wallet "%s" loaded with payment method "%s"') % (wallet_category_id.name, payment_method_id.name),
+                    'pos_wallet_category_id': wallet_category_id.id
+                    }))
 
         return line_params
 
@@ -135,10 +142,23 @@ class PosWalletWalletLoad(models.Model):
         for lines in lines_by_account:
             lines.reconcile()
 
+    def _get_load_partner(self):
+        return self.mapped('partner_id')
+
+    def _build_load_wallet_with_line_ids_params(self, line_ids, wallet_id, amount):
+        return {
+            'line_ids': line_ids.ids,
+            'wallet_id': wallet_id.id,
+            'amount': amount,
+            }
+
     def _load_with_lines(self, wallet_line_ids):
-        partner_id = self.mapped('partner_id')
+        partner_id = self._get_load_partner()
         wallet_ids = wallet_line_ids.mapped('pos_wallet_category_id')
         for wallet_category_id in wallet_ids:
             line_ids = wallet_line_ids.filtered(lambda line_id: line_id.pos_wallet_category_id == wallet_category_id)
             amount = sum(self.filtered(lambda wallet_load_id: wallet_load_id.wallet_category_id == wallet_category_id).mapped('amount'))
-            partner_id.load_wallet_with_line_ids(line_ids=line_ids.ids, wallet_id=wallet_category_id.id, amount=amount)
+            # partner_id.load_wallet_with_line_ids(line_ids=line_ids.ids, wallet_id=wallet_category_id.id, amount=amount)
+
+            load_wallet_with_line_ids_params = self._build_load_wallet_with_line_ids_params(line_ids, wallet_category_id, amount)
+            partner_id.load_wallet_with_line_ids(**load_wallet_with_line_ids_params)

@@ -1,9 +1,9 @@
 {
-    'name': "Pos pr school wallet",
+    'name': "Pos school wallet",
 
-    'summary': """Pos pr school wallet""",
+    'summary': """Pos school wallet""",
 
-    'description': """Pos pr school wallet""",
+    'description': """Pos school wallet""",
 
     'author': "Eduwebgroup",
 

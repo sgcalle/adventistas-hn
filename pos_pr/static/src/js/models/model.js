@@ -35,8 +35,6 @@ odoo.define('pos_pr.models', function (require) {
 
             {name: 'partner_id', type: 'many2one'},
             {name: 'journal_id', type: 'many2one'},
-            {name: 'student_id', type: 'many2one'},
-            {name: 'family_id', type: 'many2one'},
 
             {name: 'invoice_line_ids', type: 'one2many'},
         ],

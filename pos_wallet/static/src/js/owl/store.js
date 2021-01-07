@@ -20,7 +20,8 @@ odoo.define('pos_wallet.owl.store', require => {
              * @param {Number} walletValues
              */
             addWalletAmount({state}, walletId, walletValues) {
-                state.client_wallet_balances[walletId] = (state.client_wallet_balances[walletId] || 0) + (walletValues || 0)
+                state.client_wallet_balances[walletId] = (state.client_wallet_balances[walletId] || 0) + (walletValues || 0);
+                state.current_client.json_dict_wallet_amounts[walletId] = (state.current_client.json_dict_wallet_amounts[walletId] || 0) + (walletValues || 0);
             },
 
             /**
@@ -31,6 +32,7 @@ odoo.define('pos_wallet.owl.store', require => {
              */
             substractWalletAmount({state}, walletId, walletValues) {
                 state.client_wallet_balances[walletId] = (state.client_wallet_balances[walletId] || 0) - (walletValues || 0)
+                state.current_client.json_dict_wallet_amounts[walletId] = (state.current_client.json_dict_wallet_amounts[walletId] || 0) - (walletValues || 0)
             },
 
             setPartner({state}, newPartner) {

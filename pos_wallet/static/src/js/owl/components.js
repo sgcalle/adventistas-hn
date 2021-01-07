@@ -6,73 +6,11 @@ odoo.define('pos_wallet.owl.components', function (require) {
     const {useState, useDispatch, useStore, useRef} = owl.hooks;
     const walletServiceDepenency = require('wallet.services.WalletService');
 
-    const AutoCompleteInput = require('eduweb_utils.AutoCompleteInput');
     const {_t} = require("web.core");
     const store = require('pos_wallet.owl.store');
     const {Paymentline} = require('point_of_sale.models');
 
     const {verifyInputNumber} = require('eduweb_utils.numbers');
-
-    // Load
-    class PosWalletPartnerScreenComponent extends Component {
-        static props = ['pos'];
-
-        state = useState({
-            autoCompleteInput: {}
-        })
-        partner = useStore(state => state.current_client, {store});
-
-        mounted() {
-            super.mounted();
-
-            const partnerSuggestions = []
-            _.each(this.props.pos.db.partner_by_id, partner_id => {
-                partnerSuggestions.push({
-                    search: this.props.pos.db._partner_search_string(partner_id),
-                    label: partner_id.name,
-                    data: {
-                        partner: partner_id
-                    },
-                    dataset: {
-                        'id': partner_id.id,
-                    },
-                    onclick: event => {
-                        this.props.pos.get_order().set_client(partner_id);
-                    },
-                })
-            })
-
-            this.state.autoCompleteInput = new AutoCompleteInput({
-                inputElement: this.el.querySelector('.client_selection__input'),
-                suggestionList: partnerSuggestions,
-                filters: {
-                    'student': function (content) {
-                        return content.data.partner.person_type === 'student';
-                    },
-                    'has_invoices': function (content) {
-                        return content.data.partner.pos_wallet_has_invoice;
-                    },
-                    'has_unpaid_invoices': function (content) {
-                        return content.data.partner.pos_wallet_has_unpaid_invoice;
-                    },
-                }
-            });
-        }
-
-        toggleStudentFilter() {
-            this.state.autoCompleteInput.toggleFilter('student');
-        }
-
-        btnLoadWalletPopup() {
-            const walletList = this.props.pos.config.wallet_category_ids.map(wallet_id => this.props.pos.chrome.call('WalletService', 'getWalletById', wallet_id));
-
-            this.props.pos.gui.show_popup('posPrLoadWallet', {
-                title: _t('Load wallet'),
-                wallets: walletList,
-                body: _t('Testing wallet'),
-            });
-        }
-    }
 
     // Payment
     class WalletPaymentCardCompoment extends Component {
@@ -332,7 +270,6 @@ odoo.define('pos_wallet.owl.components', function (require) {
     return {
         // Partner Screen
         WalletPaymentCardCompoment,
-        PosWalletPartnerScreenComponent,
 
         // Payment Screen
         PosWalletPaymentSTComponent,

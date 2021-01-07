@@ -13,6 +13,7 @@ odoo.define('pos_wallet.core.order', function (require) {
 
             if (this.get_client()) {
                 this.updateWalletClientStoreAmounts();
+                this.updateWalletCustomerScreenWidget();
             }
 
             this.wallet_payments = [];

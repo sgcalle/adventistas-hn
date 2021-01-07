@@ -15,14 +15,16 @@ class WalletCategory(models.Model):
         partner_id, wallet_category_id = self._parse_get_wallet_amount_params(partner_id, wallet_category_id)
 
         if partner_id.person_type == 'student':
-            wallet_amount -= sum(self.env['pos.payment'].search([
-                ('payment_method_id', '=', wallet_category_id.pos_payment_method_id.id),
+            wallet_amount -= sum(self.env['pos.order'].search([
                 ('student_id', '=', partner_id.id),
-                ]).mapped('amount'))
+                ]).mapped('payment_ids').filtered(
+                    lambda payment: payment.payment_method_id == wallet_category_id.pos_payment_method_id
+                ).mapped('amount'))
         elif partner_id.is_family:
-            wallet_amount -= sum(self.env['pos.payment'].search([
-                ('payment_method_id', '=', wallet_category_id.pos_payment_method_id.id),
+            wallet_amount -= sum(self.env['pos.order'].search([
                 ('family_id', '=', partner_id.id),
-                ]).mapped('amount'))
+                ]).mapped('payment_ids').filtered(
+                    lambda payment: payment.payment_method_id == wallet_category_id.pos_payment_method_id
+                ).mapped('amount'))
 
         return wallet_amount
