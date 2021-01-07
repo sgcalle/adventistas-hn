@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="BtnRegisterPayment">
+        <div class="control-button">Payment Register</div>
+    </t>
+
+    <t t-name="InvoicesLineWidget">
+        <div class="pos-payment-register screen">
+            <div id="js_pos_payment_register_screen"/>
+            <!--
+            <section class="top-content">
+
+                <span class="button back" style="display: inline-block;float: left;">
+                    <i class="fa fa-angle-double-left"></i>
+                    Cancel
+                </span>
+
+                <div class="button-payment-dashboard">
+                    <div class="button validate-payments" id="btn_validate_payment" >
+                        Validate payments <i class="fa fa-angle-double-right"></i>
+                    </div>
+
+                    <div class="button apply-payments highlight">
+                        Apply to invoices <i class="fa fa-angle-double-right"></i>
+                    </div>
+                </div>
+
+            </section>
+            <section class="full-content">
+                <section class="screen-left">
+                    <div class="js_invoice_list_container h-100">
+                    </div>
+                </section>
+                <section class="screen-right touch-scrollable scrollable-y"/>
+            </section>-->
+        </div>
+    </t>
+</templates>
