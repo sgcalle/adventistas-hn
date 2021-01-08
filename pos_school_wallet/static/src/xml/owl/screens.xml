@@ -24,7 +24,6 @@
 
                 <!-- Family -->
                 <div class="input-with-label">
-                    <t t-esc="schoolState.selectedFamily and schoolState.selectedFamily.name"/>
                     <label>Family</label>
                     <select class="form-select" >
                         <option t-foreach="familyRelatedByInvoiceAddressList || []" t-as="family"
