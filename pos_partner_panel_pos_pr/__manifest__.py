@@ -1,9 +1,9 @@
 {
-    'name': "Point of sale partner",
+    'name': "Point of sale partner panel pos pr",
 
-    'summary': """Helping panel school to search quickly any customer""",
+    'summary': """Helping panel pos pr to search quickly any customer""",
 
-    'description': """Helping panel school to search quickly any customer""",
+    'description': """Helping panel pos pr to search quickly any customer""",
 
     'author': "Eduwebgroup",
 
@@ -12,7 +12,7 @@
     'category': 'Sales/Point Of Sale',
     'version': '0.1',
 
-    'depends': ['point_of_sale', 'eduweb_js_utils'],
+    'depends': ['pos_partner_panel', 'pos_pr'],
 
     'data': [
         'views/assets.xml',

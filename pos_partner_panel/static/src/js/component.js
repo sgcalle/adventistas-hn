@@ -10,13 +10,13 @@ odoo.define('pos_partner_panel.owl.components', require => {
         static props = ['pos'];
 
         state = useState({
-            autoCompleteInput: {}
+            autoCompleteInput: {},
+            partner: {}
         })
         partner = useStore(state => state.current_client, {store});
 
         mounted() {
             super.mounted();
-
             const partnerSuggestions = []
             _.each(this.props.pos.db.partner_by_id, partner_id => {
                 partnerSuggestions.push({
@@ -32,27 +32,32 @@ odoo.define('pos_partner_panel.owl.components', require => {
                         this.props.pos.get_order().set_client(partner_id);
                     },
                 })
-            })
+            });
 
             this.state.autoCompleteInput = new AutoCompleteInput({
                 inputElement: this.el.querySelector('.client_selection__input'),
                 suggestionList: partnerSuggestions,
-                filters: {
-                    'student': function (content) {
-                        return content.data.partner.person_type === 'student';
-                    },
-                    'has_invoices': function (content) {
-                        return content.data.partner.pos_wallet_has_invoice;
-                    },
-                    'has_unpaid_invoices': function (content) {
-                        return content.data.partner.pos_wallet_has_unpaid_invoice;
-                    },
-                }
+                filters: this._getFilters()
             });
         }
 
-        toggleStudentFilter() {
-            this.state.autoCompleteInput.toggleFilter('student');
+        addFilter(filterName, callback) {
+            this.state.autoCompleteInput.filters[filterName] = callback;
+        }
+
+        removeFilter(filterName) {
+            delete this.state.autoCompleteInput.filters[filterName];
+        }
+
+        toggleFilter(filterName) {
+            this.state.autoCompleteInput.toggleFilter(filterName)
+        }
+
+        /**
+         * @private
+         */
+        _getFilters() {
+            return {};
         }
 
     }

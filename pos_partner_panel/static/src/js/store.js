@@ -11,7 +11,7 @@ odoo.define('pos_partner_panel.owl.store', require => {
             }
         }
     });
-    store.on('update', null, () => console.log(store.state.current_client));
+    store.dispatch('setPartner', {});
     return store;
 
 });

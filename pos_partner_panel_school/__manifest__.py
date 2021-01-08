@@ -1,5 +1,5 @@
 {
-    'name': "Point of sale partner",
+    'name': "Point of sale partner panel school",
 
     'summary': """Helping panel school to search quickly any customer""",
 
@@ -12,7 +12,7 @@
     'category': 'Sales/Point Of Sale',
     'version': '0.1',
 
-    'depends': ['point_of_sale', 'eduweb_js_utils'],
+    'depends': ['pos_partner_panel', 'pos_school'],
 
     'data': [
         'views/assets.xml',

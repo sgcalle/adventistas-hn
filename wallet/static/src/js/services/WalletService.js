@@ -55,7 +55,6 @@ odoo.define('wallet.services.WalletService', function (require) {
                     }
 
                 });
-                console.log(this.wallets);
             },
 
             getDefaultWalletWithChildren: function (company_id) {
