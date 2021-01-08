@@ -52,7 +52,6 @@ odoo.define("pos_wallet.customer_screen", function (require) {
         //////////////////////
         //  Custom Methods  //
         //////////////////////
-
         _feed_suggestion: function () {
             const testSuggestions = []
 
@@ -85,7 +84,7 @@ odoo.define("pos_wallet.customer_screen", function (require) {
             this.pos.bind('change:selectedClient', () => {
                 store.dispatch('setPartner', this.pos.get_client());
             });
-            store.dispatch('setPartner', this.pos.get_client());
+            store.dispatch('setPartner', this.pos.get_client() || {});
         },
 
         renderElement: function () {
