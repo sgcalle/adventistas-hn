@@ -27,7 +27,7 @@ odoo.define('pos_wallet.core.order', function (require) {
         },
 
         updateWalletCustomerScreenWidget: function () {
-            store.dispatch('setPartner', this.get_client());
+            store.dispatch('setPartner', this.get_client() || {});
         },
 
         set_wallet_payments: function (wallet_payments) {

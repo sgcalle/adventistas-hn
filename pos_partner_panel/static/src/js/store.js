@@ -7,7 +7,7 @@ odoo.define('pos_partner_panel.owl.store', require => {
         },
         actions: {
             setPartner({state}, newPartner) {
-                state.current_client = newPartner;
+                state.current_client = newPartner || {};
             }
         }
     });
