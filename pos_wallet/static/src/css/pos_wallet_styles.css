@@ -13,7 +13,78 @@
   width: 80%;
   display: block;
 }
-.pos_wallet .button-load-wallet {
+.pos_wallet .wallet-layout-tree {
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 1em;
+  overflow: scroll;
+}
+.pos_wallet .wallet-layout-tree > .wallet-layout-tree__root, .pos_wallet .wallet-layout-tree > .wallet-layout-tree__root > .wallet-layout-tree__branch {
+  padding: 0;
+}
+.pos_wallet .wallet-layout-tree > .wallet-layout-tree__root::before, .pos_wallet .wallet-layout-tree > .wallet-layout-tree__root::after, .pos_wallet .wallet-layout-tree > .wallet-layout-tree__root > .wallet-layout-tree__branch::before, .pos_wallet .wallet-layout-tree > .wallet-layout-tree__root > .wallet-layout-tree__branch::after {
+  display: none;
+}
+.pos_wallet .wallet-layout-tree__root {
+  position: relative;
+  padding-left: 2vw;
+}
+.pos_wallet .wallet-layout-tree__root::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  border-top: 1px solid;
+  width: 2vw;
+}
+.pos_wallet .wallet-layout-tree__branch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 2vw;
+  position: relative;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
+}
+.pos_wallet .wallet-layout-tree__branch__container {
+  display: block;
+  border: 1px solid black;
+  position: relative;
+}
+.pos_wallet .wallet-layout-tree__branch::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  border-top: 1px solid;
+  width: 2vw;
+}
+.pos_wallet .wallet-layout-tree__branch::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  border-left: 1px solid;
+}
+.pos_wallet .wallet-layout-tree__branch:last-of-type::after {
+  height: 50%;
+  top: 0;
+}
+.pos_wallet .wallet-layout-tree__branch:first-of-type::after {
+  height: 50%;
+  bottom: 0;
+}
+.pos_wallet .wallet-layout-tree__branch:only-child {
+  padding-top: 0;
+}
+.pos_wallet .wallet-layout-tree__branch:only-child::after {
+  display: none;
+}
+.pos_wallet .wallet-layout-tree__branch:not(:first-of-type):not(:last-of-type)::after {
+  height: 100%;
+}
+.pos_wallet .o_pos_wallet_load_button {
   font-size: 1rem;
   margin-bottom: 10px;
   width: 140px;
@@ -30,7 +101,6 @@
 }
 .pos_wallet .wallet-payment-card {
   box-sizing: border-box;
-  position: absolute;
   width: 250px;
   padding: 1em;
   background-color: #c4f5ff;

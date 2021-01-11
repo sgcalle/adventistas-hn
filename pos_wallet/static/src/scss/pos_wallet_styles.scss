@@ -1,7 +1,8 @@
 .pos_wallet {
     @import "layouts/forms";
-
+    @import "layouts/wallet_tree_layout";
     @import "components/buttons";
+
     @import "components/separators";
     @import "components/wallet_payment_card";
     @import "components/wallet_list";

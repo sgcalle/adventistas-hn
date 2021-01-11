@@ -2,47 +2,19 @@ odoo.define('pos_wallet.popups', function (require) {
 
     const PopupWidget = require('point_of_sale.popups');
     const gui = require('point_of_sale.gui');
-    const _t = require('web.core')._t;
+    const {_t} = require('web.core');
 
-    const {Component, useState} = owl;
-    const {useRef} = owl.hooks;
-    const {verifyInputNumber} = require('eduweb_utils.numbers');
+    const {PosWalletLoadWalletComponent} = require('pos_wallet.owl.components');
 
-    class PosWalletLoadWalletComponent extends Component {
-        static props = ['walletPopup', 'pos']
-
-        walletAmount = useRef("walletAmount");
-        state = useState({
-            paymentAmount: 0,
-            walletCategory: 0,
-            paymentMethod: 0,
-            currentPartner: {},
-        });
-
-        patched() {
-            super.patched();
-        }
-
-        triggerInputAction(event) {
-            const decimals = ((window.posmodel && window.posmodel.currency) ? window.posmodel.currency.decimals : 2) || 2;
-            let paymentAmount = verifyInputNumber(this.walletAmount.el, decimals);
-            this.state.paymentAmount = paymentAmount;
-            event.currentTarget.value = paymentAmount;
-        }
-
-        get formIsValid() {
-            return this.state.paymentAmount && this.state.walletCategory && this.state.paymentMethod
-        }
-
-    }
 
     const LoadWalletPopup = PopupWidget.extend({
+        template: 'PosWalletLoadWalletForm',
+
         events: _.extend({}, PopupWidget.prototype.events, {
             // 'focusout .js_wallet_amount': '_validateForm',
             'submit .js_load_wallet_popup_form': '_onSubmitLoadWalletForm',
         }),
 
-        template: 'PosWalletLoadWalletForm',
 
         /**
          * @override
@@ -57,55 +29,32 @@ odoo.define('pos_wallet.popups', function (require) {
             this._super.apply(this, arguments);
 
             const owlComponentToMountEl = this.el.querySelector('.js_load_wallet_owl_component');
-            this.posWalletLoadWalletComponent.mount(owlComponentToMountEl);
+            
+            const __owl__ = this.posWalletLoadWalletComponent.__owl__;
+                if (__owl__.isMounted) {
+                    this.posWalletLoadWalletComponent.unmount();
+                }
 
+                if (this.pos.get_client()) {
+                    if (__owl__.currentFiber) {
+                        __owl__.currentFiber.cancel();
+                        __owl__.currentFiber = null;
+                    }
+                    this.posWalletLoadWalletComponent.mount(owlComponentToMountEl);
+                }
         },
 
         show: function () {
             this._super.apply(this, arguments);
             this.posWalletLoadWalletComponent.state.currentPartner = this.pos.get_client();
-        },
 
-        /**
-         * @private
-         */
-        _validateForm: function () {
-            let isInvalid = false;
-
-            isInvalid |= this._isInvalidWalletAmountInput();
-
-            const btnSubmit = this.el.querySelector('.js_btn_submit_load_wallet');
-
-            btnSubmit.disabled = isInvalid;
-            return !isInvalid;
-        },
-
-        /**
-         * @private
-         */
-        _isInvalidWalletAmountInput: function () {
-            const jsWalletAmountInput = this.el.querySelector('input.js_wallet_amount');
-            let isInvalid = false;
-
-            if (jsWalletAmountInput) {
-                if (!jsWalletAmountInput.value.match(/^\d*\.?\d*$/)) {
-                    isInvalid = true;
-                    const errorMessage = _t("Wallet amount is not a valid number");
-                    jsWalletAmountInput.setCustomValidity(errorMessage);
-                } else {
-                    const walletAmountInputNumberValue = parseFloat(jsWalletAmountInput.value);
-                    jsWalletAmountInput.value = walletAmountInputNumberValue.toFixed(2);
-                }
-
-            } else {
-                isInvalid = true;
+            if (this.options.wallets && this.options.wallets.length) {
+                this.posWalletLoadWalletComponent.state.walletCategory = this.options.wallets[0].id;
             }
-
-            if (!isInvalid) {
-                jsWalletAmountInput.setCustomValidity('');
+            if (this.pos.payment_methods && this.pos.payment_methods.length) {
+                this.posWalletLoadWalletComponent.state.paymentMethod = this.pos.payment_methods[0].id;
             }
-
-            return isInvalid
+            this.posWalletLoadWalletComponent.state.paymentAmount = 0;
         },
 
         _build_load_wallet_options: function () {
@@ -125,10 +74,8 @@ odoo.define('pos_wallet.popups', function (require) {
             event.preventDefault();
             this.gui.close_popup();
 
-            if (this._validateForm()) {
-                const walletLoad = this.pos.load_wallet(this._build_load_wallet_options());
-                this.gui.show_screen('walletLoadReceipt', {walletLoad: walletLoad});
-            }
+            const walletLoad = this.pos.load_wallet(this._build_load_wallet_options());
+            this.gui.show_screen('walletLoadReceipt', {walletLoad: walletLoad});
         }
     });
     gui.define_popup({name: 'posPrLoadWallet', widget: LoadWalletPopup});

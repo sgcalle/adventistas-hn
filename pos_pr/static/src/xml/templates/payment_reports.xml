@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
 
-    <t t-name="PosPr.InvoicePaymentReceipt">
+    <t t-name="InvoicePaymentReceipt">
         <div t-attf-class="payment-receipt pos-bootstrap #{widget.copy and 'markwater'}">
 <!--            <div class="markwater"/>-->
             <header class="row font-weight-bold">
@@ -92,12 +92,6 @@
                             <div class="col-3 h6"><t t-esc="invoice.invoice_date"/></div>
                             <div class="col-3 h6 text-right"><strong>Invoice due date:</strong></div>
                             <div class="col-3 h6"><t t-esc="invoice.invoice_date_due"/></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3 h6 text-right"><strong>Family</strong></div>
-                            <div class="col-3 h6"><t t-if="invoice.family_id" t-esc="invoice.family_id.name"/></div>
-                            <div class="col-3 h6 text-right"><strong>Student</strong></div>
-                            <div class="col-3 h6"><t t-if="invoice.student_id" t-esc="invoice.student_id.name"/></div>
                         </div>
 
                         <div class="row">

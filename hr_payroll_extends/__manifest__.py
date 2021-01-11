@@ -33,5 +33,6 @@
         'views/hr_employee_views.xml',
         'views/hr_salary_rule_views.xml',
         'views/hr_contribution_table_views.xml',
+        'data/ir_actions_server_data.xml',
     ],
 }

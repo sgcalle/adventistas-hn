@@ -115,52 +115,10 @@ odoo.define('pos_pr.owl.components', function (require) {
         static components = {PosPRInvoiceDetails, PosPRGlobalPaymentDetails, PosPRPaymentList};
     }
 
-    /*Screen*/
-
-    class PosPRScreenFilter extends Component {
-        static props = ['studentList', 'invoiceAddressList', 'posPrState'];
-
-        /**
-         * @param {EventTarget} checkboxElement
-         * @param {HTMLInputElement} checkboxElement
-         * @param {String} propsListName
-         * @param value
-         * @private
-         */
-        _toggleListFilterWithCheckbox(checkboxElement, propsListName, value) {
-            const auxList = Array.from(this.props.posPrState[propsListName]);
-            if (checkboxElement.checked) {
-                auxList.push(value);
-            } else {
-                const index = _.indexOf(auxList, value);
-                if (index > -1) {
-                    auxList.splice(index, 1);
-                }
-            }
-            this.props.posPrState[propsListName] = auxList;
-        }
-
-        /**
-         * @param {Number} studentId
-         * @param {InputEvent} event
-         */
-        toggleStudentFilter(studentId, event) {
-            this._toggleListFilterWithCheckbox(event.currentTarget, 'filterStudentsIds', studentId);
-        }
-
-        /**
-         * @param {Number} invoiceAddressId
-         * @param {InputEvent} event
-         */
-        togglePartnerFilter(invoiceAddressId, event) {
-            this._toggleListFilterWithCheckbox(event.currentTarget, 'filterPartnerIds', invoiceAddressId);
-        }
-    }
-
     class PosPRScreen extends Component {
         // Properties
         static props = ['pos', 'paymentRegister'];
-        static components = {PosPRScreenLeftSide, PosPRScreenRightSide, PosPRScreenFilter};
+        static components = {PosPRScreenLeftSide, PosPRScreenRightSide};
 
         state = useState({
             partner: {},
@@ -168,9 +126,6 @@ odoo.define('pos_pr.owl.components', function (require) {
             invoicePayments: {},
             globalInvoicesPayment: _.chain(this.props.pos.payment_methods).map(paymentMethod => [paymentMethod.id, 0]).object().value(),
             showScreen: false,
-            filterStudentsIds: [],
-            filterPartnerIds: [],
-            selectedInvoiceAddress: 0,
             payWithWalletButton: null,
             extraPayments: [],
         });
@@ -180,15 +135,17 @@ odoo.define('pos_pr.owl.components', function (require) {
         previousPartner = {};
 
         // Getters
+        // This getters are used like this to be able to do
+        // something like this.invoiceList and
+        // use patch owl method to extend them
         get invoiceList() {
-            if (this.state && this.state.partner) {
-                return this.props.pos.db.due_invoices.filter(invoice =>
-                    (invoice.partner_id.id === this.state.partner.id
-                        // We use this fields for the schools.
-                        // TODO: Move this to a future pos_pr_school module
-                        || (invoice.student_id && invoice.student_id.id === this.state.partner.id)
-                        || (invoice.family_id && invoice.family_id.id === this.state.partner.id))
+            return this._getInvoiceList();
+        }
 
+        _getInvoiceList() {
+            if (this.state && this.state.partner) {
+                return _.filter(this.props.pos.db.due_invoices, invoice =>
+                    invoice.partner_id.id === this.state.partner.id
                     // We need only the due invoices
                     && invoice.amount_residual > 0
                 );
@@ -198,33 +155,11 @@ odoo.define('pos_pr.owl.components', function (require) {
         }
 
         get filteredInvoiceList() {
-            const filteredInvoiceList = this.invoiceList.filter(invoice =>
-                (!this.state.filterStudentsIds.length || _.indexOf(this.state.filterStudentsIds, invoice.student_id.id) !== -1)
-                && (!this.state.filterPartnerIds.length || _.indexOf(this.state.filterPartnerIds, invoice.partner_id.id) !== -1)
-            );
-            return filteredInvoiceList;
+            return this._getFilteredInvoiceList();
         }
 
-        get studentList() {
-            const invoiceList = this.invoiceList;
-            if (invoiceList) {
-                return _.chain(invoiceList).map(invoice => invoice.student_id).uniq(false, student => student.id).value();
-            } else {
-                return [];
-            }
-        }
-
-        get invoiceAddressList() {
-            return this.state.partner ? _.map(this.state.partner.student_invoice_address_ids, partnerId => this.props.pos.db.partner_by_id[partnerId]) : [];
-        }
-
-        get invoicesPartnerList() {
-            const invoiceList = this.invoiceList;
-            if (invoiceList) {
-                return _.chain(invoiceList).map(invoice => invoice.partner_id).uniq(false, partner => partner.id).value();
-            } else {
-                return [];
-            }
+        _getFilteredInvoiceList() {
+            return this.invoiceList;
         }
 
         get surchargeAmount() {
@@ -266,33 +201,12 @@ odoo.define('pos_pr.owl.components', function (require) {
             return (invoice.amount_residual || 0) - amount_paid - (invoice.discount_amount || 0);
         }
 
-        /**
-         * @param {Event} event
-         */
-        selectInvoiceAddress(event) {
-            const selectInvoiceAddressId = parseInt(event.currentTarget.value) || 0;
-            this.state.selectedInvoiceAddress = _.find(this.invoiceAddressList, invAddress => invAddress.id === selectInvoiceAddressId);
-        }
-
         patched() {
             super.patched();
             // If they are different, that means that the partner has changed
             if (this.previousPartner !== this.state.partner) {
-                this.state.selectedInvoiceAddress = this.invoiceAddressList.length ? this.invoiceAddressList[0] : {};
                 this.previousPartner = this.state.partner;
             }
-        }
-
-        // Methods
-        /**
-         * @param {MouseEvent} event
-         */
-        toggleFilter(event) {
-
-            const button = event.currentTarget;
-            button.classList.toggle('toggle-screen-filter-button--active')
-
-            this.state.showScreen = !this.state.showScreen;
         }
 
         /**
@@ -313,6 +227,21 @@ odoo.define('pos_pr.owl.components', function (require) {
             })
         }
 
+        _buildPaymentGroupValues(paymentClone) {
+            return {
+                    'name': this.props.pos.generateNextPaymentGroupNumber(),
+                    'invoice_payment_ids': paymentClone,
+                    'payment_change': this.changeAmount,
+                    'partner_id': this.state.partner,
+                    'pos_session_id': this.props.pos.pos_session,
+                    'date': moment().format('YYYY-MM-DD HH:mm:ss'),
+                }
+        }
+
+        _getPartner() {
+            return this.state.partner;
+        }
+
         validatePayments() {
             const invoicePayments = this._createInvoicePayments();
             this.state.selectedInvoice = {};
@@ -322,20 +251,13 @@ odoo.define('pos_pr.owl.components', function (require) {
                 const paymentClone = _.clone(invoicePayments);
                 this._appendChangesToInvoicePayments(paymentClone);
 
-                const paymentGroup = new PaymentGroup({
-                    'name': this.props.pos.generateNextPaymentGroupNumber(),
-                    'invoice_payment_ids': paymentClone,
-                    'payment_change': this.changeAmount,
-                    'partner_id': this.state.partner.person_type === 'student' ? this.state.selectedInvoiceAddress : this.state.partner,
-                    'pos_session_id': this.props.pos.pos_session,
-                    'date': moment().format('YYYY-MM-DD HH:mm:ss'),
-                });
+                const paymentGroup = new PaymentGroup(this._buildPaymentGroupValues(paymentClone));
 
                 this._updateInvoicesAmounts(invoicePayments);
 
                 this.props.pos.gui.show_screen('invoicePaymentReceipt', {
                     paymentGroup,
-                    invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
+                    invoiceAddress: this._getPartner(),
                     changeAmount: this.changeAmount,
                 });
                 this.state.extraPayments = [];
@@ -354,10 +276,9 @@ odoo.define('pos_pr.owl.components', function (require) {
 
         validateSurchargePayments() {
             const surcharge = this._createAndPayInvoicesSurcharge();
-            console.log(surcharge);
             this.props.pos.gui.show_screen('surchargePaymentReceipt', {
                 surcharge,
-                invoiceAddress: this.state.selectedInvoiceAddress
+                invoiceAddress: this._getPartner()
             });
             this.props.pos.synch_invoive_payment_and_surcharges([], [surcharge]);
         }
@@ -372,7 +293,7 @@ odoo.define('pos_pr.owl.components', function (require) {
                         invoice,
                         paymentMethod: cash_method,
                         paymentAmount: -change,
-                        invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
+                        invoiceAddress: this._getPartner(),
 
                     });
 
@@ -439,7 +360,7 @@ odoo.define('pos_pr.owl.components', function (require) {
                                     invoice,
                                     paymentMethod,
                                     paymentAmount: invoicePaymentAmounts[paymentMethod.id],
-                                    invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
+                                    invoiceAddress: this._getPartner(),
                                 });
 
                                 // And we feed the return array with the new created InvoicePayment Object
@@ -457,7 +378,7 @@ odoo.define('pos_pr.owl.components', function (require) {
                                 paymentMethod,
                                 paymentAmount: 0,
                                 paymentDiscount: parseFloat(invoice.discount_amount),
-                                invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
+                                invoiceAddress: this._getPartner(),
                             }
                         );
                         // invoice.amount_residual -= invoice.discount_amount;
@@ -479,7 +400,7 @@ odoo.define('pos_pr.owl.components', function (require) {
             const surcharge = new SurchargeInvoice;
             surcharge.date = moment().format('YYYY-MM-DD HH:mm:ss');
             surcharge.pos_session_id = this.props.pos.pos_session.id;
-            surcharge.partner_id = this.state.partner.person_type === 'student' ? this.state.selectedInvoiceAddress : this.state.partner;
+            surcharge.partner_id = this.state.partner;
             surcharge.free_of_surcharge = 0;
             surcharge.amount = 0;
             // surcharge.free_of_surcharge = (this.free_of_surcharge[this.partner_id.id] || 0) || 0;
@@ -565,7 +486,7 @@ odoo.define('pos_pr.owl.components', function (require) {
                 let invoicePayment = this._createInvoicePaymentObject({
                     paymentAmount: amount,
                     paymentMethod: paymentMethod,
-                    invoiceAddress: this.state.selectedInvoiceAddress || this.state.partner,
+                    invoiceAddress: this._getPartner(),
                 });
                 surcharge.amount += amount;
                 surcharge.payment_ids.push(invoicePayment);
@@ -576,6 +497,13 @@ odoo.define('pos_pr.owl.components', function (require) {
     }
 
     return {
+        PosPRScreenInvoiceListRow,
+        PosPRScreenLeftSide,
+        PosPRGlobalPaymentDetails,
+        PosPRInvoiceDetails,
+        PosPRPaymentListRow,
+        PosPRPaymentList,
+        PosPRScreenRightSide,
         PosPRScreen,
     };
 

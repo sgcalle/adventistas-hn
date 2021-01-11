@@ -33,7 +33,8 @@ class AccountMove(models.Model):
     @api.depends("pos_pr_payment_ids")
     def _compute_pos_pr_paid_amount(self):
         for move_id in self:
-            move_id.pos_pr_paid_amount = sum(move_id.pos_pr_payment_ids.mapped(lambda payment: payment.display_amount) or [0])
+            not_closed_payments = move_id.pos_pr_payment_ids.filtered(lambda payment: payment.pos_session_id.state in ['opened', 'closing_control'])
+            move_id.pos_pr_paid_amount = sum(not_closed_payments.mapped(lambda payment: payment.display_amount) or [0])
 
     def _compute_is_overdue(self):
         for move_id in self:

@@ -13,6 +13,7 @@ odoo.define('pos_wallet.core.order', function (require) {
 
             if (this.get_client()) {
                 this.updateWalletClientStoreAmounts();
+                this.updateWalletCustomerScreenWidget();
             }
 
             this.wallet_payments = [];
@@ -26,7 +27,7 @@ odoo.define('pos_wallet.core.order', function (require) {
         },
 
         updateWalletCustomerScreenWidget: function () {
-            store.dispatch('setPartner', this.get_client());
+            store.dispatch('setPartner', this.get_client() || {});
         },
 
         set_wallet_payments: function (wallet_payments) {

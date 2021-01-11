@@ -1,5 +1,0 @@
-# Specify filepatterns you want git to ignore.
-**/__pycache__
-**/_school_base
-**/_school_finance
-**/*.pyc

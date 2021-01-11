@@ -33,12 +33,14 @@ class PosSession(models.Model):
             payment_ids = list(set(self.invoice_payment_ids.ids) | set(self.invoice_surcharge_ids.payment_ids.ids))
 
             self.invoice_payment_ids = payment_ids
-        self._create_payment_register_invoices_payment()
+        if self.invoice_payment_ids:
+            self._create_payment_register_invoices_payment()
+            self._create_invoices_discount()
+            self.invoice_payment_ids.mapped('move_id')._compute_pos_pr_paid_amount()
         return action
 
     def _create_payment_register_invoices_payment(self):
-
-        invoice_payment_ids = self.invoice_payment_ids.filtered('display_amount')
+        invoice_payment_ids = self.invoice_payment_ids.filtered('payment_amount')
         if invoice_payment_ids:
             journal = self.config_id.journal_id
             account_move = self.env['account.move'].with_context(default_journal_id=journal.id).create({
@@ -54,6 +56,7 @@ class PosSession(models.Model):
             MoveLine = self.env['account.move.line'].with_context(check_move_validity=False)
 
             # Debit lines
+            invoice_payment_ids.filtered('')
             payment_move_line_vals = MoveLine.create(self._get_payment_move_line_vals_list(invoice_payment_ids.filtered(lambda p: not p.payment_method_id.is_cash_count)))
             cash_reconcile_lines = MoveLine.create(self._get_payment_move_line_vals_list(invoice_payment_ids.filtered('payment_method_id.is_cash_count')))
             print(payment_move_line_vals)
@@ -95,6 +98,10 @@ class PosSession(models.Model):
                 lines_by_account = [lines_by_account.filtered(lambda l: l.account_id == account) for account in accounts]
                 for lines in lines_by_account:
                     lines.reconcile()
+
+    def _create_invoices_discount(self):
+        discount_payment_ids = self.invoice_payment_ids.filtered('discount_amount')
+        discount_payment_ids._generate_invoice_discount()
 
     def _get_payment_move_line_vals_list(self, invoice_payment_ids):
         return invoice_payment_ids.mapped(self._get_payment_move_line_vals)

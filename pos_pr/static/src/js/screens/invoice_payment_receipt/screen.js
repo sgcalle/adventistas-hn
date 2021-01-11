@@ -9,7 +9,7 @@ odoo.define('pos_pr.screens.invoice_payment_receipt', function (require) {
     const reports = require('pos_pr.components.reports');
 
     const InvoicePaymentReceiptScreenWidget = screens.ScreenWidget.extend({
-        template: 'PosPr.InvoicePaymentReceiptScreenWidget',
+        template: 'InvoicePaymentReceiptScreenWidget',
         show: function (refresh, data) {
             this._super.apply(this, arguments);
 

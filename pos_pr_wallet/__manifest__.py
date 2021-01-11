@@ -1,9 +1,9 @@
 {
     'name': "Pos pr wallet",
 
-    'summary': """ Pos pr autoupdate when change of employee """,
+    'summary': """ Pos pr wallet """,
 
-    'description': """ Pos pr autoupdate when change of employee """,
+    'description': """ Pos pr wallet implementation """,
 
     'author': "Eduwebgroup",
 

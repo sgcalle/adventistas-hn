@@ -22,7 +22,7 @@
         </field>
     </record>
 
-    <record id="view_pos_session_form" model="ir.ui.view">
+    <!--<record id="view_pos_session_form" model="ir.ui.view">
         <field name="name">pos.payment.register.view.pos.session.form.inherit</field>
         <field name="model">pos.session</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
@@ -35,5 +35,5 @@
                 <field name="id" invisible="1"/>
             </button>
         </field>
-    </record>
+    </record>-->
 </odoo>

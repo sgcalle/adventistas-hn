@@ -9,7 +9,7 @@ odoo.define('pos_pr.components.reports', function (require) {
     const _t = core._t;
 
     const InvoicePaymentReceiptment = BaseWidget.extend({
-        template: 'PosPr.InvoicePaymentReceipt',
+        template: 'InvoicePaymentReceipt',
 
         /**
          * This will be used to render payments receipts in POS.
