@@ -44,6 +44,8 @@ class HrPayslip(models.Model):
                     ["receivable"], fields.Date.context_today(self), "posted", 30)
         remaining_wage = self.net_wage
         for aml in amls.get(partner.id, []):
+            if aml["line"].date > self.date_to:
+                continue
             if aml["amount"] <= 0 or (self.struct_id.type_id.invoice_payment_scope == "overdue" and aml["period"] >= 6):
                 continue
             residual_amount = min(aml["amount"], remaining_wage)
