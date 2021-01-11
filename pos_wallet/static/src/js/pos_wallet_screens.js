@@ -47,7 +47,7 @@ odoo.define('pos_wallet.screens', require => {
 
             this.selectAnalyticWidget = new LoadWalletPadWidget(this, {});
 
-            if ((this.pos.wallet_payment_methods || []).length) {
+            if ((this.pos.db.wallet_payment_methods || []).length) {
                 this.selectAnalyticWidget.replace(this.$('.placeholder-LoadWalletWidget'));
             }
         }
@@ -78,7 +78,7 @@ odoo.define('pos_wallet.screens', require => {
         },
 
         renderPosWalletPaymentScreen: function () {
-            if (this.posWalletPaymentScreen && (this.pos.wallet_payment_methods || []).length) {
+            if (this.posWalletPaymentScreen && (this.pos.db.wallet_payment_methods || []).length) {
                 const __owl__ = this.posWalletPaymentScreen.__owl__;
                 if (__owl__.isMounted) {
                     this.posWalletPaymentScreen.unmount();
