@@ -84,6 +84,7 @@ odoo.define('pos_pr_school.owl.components', require => {
                 (!this.schoolState.filterStudentsIds.length || _.indexOf(this.schoolState.filterStudentsIds, invoice.student_id.id) !== -1)
                 && (!this.schoolState.filterPartnerIds.length || _.indexOf(this.schoolState.filterPartnerIds, invoice.partner_id.id) !== -1)
             )
+            console.log("_getFilteredInvoiceList");
 
             return filteredInvoiceList
         },
@@ -103,7 +104,7 @@ odoo.define('pos_pr_school.owl.components', require => {
 
             return invoiceList;
         },
-        
+
         _getStudentList() {
             const invoiceList = this.invoiceList;
             if (invoiceList) {
@@ -148,7 +149,7 @@ odoo.define('pos_pr_school.owl.components', require => {
                     auxList.splice(index, 1);
                 }
             }
-            this.props.posPrState[propsListName] = auxList;
+            this.props.posPrSchoolState[propsListName] = auxList;
         }
 
         toggleStudentFilter(studentId, event) {
