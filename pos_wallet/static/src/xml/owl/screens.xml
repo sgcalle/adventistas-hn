@@ -35,6 +35,7 @@
             <h1>Wallet payment dashboard</h1>
             <button t-on-click="toggleShow(!state.show)"><t t-esc="state.button_label"/></button>
         </div>
+
         <PosWalletPaymentSTComponent pos="props.pos"/>
     </div>
 
