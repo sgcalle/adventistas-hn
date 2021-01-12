@@ -82,9 +82,9 @@ odoo.define('pos_wallet.owl.components', function (require) {
 
     class WalletPaymentCardListComponent extends Component {
         static props = ["walletCategory", "walletPaymentAmounts"]
-        static components = { WalletPaymentCardListComponent, WalletPaymentCardCompoment }
+        static components = {WalletPaymentCardListComponent, WalletPaymentCardCompoment}
 
-        updateWalletPaymentAmount (walletPayment) {
+        updateWalletPaymentAmount(walletPayment) {
             const walletPaymentDetail = walletPayment.detail;
             this.props.walletPaymentAmounts[walletPaymentDetail.walletCategory.id] = walletPaymentDetail.paymentAmount;
         }
@@ -93,7 +93,7 @@ odoo.define('pos_wallet.owl.components', function (require) {
 
     class PosWalletPaymentSTComponent extends Component {
         static props = ['pos', 'height', 'categoryList'];
-        static components = { WalletPaymentCardListComponent, WalletPaymentCardCompoment }
+        static components = {WalletPaymentCardListComponent, WalletPaymentCardCompoment}
 
         spaceTree = useRef('spaceTree');
 
