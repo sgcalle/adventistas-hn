@@ -188,7 +188,7 @@
                             <t t-esc="invoice_line.product_id.default_code" />
                         </td>
                         <td>
-                            <t t-esc="invoice_line.product_id.name" />
+                            <t t-esc="invoice_line.name" />
                         </td>
                         <td t-if="not o.hide_line_price" class="text-right">
                             <span t-field="invoice_line.price_unit" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
