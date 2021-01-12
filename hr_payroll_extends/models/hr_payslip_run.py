@@ -17,3 +17,8 @@ class HrPayslipRun(models.Model):
         if close_date > 0:
             self.date_end = fields.Date.to_string(date.today().replace(day=close_date))
             self.date_start = self.date_end + relativedelta(months=-1, days=1)
+    
+    def unlink(self):
+        for batch in self.filtered(lambda x: not x.slip_ids):
+            batch.action_draft()
+        return super(HrPayslipRun, self).unlink()
