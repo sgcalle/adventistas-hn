@@ -14,14 +14,14 @@ class PosPR(models.Model):
     payment_group_id = fields.Many2one("pos_pr.payment_group")
 
     name = fields.Char()
-    date = fields.Date()
+    date = fields.Datetime()
 
     display_amount = fields.Float('Amount', compute='_compute_display_amount', store=True)
     payment_amount = fields.Float()
     payment_method_id = fields.Many2one("pos.payment.method")
 
     pos_session_id = fields.Many2one("pos.session")
-    move_id = fields.Many2one("account.move", "Invoice", domain="[ ('type', '=', 'out_invoice') ]", required=True)
+    move_id = fields.Many2one("account.move", "Invoice", domain="[('type', '=', 'out_invoice')]", required=True)
     partner_id = fields.Many2one("res.partner", 'Customer', related='move_id.partner_id')
 
     invoice_address_id = fields.Many2one('res.partner', required=True, default=lambda self: self.partner_id)
