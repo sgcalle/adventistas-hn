@@ -521,7 +521,7 @@
                         <th>E/G</th>
                     </tr>
                 </thead>
-                <t t-foreach="o.invoice_line_ids.filtered(lambda x: not x.display_type and x.price_total > 0)" t-as="invoice_line">
+                <t t-foreach="o.invoice_line_ids.filtered(lambda x: not x.display_type)" t-as="invoice_line">
                     <tr>
                         <td class="font-italic">
                             <t t-esc="invoice_line.product_id.default_code" />
