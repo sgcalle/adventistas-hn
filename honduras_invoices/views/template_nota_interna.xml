@@ -182,7 +182,7 @@
                         <th>E/G</th>
                     </tr>
                 </thead>
-                <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
+                <t t-foreach="o.invoice_line_ids.filtered(lambda x: not x.display_type)" t-as="invoice_line">
                     <tr>
                         <td class="font-italic">
                             <t t-esc="invoice_line.product_id.default_code" />
@@ -197,7 +197,7 @@
                             <t t-esc="round(invoice_line.quantity)" />
                         </td>
                         <td t-if="not o.hide_line_price" class="text-right">
-                            <span t-field="invoice_line.price_subtotal" />
+                            <span t-esc="invoice_line.price_unit * invoice_line.quantity" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
                         </td>
                         <td t-if="not o.hide_line_price" class="text-right">
                             <span t-field="invoice_line.discount" />
@@ -240,6 +240,12 @@
                 </div>
             </section>
             <section class="mt-4 border border-dark text-center border-3" t-field="o.amount_total_letters" />
+            <t t-set="note_lines" t-value="o.invoice_line_ids.filtered(lambda x: x.display_type == 'line_note')"/>
+            <section t-if="note_lines">
+                <t t-foreach="note_lines" t-as="note_line">
+                    <div t-raw="note_line.name.replace('\n','&lt;br&gt;')"/>
+                </t>
+            </section>
         </div>
     </template>
 

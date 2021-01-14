@@ -27,6 +27,7 @@
         'account_reports',
         'school_finance',
         'base_automation',
+        'print_with_journal_entry',
     ],
 
     # always loaded

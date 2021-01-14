@@ -5,8 +5,38 @@
             <t t-foreach="docs" t-as="o">
                 <t t-set="lang" t-value="o.partner_id.lang" />
                 <t t-call="honduras_invoices.invoice_payments_report_document" />
+                <t t-call="web.basic_layout" t-if="print_with_journal_entry">
+                    <h5>Journal Entry</h5>
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Account</th>
+                            <th>Label</th>
+                            <th class="text-right">Debit</th>
+                            <th class="text-right">Credit</th>
+                        </tr>
+                        <tr t-foreach="o.line_ids" t-as="line">
+                            <td>
+                                <span t-field="line.account_id" />
+                            </td>
+                            <td>
+                                <span t-field="line.name" />
+                            </td>
+                            <td class="text-right">
+                                <span t-field="line.debit"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="line.credit"/>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
             </t>
         </t>
+    </template>
+
+    <template id="honduras_invoices.invoice_payments_template_with_journal_entry">
+        <t t-set="print_with_journal_entry" t-value="True"/>
+        <t t-call="honduras_invoices.invoice_payments_template"/>
     </template>
 
     <template id="honduras_invoices.report_payment_receipt" inherit_id="account.report_payment_receipt">
@@ -491,7 +521,7 @@
                         <th>E/G</th>
                     </tr>
                 </thead>
-                <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
+                <t t-foreach="o.invoice_line_ids.filtered(lambda x: not x.display_type and x.price_total > 0)" t-as="invoice_line">
                     <tr>
                         <td class="font-italic">
                             <t t-esc="invoice_line.product_id.default_code" />
@@ -506,7 +536,7 @@
                             <t t-esc="round(invoice_line.quantity)" />
                         </td>
                         <td t-if="not o.hide_line_price" class="text-right">
-                            <span t-field="invoice_line.price_subtotal" />
+                            <span t-esc="invoice_line.price_unit * invoice_line.quantity" t-options="{'widget': 'monetary', 'display_currency': o.currency_id, 'precision': 2}" />
                         </td>
                         <td t-if="not o.hide_line_price" class="text-right">
                             <span t-field="invoice_line.discount" />
@@ -537,9 +567,9 @@
             <t t-set="amount_exonerado" t-value="0" />
             <t t-set="amount_descuento" t-value="0" />
 
-            <t t-foreach="o.invoice_line_ids" t-as="invoice_line">
+            <t t-foreach="o.invoice_line_ids.filtered(lambda x: not x.display_type)" t-as="invoice_line">
                 <t t-if="invoice_line.discount != 0">
-                    <t t-set="amount_descuento" t-value=" amount_descuento + ( 100 * invoice_line.price_total / (100 - invoice_line.discount) )" />
+                    <t t-set="amount_descuento" t-value=" amount_descuento + ( (invoice_line.price_unit * invoice_line.quantity) - invoice_line.price_total )" />
                 </t>
                 <t t-if="invoice_line.price_total &lt; 0">
                     <t t-set="amount_descuento" t-value="amount_descuento - invoice_line.price_total" />
@@ -616,6 +646,12 @@
                 </div>
             </section>
             <section class="mt-4 border border-dark text-center border-3" t-field="o.amount_total_letters" />
+            <t t-set="note_lines" t-value="o.invoice_line_ids.filtered(lambda x: x.display_type == 'line_note')"/>
+            <section t-if="note_lines">
+                <t t-foreach="note_lines" t-as="note_line">
+                    <div t-raw="note_line.name.replace('\n','&lt;br&gt;')"/>
+                </t>
+            </section>
         </div>
     </template>
 
