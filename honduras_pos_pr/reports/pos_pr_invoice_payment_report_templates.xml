@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="pos_pr_invoice_payment_report" name="Employee Timesheet">
+    <template id="pos_pr_invoice_payment_report" name="Invoice Payment Report">
         <t t-call="web.html_container">
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
             <header class="font-weight-bold">
