@@ -22,6 +22,9 @@
     'data': [
         'reports/pos_pr_invoice_payment_report_templates.xml',
         'reports/pos_pr_invoice_payment_reports.xml',
+        'reports/pos_session_report_templates.xml',
+        'reports/pos_session_reports.xml',
         'wizards/pos_pr_invoice_payment_report_wizard_views.xml',
+        'views/pos_session_views.xml',
     ],
 }
