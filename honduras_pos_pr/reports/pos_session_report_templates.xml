@@ -120,7 +120,10 @@
                                     <td><span t-field="order.pos_reference"/></td>
                                     <td><span t-field="order.partner_id"/></td>
                                     <td><span t-field="order.cashier"/></td>
-                                    <td><span t-field="order.amount_total"/></td>
+                                    <td>
+                                        <span t-field="order.amount_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                    </td>
                                 </tr>
                             </t>
                             <tr t-else="">
@@ -145,7 +148,10 @@
                                     <t t-set="filtered_payments" t-value="payments.filtered(lambda x: x.payment_method_id == payment_method)"/>
                                     <tr style="background:lightgray;">
                                         <th colspan="3"><span t-esc="payment_method.name"/></th>
-                                        <th><span t-esc="sum(filtered_payments.mapped('amount'))"/></th>
+                                        <th>
+                                            <span t-esc="sum(filtered_payments.mapped('amount'))"
+                                                t-options="{'widget': 'monetary', 'display_currency': filtered_payments[0].currency_id}"/>
+                                        </th>
                                     </tr>
                                     <tr t-foreach="filtered_payments" t-as="payment">
                                         <td><span t-field="payment.payment_date"/></td>
@@ -177,8 +183,8 @@
                             <t t-if="o.pos_wallet_load_ids">
                                 <tr t-foreach="o.pos_wallet_load_ids" t-as="load">
                                     <td><span t-field="load.name"/></td>
-                                    <td><span t-field="load.amount"/></td>
-                                    <td>
+                                    <td><span t-field="load.amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                    <td class="text-center">
                                         <span t-if="load.reconciled" class="fa fa-check-square-o"/>
                                         <span t-else="" class="fa fa-square-o"/>
                                     </td>
@@ -215,11 +221,12 @@
                                     <t t-set="filtered_payments" t-value="payments.filtered(lambda x: x.payment_method_id == payment_method)"/>
                                     <tr style="background:lightgray;">
                                         <th><span t-esc="payment_method.name"/></th>
-                                        <th colspan="6"><span t-esc="sum(filtered_payments.mapped('display_amount'))"/></th>
+                                        <th colspan="6"><span t-esc="sum(filtered_payments.mapped('display_amount'))"
+                                            t-options="{'widget': 'monetary', 'display_currency': filtered_payments[0].currency_id}"/></th>
                                     </tr>
                                     <tr t-foreach="filtered_payments" t-as="payment">
                                         <td><span t-field="payment.name"/></td>
-                                        <td><span t-field="payment.display_amount"/></td>
+                                        <td><span t-field="payment.display_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
                                         <td><span t-field="payment.move_id"/></td>
                                         <td><span t-field="payment.partner_id"/></td>
                                         <td><span t-field="payment.payment_group_id"/></td>
@@ -252,9 +259,15 @@
                             <t t-if="moves">
                                 <t t-foreach="moves" t-as="move">
                                     <tr style="background:lightgray;">
-                                        <td colspan="7"><span t-field="move.date"/>, <span t-field="move.name"/> (<span t-field="move.ref"/>)</td>
-                                        <td><span t-esc="sum(move.line_ids.mapped('debit'))"/></td>
-                                        <td><span t-esc="sum(move.line_ids.mapped('credit'))"/></td>
+                                        <th colspan="7"><span t-field="move.date"/>, <span t-field="move.name"/> (<span t-field="move.ref"/>)</th>
+                                        <th>
+                                            <span t-esc="sum(move.line_ids.mapped('debit'))"
+                                                t-options="{'widget': 'monetary', 'display_currency': move.currency_id}"/>
+                                        </th>
+                                        <th>
+                                            <span t-esc="sum(move.line_ids.mapped('credit'))"
+                                                t-options="{'widget': 'monetary', 'display_currency': move.currency_id}"/>
+                                        </th>
                                     </tr>
                                     <tr t-foreach="move.line_ids" t-as="line">
                                         <td><span t-field="line.date"/></td>
