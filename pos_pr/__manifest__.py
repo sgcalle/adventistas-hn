@@ -28,17 +28,17 @@
         'security/ir.model.access.csv',
 
         'data/products.xml',
-        'data/assets.xml',
         'data/sequence.xml',
 
-        'views/invoice_payment_views_and_menus.xml',
+        'views/assets.xml',
+        'views/invoice_payment_views.xml',
 
-        'views/inherited/point_of_save_views.xml',
-        'views/inherited/account_journal_views.xml',
-        'views/inherited/account_move_views.xml',
-        'views/inherited/cash_control_views.xml',
+        'views/pos_session_views.xml',
+        'views/account_journal_views.xml',
+        'views/account_move_views.xml',
+        'views/account_bank_statement_cashbox_views.xml',
 
-        'views/settings_view.xml',
+        'views/res_config_settings_views.xml',
     ],
 
     'qweb': [

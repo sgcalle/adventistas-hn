@@ -9,17 +9,22 @@
                     <i class="fa fa-angle-double-left"></i>
                     Cancel
                 </span>
+
+                <span class="button payment_list" style="display: inline-block;float: left;">
+                    Payment List
+                </span>
                 <div class="button-payment-dashboard">
-                    <button t-if="!surchargeAmount and !state.selectedInvoice.id" class="button highlight" t-on-click="applyGlobalPaymentsToInvoices">
+                    <button t-if="!surchargeAmount and !state.selectedInvoice.id" class="button highlight"
+                            t-on-click="applyGlobalPaymentsToInvoices">
                         Apply amounts to invoices <i class="fa fa-angle-double-down"></i>
                     </button>
 
                     <!-- To integrate pos_pr_wallet we use this -->
                     <t t-if="state.payWithWalletButton">
                         <t t-if="state.selectedInvoice.id" t-component="state.payWithWalletButton" pos="props.pos"
-                                      paymentRegister="props.paymentRegister"
-                                      surchargeAmount="surchargeAmount"
-                                      posPrState="state"/>
+                           paymentRegister="props.paymentRegister"
+                           surchargeAmount="surchargeAmount"
+                           posPrState="state"/>
                     </t>
 
                     <button t-if="!surchargeAmount" class="button" t-on-click="validatePayments">
@@ -308,5 +313,90 @@
             </td>
         </tr>
     </tfoot>
+
+    <!-- ==================== -->
+    <!-- INVOICE PAYMENT LIST -->
+    <!-- ==================== -->
+    <t owl="1" t-name="InvoicePaymentListScreen">
+        <div class="pos-payment-register screen">
+            <!-- Header -->
+            <div class="screen-content">
+                <section class="top-content">
+                    <span class="button back" style="display: inline-block;float: left;">
+                        <i class="fa fa-angle-double-left"></i>
+                        Cancel
+                    </span>
+                </section>
+                <section class="full-content">
+                    <div class="window">
+                        <section class="subwindow">
+                            <div class="subwindow-container">
+                                <div class="subwindow-container-fix touch-scrollable scrollable-y">
+                                    <div class="row">
+                                        <div class="col">
+                                            <h2>Payments</h2>
+                                            <div class="tabs">
+                                                <t t-foreach="state.paymentGroupList" t-as="paymentGroup">
+                                                    <InvoicePaymentGroupRow t-on-cancel_payments="onCancelPayment" paymentGroup="paymentGroup"/>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </t>
+
+    <div class="tab" owl="1" t-name="InvoicePaymentGroupRow">
+        <input type="checkbox" t-attf-id="chck--{{state.paymentGroup.id}}"/>
+        <label class="tab-label" t-attf-for="chck--{{state.paymentGroup.id}}">
+            <t t-esc="state.paymentGroup.name"/>
+            <button t-on-click="print" type="button" class="o_pos_pr_payment_actions--print">Print</button>
+            <button t-on-click="onCancelAllPayments" type="button" class="o_pos_pr_payment_actions--cancel">Cancel payments</button>
+        </label>
+        <div class="tab-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Method</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="state.paymentGroup.invoice_payment_ids" t-as="payment">
+                        <InvoicePaymentRow t-on-cancel_payment="onCancelPayment" payment="payment"/>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <tr owl="1" t-name="InvoicePaymentRow" t-attf-class="{{ props.payment.state !== 'cancelled' and 'invoice_payment__cancelled' }}">
+        <td>
+            <t t-esc="props.payment.name"/>
+        </td>
+        <td>
+            <t t-esc="props.payment.payment_method_id.name"/>
+        </td>
+        <td>
+            <t t-esc="props.payment.payment_amount + props.payment.discount_amount"/>
+        </td>
+        <td>
+            <t t-esc="props.payment.date"/>
+        </td>
+        <td class="o_pos_pr_payment_actions">
+            <button t-if="props.payment.state !== 'cancelled'" t-on-click="cancel" type="button"
+                    class="o_pos_pr_payment_actions--cancel">
+                Cancel
+            </button>
+        </td>
+    </tr>
 
 </templates>

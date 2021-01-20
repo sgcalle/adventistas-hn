@@ -54,7 +54,7 @@
         </div>
     </t>
 
-    <t t-extend="InvoicesLineWidget">
+    <t t-extend="InvoicePaymentRegisterScreenWidget">
         <t t-jquery="div.button-payment-dashboard" t-operation="append">
             <div class="button pay-with-wallet">
                 Pay with wallet <i class="fa fa-angle-double-right"></i>

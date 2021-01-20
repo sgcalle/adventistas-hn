@@ -3,7 +3,6 @@
 from odoo import models, fields, api, _, exceptions
 
 
-# noinspection PyProtectedMember
 class PosPR(models.Model):
     """ This model will save payments to invoices
         So we can use it for pay them when the session
@@ -28,17 +27,28 @@ class PosPR(models.Model):
 
     currency_id = fields.Many2one("res.currency", related="pos_session_id.currency_id")
     discount_amount = fields.Monetary()
+    state = fields.Selection(
+        [('draft', "Draft"),
+         ('posted', "Posted"),
+         ('cancelled', "Cancelled")],
+        default='draft', string="State", required=True)
 
     @api.depends('payment_amount', 'discount_amount')
     def _compute_display_amount(self):
         for payment in self:
             payment.display_amount = payment.payment_amount + payment.discount_amount
 
+    def cancel(self):
+        self.write({'state': 'cancelled'})
+
     @api.model
     def create(self, vals):
         if "name" not in vals:
             name = self.env["ir.sequence"].next_by_code('seq.pos.payment.register.invoice.payment')
             vals["name"] = name
+
+        if "state" not in vals or not vals['state']:
+            vals.update(self.default_get(['state']))
 
         return super().create(vals)
 
@@ -52,27 +62,15 @@ class PosPR(models.Model):
             if payment_with_moves:
                 invoice_payment_ids = payment_with_moves.filtered('payment_amount')
                 discount_invoice_payment_ids = payment_with_moves.filtered('discount_amount')
-        pass
 
-    #
-    # def pay_invoice(self):
-    #     pos_session_ids = self.mapped("pos_session_id")
-    #     for pos_session_id in pos_session_ids:
-    #         journal_id = pos_session_id.config_id.journal_id
-    #
-    #         payment_with_moves = pos_session_id.invoice_payment_ids.filtered('move_id')
-    #
-    #         if payment_with_moves:
-    #             invoice_payment_ids = payment_with_moves.filtered('payment_amount')
-    #             discount_invoice_payment_ids = payment_with_moves.filtered('discount_amount')
-    #
-    #             move_id, cash_line_ids = invoice_payment_ids._create_payment_miscellaneous_move(journal_id)
-    #             invoice_payment_ids._create_statements_and_reconcile_with_cash_line_ids(cash_line_ids)
-    #             invoice_payment_ids._reconcile_miscellaneous_move_with_invocies(move_id)
-    #
-    #             discount_invoice_payment_ids._generate_invoice_discount()
-    #
-    #             pos_session_id.invoice_payment_move_id = move_id
+    def reset_draft(self):
+        self.write({'state': 'draft'})
+
+    def write(self, vals):
+        for payment in self:
+            if payment.pos_session_id.state not in ['opened', 'closing_control']:
+                raise exceptions.UserError(_("You cannot modify a invoice payment of a already closed pos session!"))
+        return super(PosPR, self).write(vals)
 
     def _create_payment_miscellaneous_move(self, journal_id):
         payment_miscellaneous_move_id = self.env["account.move"].create({

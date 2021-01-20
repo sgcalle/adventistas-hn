@@ -252,6 +252,7 @@ odoo.define('pos_pr.owl.components', function (require) {
                 this._appendChangesToInvoicePayments(paymentClone);
 
                 const paymentGroup = new PaymentGroup(this._buildPaymentGroupValues(paymentClone));
+                this.props.pos.db.invoice_payment_groups.push(paymentGroup);
 
                 this._updateInvoicesAmounts(invoicePayments);
 
@@ -328,6 +329,7 @@ odoo.define('pos_pr.owl.components', function (require) {
 
             invoicePayment.payment_amount = properties.paymentAmount;
             invoicePayment.discount_amount = properties.paymentDiscount || 0;
+            invoicePayment.state = 'draft';
 
             return invoicePayment;
         };
@@ -496,6 +498,70 @@ odoo.define('pos_pr.owl.components', function (require) {
         }
     }
 
+    /////////////////////////////////
+    // Invoice Payment List Screen //
+    /////////////////////////////////
+
+    class InvoicePaymentRow extends Component {
+        static props = ['payment'];
+
+        cancel() {
+            this.trigger('cancel_payment', this.props.payment);
+        }
+    }
+
+    class InvoicePaymentGroupRow extends Component {
+        static props = ['paymentGroup']
+        static components = {InvoicePaymentRow};
+
+        constructor(parent, props) {
+            super(...arguments);
+            this.state = useState({
+                paymentGroup: props.paymentGroup || {}
+            })
+        }
+
+        print() {
+            alert("In construction!");
+        }
+
+        get arePaymentCancelled() {
+            console.log("Queso")
+            return true;
+        }
+
+        onCancelPayment(event) {
+            this.trigger('cancel_payments', [event.detail]);
+        }
+
+        onCancelAllPayments() {
+            this.trigger('cancel_payments', this.props.paymentGroup.invoice_payment_ids);
+        }
+    }
+
+    class InvoicePaymentListScreen extends Component {
+        static props = ['pos', 'paymentList'];
+        static components = {InvoicePaymentGroupRow};
+
+        state = useState({
+            partner: {},
+            paymentGroupList: [],
+        });
+
+        updateGroupList() {
+            this.state.paymentGroupList = _.filter(this.props.pos.db.invoice_payment_groups, paymentGroup => paymentGroup.partner_id.id == this.state.partner.id);
+        }
+
+        async onCancelPayment(event) {
+            const payments = event.detail;
+            const paymentIds = _.map(payments, payment => payment.id)
+            await this.props.pos.cancel_invoice_payment_ids(paymentIds)
+            _.each(payments, payment => {
+                payment.state = 'cancelled';
+            });
+        }
+    }
+
     return {
         PosPRScreenInvoiceListRow,
         PosPRScreenLeftSide,
@@ -505,6 +571,7 @@ odoo.define('pos_pr.owl.components', function (require) {
         PosPRPaymentList,
         PosPRScreenRightSide,
         PosPRScreen,
+        InvoicePaymentListScreen,
     };
 
 });

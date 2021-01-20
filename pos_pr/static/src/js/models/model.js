@@ -65,6 +65,7 @@ odoo.define('pos_pr.models', function (require) {
         fields: [
             {name: 'id', type: 'integer'},
             {name: 'name', type: 'char'},
+            {name: 'state', type: 'char'},
 
             {name: 'payment_amount', type: 'float'},
             {name: 'discount_amount', type: 'float'},
