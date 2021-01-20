@@ -522,12 +522,12 @@ odoo.define('pos_pr.owl.components', function (require) {
         }
 
         print() {
-            alert("In construction!");
+            const paymentGroupCloned = _.clone(this.props.paymentGroup);
+            this.trigger('print_payment_group', paymentGroupCloned);
         }
 
         get arePaymentCancelled() {
-            console.log("Queso")
-            return true;
+            return _.reduce(this.props.paymentGroup.invoice_payment_ids, (memo, payment) => memo & payment.state === 'cancelled', 1);
         }
 
         onCancelPayment(event) {
@@ -550,6 +550,15 @@ odoo.define('pos_pr.owl.components', function (require) {
 
         updateGroupList() {
             this.state.paymentGroupList = _.filter(this.props.pos.db.invoice_payment_groups, paymentGroup => paymentGroup.partner_id.id == this.state.partner.id);
+        }
+//this.props.pos.db.partner_by_id[]
+        onPrintPaymentGroup(event) {
+            const paymentGroup = event.detail;
+            this.props.pos.gui.show_screen('invoicePaymentReceipt', {
+                paymentGroup,
+                invoiceAddress: this.props.pos.db.partner_by_id[paymentGroup.partner_id.id],
+                changeAmount: 0,
+            });
         }
 
         async onCancelPayment(event) {

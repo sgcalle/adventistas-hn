@@ -337,7 +337,10 @@
                                             <h2>Payments</h2>
                                             <div class="tabs">
                                                 <t t-foreach="state.paymentGroupList" t-as="paymentGroup">
-                                                    <InvoicePaymentGroupRow t-on-cancel_payments="onCancelPayment" paymentGroup="paymentGroup"/>
+                                                    <InvoicePaymentGroupRow
+                                                            t-on-cancel_payments="onCancelPayment"
+                                                            t-on-print_payment_group="onPrintPaymentGroup"
+                                                            paymentGroup="paymentGroup"/>
                                                 </t>
                                             </div>
                                         </div>
@@ -356,7 +359,7 @@
         <label class="tab-label" t-attf-for="chck--{{state.paymentGroup.id}}">
             <t t-esc="state.paymentGroup.name"/>
             <button t-on-click="print" type="button" class="o_pos_pr_payment_actions--print">Print</button>
-            <button t-on-click="onCancelAllPayments" type="button" class="o_pos_pr_payment_actions--cancel">Cancel payments</button>
+            <button t-if="!arePaymentCancelled" t-on-click="onCancelAllPayments" type="button" class="o_pos_pr_payment_actions--cancel">Cancel payments</button>
         </label>
         <div class="tab-content">
             <table>
@@ -378,7 +381,7 @@
         </div>
     </div>
 
-    <tr owl="1" t-name="InvoicePaymentRow" t-attf-class="{{ props.payment.state !== 'cancelled' and 'invoice_payment__cancelled' }}">
+    <tr owl="1" t-name="InvoicePaymentRow" t-attf-class="{{ props.payment.state === 'cancelled' and 'o_pos_pr_payment_row__cancelled' }}">
         <td>
             <t t-esc="props.payment.name"/>
         </td>
