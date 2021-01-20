@@ -36,7 +36,9 @@ class TuitionPlanInstallment(models.Model):
         for installment in self.filtered(lambda i: i.plan_id.active and i.product_ids):
             plan = installment.plan_id
             students = self._context.get("students") or (plan.partner_ids | plan.default_partner_ids)
-            students = students.filtered(lambda s: s.grade_level_id in plan.grade_level_ids and s.student_status == "Enrolled")
+            students = students.filtered(lambda s: s.grade_level_id in plan.grade_level_ids)
+            if plan.apply_for_status:
+                students = students.filtered(lambda s: s.student_status_id == plan.apply_for_status)
             if not students:
                 continue
             invoice_due_date = False
