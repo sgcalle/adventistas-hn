@@ -121,7 +121,9 @@ odoo.define('pos_pr.models', function (require) {
         _getPaymentAmountTotal: function () {
             let paymentAmountTotal = 0;
             _.each(this.invoice_payment_ids, function (invoicePayment) {
-                paymentAmountTotal += invoicePayment.payment_amount || 0;
+                if (invoicePayment.state !== 'cancelled') {
+                    paymentAmountTotal += invoicePayment.payment_amount || 0;
+                }
             });
             return paymentAmountTotal;
         }

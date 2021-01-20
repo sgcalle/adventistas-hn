@@ -14,7 +14,7 @@ class PaymentGroup(models.Model):
 
     name = fields.Char(string='Name')
     invoice_payment_ids = fields.One2many("pos_pr.invoice.payment", "payment_group_id", string="Payments")
-    payment_amount_total = fields.Monetary()
+    payment_amount_total = fields.Monetary(compute='_compute_amount_total', store=True)
     payment_change = fields.Monetary()
 
     partner_id = fields.Many2one('res.partner', required=True)
@@ -30,21 +30,10 @@ class PaymentGroup(models.Model):
         if 'date' not in vals:
             vals['date'] = fields.Datetime.to_string(fields.Datetime.now())
 
-        # payment_change = vals.get('payment_change', 0)
-        # if payment_change:
-        #     invoice_payment_ids = vals.get('invoice_payment_ids', [])
-        #
-        #     cash_id = self.env['pos.session'].browse(vals['pos_session_id']).payment_method_ids.filtered('is_cash_count')[:1]
-        #
-        #     invoice_payment_ids.append([0, 0, {
-        #         'date': vals['date'],
-        #         'partner_id': vals.get('partner_id', False),
-        #         'invoice_address_id': vals.get('partner_id', False),
-        #         'payment_amount': -payment_change,
-        #         'payment_method_id': cash_id.id,
-        #         'pos_session_id': vals['pos_session_id'],
-        #         # 'move_id': '',
-        #     }])
-        #     vals['invoice_payment_ids'] = invoice_payment_ids
-
         return super().create(vals)
+
+    @api.depends('invoice_payment_ids', 'invoice_payment_ids.state')
+    def _compute_amount_total(self):
+        for payment_group_id in self:
+            payment_amount_total = sum(payment_group_id.invoice_payment_ids.filtered(lambda p: p.state != 'cancelled').mapped('payment_amount'))
+            payment_group_id.payment_amount_total = payment_amount_total

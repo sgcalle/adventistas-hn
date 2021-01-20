@@ -56,8 +56,11 @@ odoo.define('pos_pr.components.reports', function (require) {
 
         _compute_invoice: function () {
             const invoices = [];
-            _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
+            _.each(this.paymentGroup.invoice_payment_ids, (invoicePayment) => {
                 if (!invoices.some(invoice => invoice.id === invoicePayment.move_id.id)) {
+                    if (!invoicePayment.move_id.amount_total) {
+                        invoicePayment.move_id = this.pos.db.due_invoices_by_id[invoicePayment.move_id.id]
+                    }
                     invoices.push(invoicePayment.move_id);
                 }
             });
@@ -100,12 +103,13 @@ odoo.define('pos_pr.components.reports', function (require) {
         _compute_payment_totals_by_method: function () {
             const paymentTotalsByMethod = {};
             _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
-
-                const paymentMethod = invoicePayment.payment_method_id;
-                if (!paymentTotalsByMethod[paymentMethod.id]) {
-                    paymentTotalsByMethod[paymentMethod.id] = 0;
+                if (invoicePayment.state !== 'cancelled') {
+                    const paymentMethod = invoicePayment.payment_method_id;
+                    if (!paymentTotalsByMethod[paymentMethod.id]) {
+                        paymentTotalsByMethod[paymentMethod.id] = 0;
+                    }
+                    paymentTotalsByMethod[paymentMethod.id] += invoicePayment.payment_amount;
                 }
-                paymentTotalsByMethod[paymentMethod.id] += invoicePayment.payment_amount;
             });
             return paymentTotalsByMethod;
         }
