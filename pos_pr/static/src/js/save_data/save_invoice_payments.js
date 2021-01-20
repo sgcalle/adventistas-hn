@@ -39,7 +39,6 @@ odoo.define("pos_pr.save_invoice_payments", function (require) {
             });
         },
 
-
         send_invoice_payment_groups: function (invoicePaymentsJson) {
             return new Promise(function (resolve, reject) {
                 if (invoicePaymentsJson && invoicePaymentsJson.length) {
@@ -133,6 +132,14 @@ odoo.define("pos_pr.save_invoice_payments", function (require) {
 
             }
         },
+
+        cancel_invoice_payment_ids(invoicePaymentIds) {
+            return rpc.query({
+                model: "pos_pr.invoice.payment",
+                method: "write",
+                args: [invoicePaymentIds, {state: 'cancelled'}],
+            }, {});
+        }
     });
 
 });

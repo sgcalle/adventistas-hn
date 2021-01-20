@@ -28,7 +28,7 @@ odoo.define('pos_pr.components.buttons', function (require) {
 
         _go_to_register_payment_screen: function () {
             // var self = this;
-            this.gui.show_screen("pos_invoice_payment_register_widget");
+            this.gui.show_screen("invoice_payment_register_screen");
         },
     });
 
