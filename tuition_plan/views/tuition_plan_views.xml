@@ -50,6 +50,7 @@
                                 - <field name="period_date_to" class="oe_inline" attrs="{'readonly': [('period_type','!=','manual')]}" force_save="1"/>
                             </div>
                             <field name="first_charge_date"/>
+                            <field name="override_installment_dates"/>
                             <label for="payment_term_id" options="{'no_create_edit': 1, 'no_create':1}"/>
                             <div class="d-flex">
                                 <field name="payment_term_id" placeholder="Terms" options="{'no_create_edit': 1}"/>
@@ -61,6 +62,7 @@
                         <group>
                             <field name="grade_level_ids" widget="many2many_tags" options="{'no_create_edit': 1, 'no_create':1}"/>
                             <field name="category_id" options="{'no_create_edit': 1, 'no_create':1}"/>
+                            <field name="apply_for_status"/>
                             <field name="automation"/>
                             <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
                         </group>
@@ -112,6 +114,17 @@
                             <group string="Auto Assigned" attrs="{'invisible': [('default_partner_ids','=',[])]}">
                                 <field name="default_partner_ids" nolabel="1"/>
                             </group>
+                        </page>
+                        <page name="installment_dates" string="Installment Dates" attrs="{'invisible': [('override_installment_dates','=',False)]}">
+                            <div class="alert alert-info" role="alert" attrs="{'invisible': [('id','!=',False)]}">
+                                <span class="fa fa-info"/>
+                                Kindly save the record first before you can edit the installment dates
+                            </div>
+                            <field name="installment_ids" attrs="{'readonly': [('id','=',False)]}">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                </tree>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>

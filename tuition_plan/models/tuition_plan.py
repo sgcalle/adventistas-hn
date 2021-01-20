@@ -4,6 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
+from odoo.addons.school_base.models.res_partner import SELECT_STATUS_TYPES
 
 class TuitionPlan(models.Model):
     _name = "tuition.plan"
@@ -64,6 +65,7 @@ class TuitionPlan(models.Model):
         comodel_name="tuition.plan.installment",
         inverse_name="plan_id",
         help="Installment dates generated for the tuition plan based on the first charge date")
+    override_installment_dates = fields.Boolean(string="Override Installment Dates")
     product_ids = fields.One2many(string="Products",
         comodel_name="tuition.plan.product",
         inverse_name="plan_id",
@@ -97,6 +99,10 @@ class TuitionPlan(models.Model):
     report_ids = fields.One2many(string="Report Lines",
         comodel_name="tuition.plan.report",
         inverse_name="plan_id")
+    apply_for_status = fields.Selection(string="Apply for Status",
+        selection=SELECT_STATUS_TYPES,
+        help="Will only apply for students with matching status. If empty, applies to any status.",
+        default="enrolled")
 
     @api.constrains("default", "grade_level_ids", "period_date_from", "period_date_to", "category_id", "active")
     def _check_default(self):
