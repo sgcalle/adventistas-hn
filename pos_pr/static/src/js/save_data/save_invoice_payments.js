@@ -39,26 +39,17 @@ odoo.define("pos_pr.save_invoice_payments", function (require) {
             });
         },
 
-        send_invoice_payment_groups: function (invoicePaymentsJson) {
-            return new Promise(function (resolve, reject) {
-                if (invoicePaymentsJson && invoicePaymentsJson.length) {
-                    rpc.query({
-                        model: "pos_pr.payment_group",
-                        method: "create",
-                        args: [invoicePaymentsJson],
-                    }, {}).then(function (data) {
-                        resolve(data);
-                    }).catch(function (error) {
-                        reject(error);
-                    });
-                } else {
-                    resolve();
-                }
-            });
+        send_invoice_payment_groups: async function (invoicePaymentsJson) {
+            if (invoicePaymentsJson && invoicePaymentsJson.length) {
+                return await rpc.query({
+                    model: "pos_pr.payment_group",
+                    method: "create",
+                    args: [invoicePaymentsJson],
+                }, {})
+            }
         },
 
-        synch_invoive_payment_and_surcharges(invoicePaymentGroup, surcharges) {
-            const self = this;
+        async synch_invoive_payment_and_surcharges(invoicePaymentGroup, surcharges) {
             invoicePaymentGroup = invoicePaymentGroup || {};
             surcharges = surcharges || [];
 
@@ -95,19 +86,37 @@ odoo.define("pos_pr.save_invoice_payments", function (require) {
             });
 
             if (surchargesToSynch.length > 0 || invoicePaymentsToSynch.length > 0) {
+                try {
+                    const data = await Promise.all([this.send_surcharge(surchargesToSynch),
+                                                           this.send_invoice_payment_groups(invoicePaymentsToSynch)]);
+                    const paymentGroupIds = data[1];
 
-                Promise.all([this.send_surcharge(surchargesToSynch), this.send_invoice_payment_groups(invoicePaymentsToSynch)])
-                    .then(function () {
-                        self.trigger('invoice_payment:synch', {
-                            'state': 'connected',
-                        });
-                        self.gui.show_popup('alert', {
-                            'title': _t('Changes saved correctly'),
-                            'body': _t('In order to apply the changes in backend the Point of sale needs to be closed and validated'),
-                        });
-                    }).catch(function (reason) {
+                    // Now we get every id from odoo
+                    const invoicePaymentIds = await rpc.query({
+                        model: "pos_pr.invoice.payment",
+                        method: "search_read",
+                        domain: [['payment_group_id', '=', paymentGroupIds[0]]],
+                        fields: [
+                            'id',
+                            'name',
+                        ],
+                    }, {})
 
-                    var error = reason.message;
+                    _.each(invoicePaymentIds, invoicePaymentId => {
+                        const payment = _.find(invoicePaymentGroup.invoice_payment_ids, payment => payment.name === invoicePaymentId.name);
+                        payment.id = invoicePaymentId.id;
+                    })
+
+                    this.trigger('invoice_payment:synch', {
+                        'state': 'connected',
+                    });
+                    this.gui.show_popup('alert', {
+                        'title': _t('Changes saved correctly'),
+                        'body': _t('In order to apply the changes in backend the Point of sale needs to be closed and validated'),
+                    });
+                    return data;
+                } catch (reason) {
+                    const error = reason.message;
                     if (error.code === 200) {
                         // Business Logic Error, not a connection problem
                         //if warning do not need to display traceback!!
@@ -116,20 +125,19 @@ odoo.define("pos_pr.save_invoice_payments", function (require) {
                         }
 
                         // Hide error if already shown before ...
-                        self.gui.show_popup('error-traceback', {
+                        this.gui.show_popup('error-traceback', {
                             'title': error.data.message,
                             'body': error.data.debug
                         });
                     }
-                    self.trigger('invoice_payment:synch', {
+                    this.trigger('invoice_payment:synch', {
                         'state': 'disconnected',
                         'pending': surchargesToSynch.length + invoicePaymentsToSynch.length,
                     });
-                    self.db.save('pending_invoice_payments', invoicePaymentsToSynch);
-                    self.db.save('pending_surcharge_invoices', surchargesToSynch);
+                    this.db.save('pending_invoice_payments', invoicePaymentsToSynch);
+                    this.db.save('pending_surcharge_invoices', surchargesToSynch);
                     throw error;
-                });
-
+                }
             }
         },
 

@@ -229,6 +229,22 @@
   width: 100% !important;
   /* Taken from boostrap 4 input css this is not my code*/
 }
+.pos .pos-payment-register .invoice-details * > .fa-hover-show, .pos .pos-payment-register .invoice-details *:hover > .fa-hover-hidden {
+  display: none;
+}
+.pos .pos-payment-register .invoice-details *:hover > .fa-hover-show {
+  display: inline-block;
+}
+.pos .pos-payment-register .invoice-details .js-more-detail button {
+  font-size: 32px;
+  z-index: 10;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+.pos .pos-payment-register .invoice-details .js-more-detail button:hover {
+  background: #e6e6e6;
+}
 .pos .pos-payment-register .invoice-details .invoice-details-left {
   float: left;
   width: 50%;

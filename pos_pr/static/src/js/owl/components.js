@@ -26,6 +26,10 @@ odoo.define('pos_pr.owl.components', function (require) {
             return (this.props.invoice.amount_residual || 0) - amount_paid - (this.props.invoice.discount_amount || 0);
         }
 
+        state = useState({
+            show_details: false
+        })
+
     }
 
     class PosPRScreenLeftSide extends Component {
@@ -64,6 +68,26 @@ odoo.define('pos_pr.owl.components', function (require) {
 
     class PosPRInvoiceDetails extends Component {
         static props = ['pos', 'paymentRegister', 'posPrState'];
+
+        state = useState({
+            toggleDetails: false,
+        })
+
+        toggleMoreDetails() {
+            this.state.toggleDetails = !this.state.toggleDetails;
+        }
+
+        async printInvoice() {
+            try {
+                let invoice_id = this.props.posPrState.selectedInvoice.id;
+                await this.props.pos.chrome.do_action('account.account_invoices_without_payment',{additional_context:{
+                    active_ids: [invoice_id],
+                }});
+            } catch {
+                throw "There is no internet connection, impossible to send the email."
+            }
+        }
+
     }
 
     class PosPRPaymentListRow extends Component {
@@ -252,7 +276,6 @@ odoo.define('pos_pr.owl.components', function (require) {
                 this._appendChangesToInvoicePayments(paymentClone);
 
                 const paymentGroup = new PaymentGroup(this._buildPaymentGroupValues(paymentClone));
-                this.props.pos.db.invoice_payment_groups.push(paymentGroup);
 
                 this._updateInvoicesAmounts(invoicePayments);
 
@@ -262,6 +285,7 @@ odoo.define('pos_pr.owl.components', function (require) {
                     changeAmount: this.changeAmount,
                 });
                 this.state.extraPayments = [];
+                this.props.pos.db.invoice_payment_groups.push(paymentGroup);
                 this.props.pos.synch_invoive_payment_and_surcharges(paymentGroup, []);
 
                 // _.each(self.invoice_ids, function (invoice) {

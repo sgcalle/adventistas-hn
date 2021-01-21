@@ -26,11 +26,11 @@ class AccountMove(models.Model):
     surcharge_amount = fields.Monetary(default=_default_surcharge_amount)
     is_overdue = fields.Boolean(compute="_compute_is_overdue", default=False)
     is_overdue_stored = fields.Boolean(compute="_compute_is_overdue_stored", store=True, default=False)
-    pos_pr_payment_ids = fields.One2many("pos_pr.invoice.payment", "move_id")
+    pos_pr_payment_ids = fields.One2many("pos_pr.invoice.payment", "move_id", domain=[('state', '!=', 'cancelled')])
 
     pos_pr_paid_amount = fields.Float(compute="_compute_pos_pr_paid_amount", store=True)
 
-    @api.depends("pos_pr_payment_ids")
+    @api.depends("pos_pr_payment_ids", "pos_pr_payment_ids.state")
     def _compute_pos_pr_paid_amount(self):
         for move_id in self:
             not_closed_payments = move_id.pos_pr_payment_ids.filtered(lambda payment: payment.pos_session_id.state in ['opened', 'closing_control'])

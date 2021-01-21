@@ -8,15 +8,17 @@ class PosSession(models.Model):
     _inherit = "pos.session"
 
     invoice_payment_ids = fields.One2many("pos_pr.invoice.payment", "pos_session_id")
-    invoice_payment_groups_ids = fields.Many2many('pos_pr.payment_group', compute='_compute_invoice_payment_groups_ids', store=True)
     invoice_surcharge_ids = fields.One2many("pos_pr.invoice.surcharge", "pos_session_id")
+
+    invoice_payment_groups_ids = fields.Many2many('pos_pr.payment_group', compute='_compute_invoice_payment_groups_ids', store=True)
+
     invoice_payment_amount = fields.Float(compute='_compute_cash_balance')
     invoice_payment_move_id = fields.Many2one("account.move", string="Invoice payment misc move")
 
     @api.depends('invoice_payment_ids')
     def _compute_invoice_payment_groups_ids(self):
         for pos_session in self:
-            pos_session.invoice_payment_groups_ids = pos_session.invoice_payment_ids.mapped('payment_group_id')
+            pos_session.invoice_payment_groups_ids = pos_session.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled').mapped('payment_group_id')
 
     def json_get_paid_surcharge_by_customer(self):
         self.ensure_one()
@@ -36,11 +38,11 @@ class PosSession(models.Model):
         if self.invoice_payment_ids:
             self._create_payment_register_invoices_payment()
             self._create_invoices_discount()
-            self.invoice_payment_ids.mapped('move_id')._compute_pos_pr_paid_amount()
+            self.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled').mapped('move_id')._compute_pos_pr_paid_amount()
         return action
 
     def _create_payment_register_invoices_payment(self):
-        invoice_payment_ids = self.invoice_payment_ids.filtered('payment_amount')
+        invoice_payment_ids = self.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled' and payment.payment_amount)
         if invoice_payment_ids:
             journal = self.config_id.journal_id
             account_move = self.env['account.move'].with_context(default_journal_id=journal.id).create({
@@ -100,7 +102,7 @@ class PosSession(models.Model):
                     lines.reconcile()
 
     def _create_invoices_discount(self):
-        discount_payment_ids = self.invoice_payment_ids.filtered('discount_amount')
+        discount_payment_ids = self.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled' and payment.discount_amount)
         discount_payment_ids._generate_invoice_discount()
 
     def _get_payment_move_line_vals_list(self, invoice_payment_ids):
@@ -257,12 +259,12 @@ class PosSession(models.Model):
             if cash_payment_method_ids:
                 transaction_total_amount = session.get_cash_transaction_total_amount()
                 total_cash_invoice_payment_amount = 0.0 if session.state == 'closed' else sum(
-                    session.invoice_payment_ids.filtered("payment_method_id.is_cash_count").mapped("display_amount"))
+                    session.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled' and payment.payment_method_id.is_cash_count).mapped("display_amount"))
 
                 cash_register_total_entry_encoding = session.cash_register_id.total_entry_encoding + transaction_total_amount + total_cash_invoice_payment_amount
 
                 session.cash_register_total_entry_encoding = cash_register_total_entry_encoding
-                session.invoice_payment_amount = sum(session.invoice_payment_ids.mapped("display_amount"))
+                session.invoice_payment_amount = sum(session.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled').mapped("display_amount"))
                 session.cash_register_balance_end = session.cash_register_balance_start + session.cash_register_total_entry_encoding
                 session.cash_register_difference = session.cash_register_balance_end_real - session.cash_register_balance_end
             else:

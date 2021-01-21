@@ -1,4 +1,4 @@
-odoo.define("pos_pr.load_data.models", function (require) {
+odoo.define("pos_pr.load_data.models", require => {
 
     const models = require("point_of_sale.models")
     const PosDB = require("point_of_sale.DB")
@@ -9,7 +9,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
             model: "account.journal",
             fields: ["display_name", "inbound_payment_method_ids"],
             domain: [],
-            loaded: function (self, journals) {
+            loaded(self, journals) {
                 self.db.add_journals(journals);
             }
         }
@@ -17,20 +17,54 @@ odoo.define("pos_pr.load_data.models", function (require) {
     models.load_models([
         {
             model: "account.move",
-            fields: ["name", "journal_id", "partner_id", "invoice_date", "invoice_date_due", "amount_total",
-                "amount_residual", "surcharge_invoice_id", "is_overdue", "surcharge_amount", "pos_pr_paid_amount",],
+            fields: [
+                "name",
+                "journal_id",
+                "partner_id",
+                "invoice_date",
+                "invoice_date_due",
+                "amount_total",
+                "amount_residual",
+                "surcharge_invoice_id",
+                "is_overdue",
+                "surcharge_amount",
+                "pos_pr_paid_amount",
+                'invoice_line_ids',
+            ],
             domain: [
                 ["type", "=", "out_invoice"],
                 ["invoice_payment_state", "!=", "paid"],
                 ["state", "=", "posted"],
                 ["partner_id", "!=", false],
             ],
-            order: [{name: 'invoice_date_due', asc: true}], //, function (name) { return {name: name}; }),
-            loaded: function (self, invoices) {
+            order: [{name: 'invoice_date_due', asc: true}], //, (name) { return {name: name}; }) =>,
+            loaded(self, invoices) {
                 self.db.add_due_invoices(invoices);
             }
         }
     ]);
+
+    models.load_models([
+        {
+            model: 'account.move.line',
+            fields: [
+                'move_id',
+                'product_id',
+                'name',
+                'quantity',
+                'price_unit',
+                'discount',
+                'tax_ids',
+                'price_subtotal',
+                'price_total',
+            ],
+            domain: self => [['move_id', 'in', self.db.due_invoices_ids], ['exclude_from_invoice_tab', '=', false]],
+            loaded: (self, invoiceLineIds) => {
+                self.add_due_invoice_lines(invoiceLineIds);
+            }
+        }
+    ])
+
     models.load_models([
         {
             model: "pos.payment.method",
@@ -38,7 +72,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
             domain: [
                 ["is_pos_pr_discount", "=", true]
             ],
-            loaded: function (self, posPaymentMethods) {
+            loaded(self, posPaymentMethods) {
                 if (posPaymentMethods && posPaymentMethods.length > 0) {
                     self.db.discount_payment_method = posPaymentMethods[0];
                 }
@@ -50,10 +84,10 @@ odoo.define("pos_pr.load_data.models", function (require) {
         {
             model: "pos_pr.invoice.payment",
             fields: ["id", "name"],
-            domain: function (self) {
+            domain(self) {
                 return [['id', 'in', self.pos_session.invoice_payment_ids]];
             },
-            loaded: function (self, invoicePayments) {
+            loaded(self, invoicePayments) {
                 self.db.add_invoice_payments(invoicePayments);
             }
         }
@@ -74,10 +108,10 @@ odoo.define("pos_pr.load_data.models", function (require) {
                 'invoice_address_id',
                 'state',
             ],
-            domain: function (self) {
+            domain(self) {
                 return [['id', 'in', self.pos_session.invoice_payment_ids]];
             },
-            loaded: function (self, invoicePayments) {
+            loaded(self, invoicePayments) {
                 self.db.add_invoice_payments(invoicePayments);
             }
         }
@@ -96,23 +130,27 @@ odoo.define("pos_pr.load_data.models", function (require) {
                 'pos_session_id',
                 'partner_id',
             ],
-            domain: function (self) {
+            domain(self) {
                 return [['id', 'in', self.pos_session.invoice_payment_groups_ids]];
             },
-            loaded: function (self, invoicePayments) {
+            loaded(self, invoicePayments) {
                 self.db.add_invoice_payment_groups(invoicePayments);
             }
         }
     ]);
 
     PosDB.include({
-        init: function (options) {
+        init(options) {
             this._super(options);
             this.journal = [];
             this.journal_by_id = {};
 
             this.due_invoices = [];
             this.due_invoices_by_id = {};
+            this.due_invoices_ids = [];
+
+            this.due_invoice_lines = [];
+            this.due_invoice_lines_by_id = {};
 
             this.invoice_payments = [];
             this.invoice_payments_by_id = {};
@@ -121,18 +159,16 @@ odoo.define("pos_pr.load_data.models", function (require) {
             this.invoice_payment_groups_by_id = {};
         },
 
-        add_journals: function (add_journals) {
+        add_journals(add_journals) {
             this.journals = add_journals;
             let self = this;
-            _.each(add_journals, function (journal) {
+            _.each(add_journals, journal => {
                 self.journal_by_id[journal.id] = journal;
             });
         },
 
-        add_due_invoices: function (invoices) {
-            const self = this;
-
-            _.each(invoices, function (invoiceJson) {
+        add_due_invoices(invoices) {
+            _.each(invoices, invoiceJson => {
                 const invoice = new posPrModels.AccountMove(invoiceJson);
 
                 invoice.amount_residual -= invoice.pos_pr_paid_amount;
@@ -141,12 +177,15 @@ odoo.define("pos_pr.load_data.models", function (require) {
                 invoice.original_surcharge = invoice.surcharge_amount;
                 invoice.session_payment = 0;
                 invoice.discount_amount = 0;
-                self.due_invoices.push(invoice);
-                self.due_invoices_by_id[invoice.id] = invoice;
+                this.due_invoices.push(invoice);
+                this.due_invoices_by_id[invoice.id] = invoice;
+
+                this.due_invoices_ids.push(invoice.id);
+
             });
         },
 
-        add_invoice_payments: function (invoicePayments) {
+        add_invoice_payments(invoicePayments) {
             this.invoice_payments = [];
             _.each(invoicePayments, paymentJson => {
                 const payment = new posPrModels.InvoicePayment(paymentJson);
@@ -155,7 +194,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
             });
         },
 
-        add_invoice_payment_groups: function (invoicePaymentGroups) {
+        add_invoice_payment_groups(invoicePaymentGroups) {
             this.invoice_payment_groups = [];
             _.each(invoicePaymentGroups, paymentGroupJson => {
                 const paymentGroup = new posPrModels.PaymentGroup(paymentGroupJson);
@@ -179,11 +218,31 @@ odoo.define("pos_pr.load_data.models", function (require) {
 
     models.PosModel = models.PosModel.extend({
 
+        add_due_invoice_lines(invoiceLines) {
+            _.each(invoiceLines, invoiceLineJSON => {
+                const invoiceLine = new posPrModels.AccountMoveLine(invoiceLineJSON);
+
+                invoiceLine.taxes = [];
+                _.each(invoiceLine.tax_ids, tax_id => {
+                    invoiceLine.taxes.push(this.taxes_by_id[tax_id]);
+                });
+                invoiceLine.taxes_joined = _.map(invoiceLine.taxes, tax => `"${tax.name}"`).join(', ');
+                this.db.due_invoice_lines.push(invoiceLine);
+                this.db.due_invoice_lines_by_id[invoiceLine.id] = invoiceLine;
+
+                const move = this.db.due_invoices_by_id[invoiceLine.move_id.id];
+                if (!move.invoice_lines) {
+                    move.invoice_lines = [];
+                }
+                move.invoice_lines.push(invoiceLine);
+            });
+        },
+
         /**
          * Get the tCurrent number in the payment sequence
          * @param {Boolean} reset Reset the payment sequence
          */
-        getCurrentPaymentSequenceNumber: function (reset) {
+        getCurrentPaymentSequenceNumber(reset) {
             reset = !!reset;
             let paymentSequenceNumber = parseInt(this.db.load('payment_sequence_number', 0));
             if (!paymentSequenceNumber || reset) {
@@ -197,7 +256,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
          * Get the next number in the payment sequence
          * @param {Boolean} [reset] Reset the payment sequence
          */
-        getNextPaymentSequenceNumber: function (reset) {
+        getNextPaymentSequenceNumber(reset) {
             reset = !!reset;
             const nextNumber = this.getCurrentPaymentSequenceNumber(reset) + 1;
             this.db.save('payment_sequence_number', nextNumber);
@@ -209,7 +268,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
          * Get the tCurrent number in the payment group sequence
          * @param {Boolean} reset Reset the payment group sequence
          */
-        getCurrentPaymentGroupSequenceNumber: function (reset) {
+        getCurrentPaymentGroupSequenceNumber(reset) {
             reset = !!reset;
             let paymentSequenceNumber = parseInt(this.db.load('payment_group_sequence_number', 0));
 
@@ -225,14 +284,14 @@ odoo.define("pos_pr.load_data.models", function (require) {
          * Get the next number in the payment group sequence
          * @param {Boolean} [reset] reset Reset the payment group sequence
          */
-        getNextPaymentGroupSequenceNumber: function (reset) {
+        getNextPaymentGroupSequenceNumber(reset) {
             reset = !!reset;
             const nextNumber = this.getCurrentPaymentGroupSequenceNumber(reset) + 1;
             this.db.save('payment_group_sequence_number', nextNumber);
             return nextNumber;
         },
 
-        generateNextPaymentNumber: function () {
+        generateNextPaymentNumber() {
             const nextNumber = this.getNextPaymentSequenceNumber();
             return 'POS-P/'
                 + this._zero_pad(this.pos_session.id, 5) + '-'
@@ -240,7 +299,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
                 + this._zero_pad(nextNumber, 5);
         },
 
-        generateNextPaymentGroupNumber: function () {
+        generateNextPaymentGroupNumber() {
             const nextNumber = this.getNextPaymentGroupSequenceNumber();
             return 'POS-PG/'
                 + this._zero_pad(this.pos_session.id, 5) + '-'
@@ -248,7 +307,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
                 + this._zero_pad(nextNumber, 5);
         },
 
-        _zero_pad: function (num, size) {
+        _zero_pad(num, size) {
             let s = "" + num;
             while (s.length < size) {
                 s = "0" + s;
@@ -259,7 +318,7 @@ odoo.define("pos_pr.load_data.models", function (require) {
         /**
          * Get the company with a specific format
          */
-        getFormattedCompanyAddress: function () {
+        getFormattedCompanyAddress() {
 
             let formattedCompanyAddress = "";
             if (this.company.country) {

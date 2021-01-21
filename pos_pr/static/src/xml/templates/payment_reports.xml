@@ -223,7 +223,7 @@
                             <div class="row text-right payment-amount-total justify-content-end pr-4 h4">
                                 <div class="col-6"><strong class="label">Total paid: </strong></div>
                                 <div class="col-6">
-<!--                                    <t t-if="!widget.paymentGroup.payment_amount_total">-->
+<!--                                    <t t-if="!widgjs_payment_list_placeholderet.paymentGroup.payment_amount_total">-->
                                     <t t-set="payment_amount_total" t-value="0"/>
                                     <t t-foreach="widget.paymentGroup.invoice_payment_ids" t-as="payment">
                                         <t t-if="widget.pos.db.discount_payment_method.id !== payment.id and payment.state !== 'cancelled'">

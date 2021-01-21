@@ -172,10 +172,62 @@
         </t>
     </table>
     <table owl="1" t-name="PosPRInvoiceDetails" class="invoice-details">
-
         <tr>
-            <td colspan="2">
+            <td>
                 <h1><t t-esc="props.posPrState.selectedInvoice.name"/></h1>
+            </td>
+            <td class="js-more-detail" colspan="2">
+                <button type="button" t-on-click="toggleMoreDetails">
+                    <t t-if="!state.toggleDetails">
+                        <i class="fa fa-eye fa-hover-show"/>
+                        <i class="fa fa-eye-slash fa-hover-hidden"/>
+                    </t>
+                    <t t-else="">
+                        <i class="fa fa-eye"/>
+                    </t>
+                </button>
+            </td>
+            <td class="js-more-detail" colspan="3">
+                <button type="button" t-on-click="printInvoice">
+                    <i class="fa fa-print"/>
+                </button>
+            </td>
+        </tr>
+
+        <tr t-if="state.toggleDetails">
+            <td colspan="4">
+                <t t-esc="invoice_lines"/>
+                <hr style="width: 100%"/>
+                <table style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Label</th>
+                            <th>Qnty.</th>
+                            <th>Price Unit</th>
+                            <th>Disc.</th>
+                            <th>Taxes</th>
+                            <th>Amount subtotal</th>
+                            <th>Amount total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="props.posPrState.selectedInvoice.invoice_lines" t-as="invoiceLine">
+                            <tr>
+                                <td><t t-esc="invoiceLine.product_id.name"/></td>
+                                <td><t t-esc="invoiceLine.name"/></td>
+                                <td><t t-esc="invoiceLine.quantity"/></td>
+                                <td><t t-esc="invoiceLine.price_unit"/></td>
+                                <td><t t-esc="invoiceLine.discount"/></td>
+                                <td><t t-esc="invoiceLine.taxes_joined"/></td>
+                                <td><t t-esc="invoiceLine.price_subtotal"/></td>
+                                <td><t t-esc="invoiceLine.price_total"/></td>
+                            </tr>
+                        </t>
+<!--                        <t t-foreach=""-->
+                    </tbody>
+                </table>
+                <hr style="width: 100%"/>
             </td>
         </tr>
 
@@ -331,7 +383,8 @@
                     <div class="window">
                         <section class="subwindow">
                             <div class="subwindow-container">
-                                <div class="subwindow-container-fix touch-scrollable scrollable-y">
+                                <div class="subwindow-container-fix touch-scrollable scrollable-y"
+                                     style="height: 664px;">
                                     <div class="row">
                                         <div class="col">
                                             <h2>Payments</h2>
@@ -359,7 +412,8 @@
         <label class="tab-label" t-attf-for="chck--{{state.paymentGroup.id}}">
             <t t-esc="state.paymentGroup.name"/>
             <button t-on-click="print" type="button" class="o_pos_pr_payment_actions--print">Print</button>
-            <button t-if="!arePaymentCancelled" t-on-click="onCancelAllPayments" type="button" class="o_pos_pr_payment_actions--cancel">Cancel payments</button>
+            <button t-if="!arePaymentCancelled" t-on-click="onCancelAllPayments" type="button"
+                    class="o_pos_pr_payment_actions--cancel">Cancel payments</button>
         </label>
         <div class="tab-content">
             <table>
@@ -381,7 +435,8 @@
         </div>
     </div>
 
-    <tr owl="1" t-name="InvoicePaymentRow" t-attf-class="{{ props.payment.state === 'cancelled' and 'o_pos_pr_payment_row__cancelled' }}">
+    <tr owl="1" t-name="InvoicePaymentRow"
+        t-attf-class="{{ props.payment.state === 'cancelled' and 'o_pos_pr_payment_row__cancelled' }}">
         <td>
             <t t-esc="props.payment.name"/>
         </td>
