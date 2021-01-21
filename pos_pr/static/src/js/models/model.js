@@ -40,25 +40,21 @@ odoo.define('pos_pr.models', function (require) {
         ],
     });
 
-    models.AccountMoveLine = Backbone.Model.extend({
-        constructor: function (invoiceValues) {
-            this.init_from_JSON(invoiceValues);
-        },
-        init_from_JSON: function (json) {
-            this.id = json.id;
-            this.move_id = json.move_id;
-            this.price_unit = json.price_unit;
-        },
-        export_as_JSON: function () {
-            return {
-                id: this.id,
-                name: this.name,
-                partner_id: this.partner_id,
-                student_id: this.student_id,
-                family_id: this.family_id,
-                price_unit: this.price_unit,
-            };
-        },
+    models.AccountMoveLine = EduwebClass.extend({
+        fields: [
+            {name: 'id', type: 'integer'},
+            {name: 'name', type: 'char'},
+
+            {name: 'price_unit', type: 'float'},
+            {name: 'quantity', type: 'float'},
+            {name: 'discount', type: 'float'},
+            {name: 'price_subtotal', type: 'float'},
+            {name: 'price_total', type: 'float'},
+
+            {name: 'tax_ids', type: 'many2many'},
+            {name: 'product_id', type: 'many2one'},
+            {name: 'move_id', type: 'many2one'},
+        ]
     });
 
     models.InvoicePayment = EduwebClass.extend({

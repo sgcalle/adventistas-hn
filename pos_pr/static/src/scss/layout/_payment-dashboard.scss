@@ -60,6 +60,28 @@
 
 .invoice-details {
     @extend %font-payment-dashboard;
+
+    * > .fa-hover-show, *:hover > .fa-hover-hidden {
+      display: none;
+    }
+    *:hover > .fa-hover-show {
+      display: inline-block;
+    }
+    .js-more-detail {
+        button {
+            font-size: 32px;
+            z-index: 10;
+            position: relative;
+            top: 0;
+            left: 0;
+            &:hover {
+                background: darken(white, 10%);
+            }
+
+
+        }
+    }
+
     float: left;
     width: 100% !important;
 

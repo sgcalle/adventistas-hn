@@ -70,7 +70,9 @@ odoo.define('pos_pr.components.reports', function (require) {
         _compute_discount_total: function () {
             let discountTotal = 0;
             _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
-                discountTotal += invoicePayment.discount_amount || 0;
+                if (invoicePayment.state !== 'cancelled') {
+                    discountTotal += invoicePayment.discount_amount || 0;
+                }
             });
             return discountTotal;
         },
@@ -103,11 +105,11 @@ odoo.define('pos_pr.components.reports', function (require) {
         _compute_payment_totals_by_method: function () {
             const paymentTotalsByMethod = {};
             _.each(this.paymentGroup.invoice_payment_ids, function (invoicePayment) {
+                const paymentMethod = invoicePayment.payment_method_id;
+                if (!paymentTotalsByMethod[paymentMethod.id]) {
+                    paymentTotalsByMethod[paymentMethod.id] = 0;
+                }
                 if (invoicePayment.state !== 'cancelled') {
-                    const paymentMethod = invoicePayment.payment_method_id;
-                    if (!paymentTotalsByMethod[paymentMethod.id]) {
-                        paymentTotalsByMethod[paymentMethod.id] = 0;
-                    }
                     paymentTotalsByMethod[paymentMethod.id] += invoicePayment.payment_amount;
                 }
             });

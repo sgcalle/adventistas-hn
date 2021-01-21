@@ -19,7 +19,7 @@ class PosPR(models.Model):
     payment_amount = fields.Float()
     payment_method_id = fields.Many2one("pos.payment.method")
 
-    pos_session_id = fields.Many2one("pos.session")
+    pos_session_id = fields.Many2one("pos.session", required=True)
     move_id = fields.Many2one("account.move", "Invoice", domain="[('type', '=', 'out_invoice')]", required=True)
     partner_id = fields.Many2one("res.partner", 'Customer', related='move_id.partner_id')
 
