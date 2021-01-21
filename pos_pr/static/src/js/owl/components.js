@@ -573,7 +573,11 @@ odoo.define('pos_pr.owl.components', function (require) {
         });
 
         updateGroupList() {
-            this.state.paymentGroupList = _.filter(this.props.pos.db.invoice_payment_groups, paymentGroup => paymentGroup.partner_id.id == this.state.partner.id);
+            if (this.state.partner) {
+                this.state.paymentGroupList = _.filter(this.props.pos.db.invoice_payment_groups, paymentGroup => paymentGroup.partner_id.id == this.state.partner.id);
+            } else {
+                this.state.paymentGroupList = this.props.pos.db.invoice_payment_groups;
+            }
         }
 //this.props.pos.db.partner_by_id[]
         onPrintPaymentGroup(event) {

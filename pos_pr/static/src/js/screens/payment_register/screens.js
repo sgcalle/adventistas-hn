@@ -91,10 +91,10 @@ odoo.define('pos_pr.payment_register.screens', function (require) {
          */
         show: function (reload) {
             this._super(); // We need to check if the user has selected a customer
-            if (this.pos.get_client()) {
-                this.owlComponent.state.partner = this.pos.get_client();
-                this.owlComponent.updateGroupList();
-            }
+            // if (this.pos.get_client()) {
+            this.owlComponent.state.partner = this.pos.get_client();
+            this.owlComponent.updateGroupList();
+            // }
         },
 
         /**

@@ -5,12 +5,12 @@
         <div class="pos-payment-register screen">
             <!-- Header -->
             <section class="top-content">
-                <span class="button back" style="display: inline-block;float: left;">
+                <span class="button back" style="display: inline-block; float: left; position: relative;">
                     <i class="fa fa-angle-double-left"></i>
                     Cancel
                 </span>
 
-                <span class="button payment_list" style="display: inline-block;float: left;">
+                <span class="button payment_list" style="display: inline-block; float: left; position: relative;">
                     Payment List
                 </span>
                 <div class="button-payment-dashboard">
@@ -212,7 +212,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <t t-foreach="props.posPrState.selectedInvoice.invoice_lines" t-as="invoiceLine">
+                        <t t-foreach="props.posPrState.selectedInvoice.invoice_lines"
+                           t-as="invoiceLine" t-key="'invoice-line-detail-'+invoiceLine.id">
                             <tr>
                                 <td><t t-esc="invoiceLine.product_id.name"/></td>
                                 <td><t t-esc="invoiceLine.name"/></td>
@@ -389,7 +390,8 @@
                                         <div class="col">
                                             <h2>Payments</h2>
                                             <div class="tabs">
-                                                <t t-foreach="state.paymentGroupList" t-as="paymentGroup">
+                                                <t t-foreach="state.paymentGroupList"
+                                                   t-as="paymentGroup" t-key="'payment-group-'+paymentGroup.name">
                                                     <InvoicePaymentGroupRow
                                                             t-on-cancel_payments="onCancelPayment"
                                                             t-on-print_payment_group="onPrintPaymentGroup"
@@ -408,8 +410,8 @@
     </t>
 
     <div class="tab" owl="1" t-name="InvoicePaymentGroupRow">
-        <input type="checkbox" t-attf-id="chck--{{state.paymentGroup.id}}"/>
-        <label class="tab-label" t-attf-for="chck--{{state.paymentGroup.id}}">
+        <input type="checkbox" t-attf-id="chck--{{state.paymentGroup.name}}"/>
+        <label class="tab-label" t-attf-for="chck--{{state.paymentGroup.name}}">
             <t t-esc="state.paymentGroup.name"/>
             <button t-on-click="print" type="button" class="o_pos_pr_payment_actions--print">Print</button>
             <button t-if="!arePaymentCancelled" t-on-click="onCancelAllPayments" type="button"
@@ -427,7 +429,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="state.paymentGroup.invoice_payment_ids" t-as="payment">
+                    <t t-foreach="state.paymentGroup.invoice_payment_ids"
+                       t-as="payment" t-key="'invoice-payment-'+payment.name">
                         <InvoicePaymentRow t-on-cancel_payment="onCancelPayment" payment="payment"/>
                     </t>
                 </tbody>
