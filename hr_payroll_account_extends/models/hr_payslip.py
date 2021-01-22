@@ -3,7 +3,7 @@
 import json
 
 from odoo import models, fields, api
-from odoo.exceptions import MissingError
+from odoo.exceptions import MissingError, ValidationError
 
 class HrPayslip(models.Model):
     _inherit = "hr.payslip"
@@ -16,14 +16,14 @@ class HrPayslip(models.Model):
         inverse_name="payslip_id")
     
     def compute_sheet(self):
-        for payslip in self:
+        for payslip in self.filtered(lambda s: s.state not in ["cancel", "done"]):
             payslip.deduction_ids.unlink()
         super(HrPayslip, self).compute_sheet()
         self._compute_deductions()
         return super(HrPayslip, self).compute_sheet()
     
     def _compute_deductions(self):
-        for payslip in self:
+        for payslip in self.filtered(lambda s: s.state not in ["cancel", "done"]):
             if not payslip.employee_id or payslip.credit_note or not payslip.struct_id.type_id.invoice_payment_scope:
                 continue
             deduction_vals = payslip._get_deduction_lines()
@@ -64,6 +64,17 @@ class HrPayslip(models.Model):
         return sum(self.deduction_ids.mapped("amount"))
 
     def action_payslip_done(self):
+        payslip_runs = self.filtered(lambda s: s.payslip_run_id).mapped("payslip_run_id")
+        for run in payslip_runs:
+            run_payslips = run.slip_ids.filtered(lambda s: s.state not in ["cancel", "done"])
+            separated_payslips = run_payslips - self
+            if separated_payslips:
+                raise ValidationError(("You cannot create a draft entry for a payslip separate from other draft/waiting payslips in the same batch\n" \
+                    "Batch: %s\n\n" \
+                    "Included Payslips: %s\n\n" \
+                    "Missing Payslips: %s") %
+                    (run.name, ", ".join(self.filtered(lambda s: s.payslip_run_id == run).mapped("number")), ", ".join(separated_payslips.mapped("number"))))
+
         for payslip in self:
             employee = payslip.employee_id
             if not employee.address_home_id:
@@ -81,7 +92,7 @@ class HrPayslip(models.Model):
         move_obj = self.env["account.move"]
         move_line_obj = self.env["account.move.line"]
         move_data = {}
-        for payslip in self.filtered(lambda p: p.move_id and p.move_id.state == 'draft'):
+        for payslip in self.filtered(lambda p: p.move_id and p.move_id.state == 'draft' and not p.move_line_ids):
             data = {}
             
             # CREATE INVOICE DEDUCTION OR BILL FOR EMPLOYEE PAY
