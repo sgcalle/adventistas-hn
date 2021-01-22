@@ -70,9 +70,10 @@ class HrPayslip(models.Model):
             separated_payslips = run_payslips - self
             if separated_payslips:
                 raise ValidationError(("You cannot create a draft entry for a payslip separate from other draft/waiting payslips in the same batch\n" \
-                    "Batch: %s\n" \
-                    "Payslips: %s") %
-                    run.name, ", ".join(separated_payslips.mapped("name")))
+                    "Batch: %s\n\n" \
+                    "Included Payslips: %s\n\n" \
+                    "Missing Payslips: %s") %
+                    (run.name, ", ".join(self.filtered(lambda s: s.payslip_run_id == run).mapped("number")), ", ".join(separated_payslips.mapped("number"))))
 
         for payslip in self:
             employee = payslip.employee_id
@@ -91,7 +92,7 @@ class HrPayslip(models.Model):
         move_obj = self.env["account.move"]
         move_line_obj = self.env["account.move.line"]
         move_data = {}
-        for payslip in self.filtered(lambda p: p.move_id and p.move_id.state == 'draft'):
+        for payslip in self.filtered(lambda p: p.move_id and p.move_id.state == 'draft' and not p.move_line_ids):
             data = {}
             
             # CREATE INVOICE DEDUCTION OR BILL FOR EMPLOYEE PAY
