@@ -38,7 +38,9 @@ class PosSession(models.Model):
         if self.invoice_payment_ids:
             self._create_payment_register_invoices_payment()
             self._create_invoices_discount()
-            self.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled').mapped('move_id')._compute_pos_pr_paid_amount()
+            not_cacelled_payment_ids = self.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled')
+            not_cacelled_payment_ids.with_context({'force_save': True}).write({'state': 'posted'})
+            not_cacelled_payment_ids.mapped('move_id')._compute_pos_pr_paid_amount()
         return action
 
     def _create_payment_register_invoices_payment(self):
@@ -253,34 +255,30 @@ class PosSession(models.Model):
 
     @api.depends('payment_method_ids', 'order_ids', 'cash_register_balance_start', 'cash_register_id', 'invoice_payment_ids')
     def _compute_cash_balance(self):
+        super()._compute_cash_balance()
         for session in self:
             cash_payment_method_ids = session.payment_method_ids.filtered('is_cash_count')
 
             if cash_payment_method_ids:
-                transaction_total_amount = session.get_cash_transaction_total_amount()
+                cash_payment_method_ids = cash_payment_method_ids[1:]
+                transaction_total_amount = session.get_remain_cash_transaction_total_amount(cash_payment_method_ids=cash_payment_method_ids)
                 total_cash_invoice_payment_amount = 0.0 if session.state == 'closed' else sum(
-                    session.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled' and payment.payment_method_id.is_cash_count).mapped("display_amount"))
+                    session.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled' and payment.payment_method_id.is_cash_count).mapped("payment_amount"))
 
-                cash_register_total_entry_encoding = session.cash_register_id.total_entry_encoding + transaction_total_amount + total_cash_invoice_payment_amount
+                cash_register_total_entry_encoding = 0.0 if session.state == 'closed' else transaction_total_amount + total_cash_invoice_payment_amount
 
-                session.cash_register_total_entry_encoding = cash_register_total_entry_encoding
+                session.cash_register_total_entry_encoding += cash_register_total_entry_encoding
                 session.invoice_payment_amount = sum(session.invoice_payment_ids.filtered(lambda payment: payment.state != 'cancelled').mapped("display_amount"))
-                session.cash_register_balance_end = session.cash_register_balance_start + session.cash_register_total_entry_encoding
-                session.cash_register_difference = session.cash_register_balance_end_real - session.cash_register_balance_end
+                session.cash_register_balance_end += cash_register_total_entry_encoding
+                session.cash_register_difference -= cash_register_total_entry_encoding
             else:
-                session.cash_register_total_entry_encoding = 0.0
-                session.cash_register_balance_end = 0.0
-                session.cash_register_difference = 0.0
+                session.invoice_payment_amount = 0.0
 
-    def get_cash_transaction_total_amount(self):
+    def get_remain_cash_transaction_total_amount(self, cash_payment_method_ids):
         self.ensure_one()
-        cash_payment_method_ids = self.payment_method_ids.filtered('is_cash_count')
         cash_register_total_entry_encoding = 0.0
 
         for cash_payment_method in cash_payment_method_ids:
             total_cash_payment = sum(self.order_ids.mapped('payment_ids').filtered(lambda payment: payment.payment_method_id == cash_payment_method).mapped('amount'))
-            # cash_register_total_entry_encoding += (0.0 if self.state == 'closed' else total_cash_payment)
-            cash_register_total_entry_encoding += total_cash_payment  # (0.0 if self.state == 'closed' else total_cash_payment)
-
-        # cash_register_total_entry_encoding += self.cash_register_id.total_entry_encoding
+            cash_register_total_entry_encoding += total_cash_payment
         return cash_register_total_entry_encoding

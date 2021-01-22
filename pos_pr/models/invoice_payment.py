@@ -68,7 +68,7 @@ class PosPR(models.Model):
 
     def write(self, vals):
         for payment in self:
-            if payment.pos_session_id.state not in ['opened', 'closing_control']:
+            if not self._context.get('force_save', False) and payment.pos_session_id.state not in ['opened', 'closing_control']:
                 raise exceptions.UserError(_("You cannot modify a invoice payment of a already closed pos session!"))
         return super(PosPR, self).write(vals)
 
