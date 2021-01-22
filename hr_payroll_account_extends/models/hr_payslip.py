@@ -3,7 +3,7 @@
 import json
 
 from odoo import models, fields, api
-from odoo.exceptions import MissingError
+from odoo.exceptions import MissingError, ValidationError
 
 class HrPayslip(models.Model):
     _inherit = "hr.payslip"
@@ -16,14 +16,14 @@ class HrPayslip(models.Model):
         inverse_name="payslip_id")
     
     def compute_sheet(self):
-        for payslip in self:
+        for payslip in self.filtered(lambda s: s.state not in ["cancel", "done"]):
             payslip.deduction_ids.unlink()
         super(HrPayslip, self).compute_sheet()
         self._compute_deductions()
         return super(HrPayslip, self).compute_sheet()
     
     def _compute_deductions(self):
-        for payslip in self:
+        for payslip in self.filtered(lambda s: s.state not in ["cancel", "done"]):
             if not payslip.employee_id or payslip.credit_note or not payslip.struct_id.type_id.invoice_payment_scope:
                 continue
             deduction_vals = payslip._get_deduction_lines()
@@ -64,6 +64,16 @@ class HrPayslip(models.Model):
         return sum(self.deduction_ids.mapped("amount"))
 
     def action_payslip_done(self):
+        payslip_runs = self.filtered(lambda s: s.payslip_run_id).mapped("payslip_run_id")
+        for run in payslip_runs:
+            run_payslips = run.slip_ids.filtered(lambda s: s.state not in ["cancel", "done"])
+            separated_payslips = run_payslips - self
+            if separated_payslips:
+                raise ValidationError(("You cannot create a draft entry for a payslip separate from other draft/waiting payslips in the same batch\n" \
+                    "Batch: %s\n" \
+                    "Payslips: %s") %
+                    run.name, ", ".join(separated_payslips.mapped("name")))
+
         for payslip in self:
             employee = payslip.employee_id
             if not employee.address_home_id:
