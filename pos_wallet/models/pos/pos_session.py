@@ -26,7 +26,10 @@ class PosSession(models.Model):
         super()._compute_cash_balance()
         for session in self:
             session.pos_wallet_loads_amount = sum(session.pos_wallet_load_ids.mapped('amount'))
-            session.cash_register_total_entry_encoding += sum(session.pos_wallet_load_ids.filtered('payment_method_id.is_cash_count').mapped('amount'))
+            wallet_cash_amount = 0.0 if session.state == 'closed' else sum(session.pos_wallet_load_ids.filtered('payment_method_id.is_cash_count').mapped('amount'))
+            session.cash_register_total_entry_encoding += wallet_cash_amount
+            session.cash_register_balance_end += wallet_cash_amount
+            session.cash_register_difference -= wallet_cash_amount
 
     @api.model
     def get_partner_receivable(self, partner_id):
