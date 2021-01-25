@@ -37,7 +37,7 @@ class HrPayslip(models.Model):
         self.ensure_one()
         res = []
         if not self.employee_id.address_home_id:
-            raise MissingError("Private address of {} is not set. Set the private address in the employee form.".format(employee.name))
+            raise MissingError("Private address of {} is not set. Set the private address in the employee form.".format(self.employee_id.name))
         partner = self.employee_id.address_home_id
         results, total, amls = self.env["report.account.report_agedpartnerbalance"].with_context(
             partner_ids=partner)._get_partner_move_lines(
@@ -148,11 +148,14 @@ class HrPayslip(models.Model):
 
             if payslip.net_wage:
                 product = payslip.employee_id.payroll_bill_product_id
-                payslip_bill = move_obj.create({
+                payslip_bill_vals = {
                     "type": "in_refund" if (payslip.credit_note or payslip.net_wage < 0) else "in_invoice",
                     "partner_id": payslip.employee_id.address_home_id.id,
                     "journal_id": payslip.employee_id.payroll_journal_id.id,
-                })
+                }
+                if payslip.payslip_run_id.bill_date:
+                    payslip_bill_vals["invoice_date"] = payslip.payslip_run_id.bill_date
+                payslip_bill = move_obj.create(payslip_bill_vals)
                 payslip_bill._onchange_partner_id()
                 move_data.setdefault(payslip_bill.id, {})
                 accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=payslip_bill.fiscal_position_id)
