@@ -46,7 +46,9 @@ class HrPayslip(models.Model):
         for aml in amls.get(partner.id, []):
             if aml["line"].date > self.date_to:
                 continue
-            if aml["amount"] <= 0 or (self.struct_id.type_id.invoice_payment_scope == "overdue" and aml["period"] >= 6):
+            if aml["amount"] <= 0 or ("overdue" in self.struct_id.type_id.invoice_payment_scope and aml["period"] >= 6):
+                continue
+            if self.struct_id.type_id.invoice_payment_scope == "overdue_end_of_period" and aml["line"].date_maturity > self.date_to:
                 continue
             residual_amount = min(aml["amount"], remaining_wage)
             deduction_vals = {
