@@ -44,8 +44,10 @@ class TuitionPlan(models.Model):
         selection=[
             ("quotation", "Create Quotation"),
             ("sales_order", "Create Sales Order"),
+            ("sales_order_email", "Create Sales Order and send by email"),
             ("draft_invoice", "Create Sales Order and Draft Invoice"),
-            ("posted_invoice", "Create Sales Order and Posted Invoice")],
+            ("posted_invoice", "Create Sales Order and Posted Invoice"),
+            ("posted_invoice_email", "Create Sales Order and Posted Invoice and send by email")],
         required=True,
         default="quotation",
         help="Specify what will automatically be created when an installment of this tuition plan is executed")

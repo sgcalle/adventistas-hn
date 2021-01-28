@@ -2,7 +2,7 @@
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import models, fields, api
+from odoo import models, fields, api, SUPERUSER_ID
 
 class TuitionPlanInstallment(models.Model):
     _name = "tuition.plan.installment"
@@ -89,16 +89,23 @@ class TuitionPlanInstallment(models.Model):
                                 })]
                             })
             automation = self._context.get("automation") or plan.automation
-            if automation in ["sales_order", "draft_invoice", "posted_invoice"]:
+            if automation in ["sales_order", "sales_order_email", "draft_invoice", "posted_invoice", "posted_invoice_email"]:
                 for sale in make_sale.sales_ids:
                     sale.action_confirm()
-                    if automation in ["draft_invoice", "posted_invoice"]:
+                    if automation in ["sales_order_email"]:
+                        sale._send_order_confirmation_mail()
+                    if automation in ["draft_invoice", "posted_invoice", "posted_invoice_email"]:
                         invoices = sale._create_invoices(grouped=True)
                         invoice_lines = invoices.invoice_line_ids
                         for product in installment.product_ids:
                             for line in invoice_lines:
                                 if line.price_unit >= 0 and product.product_id == line.product_id and product.analytic_account_id:
                                     line.analytic_account_id = product.analytic_account_id.id
-                        if automation == "posted_invoice":
+                        if automation in ["posted_invoice", "posted_invoice_email"]:
                             invoices.action_post()
+                            if automation in ["posted_invoice_email"]:
+                                template = self.env.ref("account.email_template_edi_invoice", raise_if_not_found=False)
+                                if template:
+                                    for invoice in invoices.with_user(SUPERUSER_ID):
+                                        invoice.message_post_with_template(template.id, email_layout_xmlid="mail.mail_notification_paynow")
         return make_sale.sales_ids
