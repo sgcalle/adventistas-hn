@@ -69,6 +69,7 @@ class PosSession(models.Model):
             statement_line_vals = self._get_pr_statement_line_vals(invoice_payment_ids)
             cash_statement_lines = {}
             for statement in self.statement_ids:
+                statement.button_reopen()
                 cash_statement_lines[statement] = self.env['account.bank.statement.line'].create(statement_line_vals[statement])
                 if not self.config_id.cash_control:
                     statement.write({'balance_end_real': statement.balance_end})
