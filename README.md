@@ -1,3 +1,3 @@
 # adventistas-hn-testing
 
-try 2.6
+try 2.7
