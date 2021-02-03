@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
 
-    <record id="pos_pr.view_move_form_surcharge" model="ir.ui.view">
-        <field name="name">pos_pr.view.move.form.surcharge</field>
+    <record id="account_reports_journal_dashboard_kanban_view_inherit_group" model="ir.ui.view">
+        <field name="name">hondura.access.account.reports.journal.dashboard.kanban.view.inherit.group</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account_reports.account_reports_journal_dashboard_kanban_view"/>
         <field name="arch" type="xml">
