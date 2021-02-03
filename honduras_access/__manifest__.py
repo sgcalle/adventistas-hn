@@ -16,6 +16,7 @@
 
     'depends': [
         'account',
+        'account_reports',
         'account_asset',
         'point_of_sale',
         'hr_payroll_extends',
