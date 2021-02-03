@@ -17,6 +17,7 @@ class ResPartner(models.Model):
         comodel_name="tuition.plan",
         compute="_compute_default_tuition_plan_ids",
         help="Tuition plans used if no tuition plan is manually set for a given school year, category, and gradelevel")
+    email_statement = fields.Boolean(string="Email Statement Report")
     
     def _compute_default_tuition_plan_ids(self):
         for partner in self:
