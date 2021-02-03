@@ -25,23 +25,24 @@ class WalletCategory(models.Model):
     def _compute_pos_payment_method_id(self):
         for wallet_category_id in self:
             receivable_account_id = wallet_category_id.account_id or wallet_category_id.company_id.account_default_pos_receivable_account_id
-            if not wallet_category_id.pos_payment_method_id:
-                wallet_category_id.pos_payment_method_id = self.env['pos.payment.method'].create({
-                    'name': wallet_category_id.name,
-                    'receivable_account_id': receivable_account_id.id,
-                    'company_id': wallet_category_id.company_id.id,
+            if receivable_account_id:
+                if not wallet_category_id.pos_payment_method_id:
+                    wallet_category_id.pos_payment_method_id = self.env['pos.payment.method'].create({
+                        'name': wallet_category_id.name,
+                        'receivable_account_id': receivable_account_id.id,
+                        'company_id': wallet_category_id.company_id.id,
 
-                    'is_cash_count': False,
-                    'wallet_category_id': wallet_category_id.id,
-                    'is_wallet_payment_method': True,
-                    'split_transactions': True,
-                    })
-            else:
-                wallet_category_id.pos_payment_method_id.update({
-                    'name': wallet_category_id.name,
-                    'receivable_account_id': receivable_account_id.id,
-                    'company_id': wallet_category_id.company_id.id,
-                    })
+                        'is_cash_count': False,
+                        'wallet_category_id': wallet_category_id.id,
+                        'is_wallet_payment_method': True,
+                        'split_transactions': True,
+                        })
+                else:
+                    wallet_category_id.pos_payment_method_id.update({
+                        'name': wallet_category_id.name,
+                        'receivable_account_id': receivable_account_id.id,
+                        'company_id': wallet_category_id.company_id.id,
+                        })
 
     def get_wallet_amount(self, partner_id, wallet_category_id=False):
         wallet_amount = super(WalletCategory, self).get_wallet_amount(partner_id, wallet_category_id)

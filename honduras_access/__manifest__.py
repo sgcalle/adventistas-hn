@@ -12,10 +12,12 @@
     'website': 'http://www.eduwebgroup.com',
 
     'category': 'Extra Tools',
-    'version': '1.0',
+    'version': '1.1',
+
 
     'depends': [
         'account',
+        'account_reports',
         'account_asset',
         'point_of_sale',
         'hr_payroll_extends',
@@ -32,5 +34,7 @@
         'views/hr_contract_views.xml',
         'views/account_asset_views.xml',
         'views/res_users_views.xml',
+        'views/account_move_views.xml',
+        'views/account_payment_views.xml',
     ],
 }

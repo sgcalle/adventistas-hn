@@ -10,7 +10,7 @@
     'website': "http://www.eduwebgroup.com",
 
     'category': 'Sales/Point Of Sale',
-    'version': '0.1.1',
+    'version': '0.1.2',
 
     'depends': ['point_of_sale', 'eduweb_js_utils', 'wallet'],
 

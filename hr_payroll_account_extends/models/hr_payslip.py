@@ -96,6 +96,9 @@ class HrPayslip(models.Model):
         move_data = {}
         for payslip in self.filtered(lambda p: p.move_id and p.move_id.state == 'draft' and not p.move_line_ids):
             data = {}
+            payslip_batch_bill_date = payslip.payslip_run_id.bill_date
+            if payslip_batch_bill_date:
+                payslip.move_id.date = payslip_batch_bill_date
             
             # CREATE INVOICE DEDUCTION OR BILL FOR EMPLOYEE PAY
             product = payslip.employee_id.payroll_invoice_product_id
@@ -117,13 +120,17 @@ class HrPayslip(models.Model):
                     for family_id, student_ids in family_ids.items():
                         for student_id, account_ids in student_ids.items():
                             for account_id, details in account_ids.items():
-                                credit_note = move_obj.create({
+                                credit_note_vals = {
                                     "type": "out_refund",
                                     "partner_id": partner_id,
                                     "family_id": family_id,
                                     "student_id": student_id,
                                     "journal_id": payslip.employee_id.payroll_journal_id.id
-                                })
+                                }
+                                if payslip_batch_bill_date:
+                                    credit_note_vals["invoice_date"] = payslip_batch_bill_date
+                                    credit_note_vals["date"] = payslip_batch_bill_date
+                                credit_note = move_obj.create(credit_note_vals)
                                 credit_note._onchange_partner_id()
                                 accounts = product.product_tmpl_id.get_product_accounts(fiscal_pos=credit_note.fiscal_position_id)
                                 created_line = move_line_obj.create({
@@ -155,8 +162,9 @@ class HrPayslip(models.Model):
                     "partner_id": payslip.employee_id.address_home_id.id,
                     "journal_id": payslip.employee_id.payroll_journal_id.id,
                 }
-                if payslip.payslip_run_id.bill_date:
-                    payslip_bill_vals["invoice_date"] = payslip.payslip_run_id.bill_date
+                if payslip_batch_bill_date:
+                    payslip_bill_vals["invoice_date"] = payslip_batch_bill_date
+                    payslip_bill_vals["date"] = payslip_batch_bill_date
                 payslip_bill = move_obj.create(payslip_bill_vals)
                 payslip_bill._onchange_partner_id()
                 move_data.setdefault(payslip_bill.id, {})
@@ -279,17 +287,25 @@ class HrPayslip(models.Model):
             # CREATE/UPDATE VENDOR BILLS FOR CONTRIBUTIONS
             for contrib in payslip.contract_id.contribution_ids:
                 # EMPLOYEE
-                matched_bill = move_obj.search([
+                contrib_bill_domain = [
                     ("type","=","in_invoice"),
                     ("partner_id","=",contrib.partner_id.id),
                     ("journal_id","=",contrib.emp_journal_id.id),
-                    ("state","=","draft")], limit=1)
+                    ("state","=","draft")
+                ]
+                contrib_bill_vals = {
+                    "type": "in_invoice",
+                    "partner_id": contrib.partner_id.id,
+                    "journal_id": contrib.emp_journal_id.id,
+                }
+                if payslip_batch_bill_date:
+                    contrib_bill_domain.append(("invoice_date","=",payslip_batch_bill_date))
+                    contrib_bill_domain.append(("date","=",payslip_batch_bill_date))
+                    contrib_bill_vals["invoice_date"] = payslip_batch_bill_date
+                    contrib_bill_vals["date"] = payslip_batch_bill_date
+                matched_bill = move_obj.search(contrib_bill_domain, limit=1)
                 if not matched_bill:
-                    matched_bill = move_obj.create({
-                        "type": "in_invoice",
-                        "partner_id": contrib.partner_id.id,
-                        "journal_id": contrib.emp_journal_id.id,
-                    })
+                    matched_bill = move_obj.create(contrib_bill_vals)
                     matched_bill._onchange_partner_id()
                 move_data.setdefault(matched_bill.id, {})
                 accounts = contrib.emp_product_id.product_tmpl_id.get_product_accounts(fiscal_pos=matched_bill.fiscal_position_id)
@@ -308,17 +324,25 @@ class HrPayslip(models.Model):
                 }
                 
                 # COMPANY
-                matched_bill = move_obj.search([
+                contrib_bill_domain = [
                     ("type","=","in_invoice"),
                     ("partner_id","=",contrib.partner_id.id),
                     ("journal_id","=",contrib.comp_journal_id.id),
-                    ("state","=","draft")], limit=1)
+                    ("state","=","draft")
+                ]
+                contrib_bill_vals = {
+                    "type": "in_invoice",
+                    "partner_id": contrib.partner_id.id,
+                    "journal_id": contrib.comp_journal_id.id,
+                }
+                if payslip_batch_bill_date:
+                    contrib_bill_domain.append(("invoice_date","=",payslip_batch_bill_date))
+                    contrib_bill_domain.append(("date","=",payslip_batch_bill_date))
+                    contrib_bill_vals["invoice_date"] = payslip_batch_bill_date
+                    contrib_bill_vals["date"] = payslip_batch_bill_date
+                matched_bill = move_obj.search(contrib_bill_domain, limit=1)
                 if not matched_bill:
-                    matched_bill = move_obj.create({
-                        "type": "in_invoice",
-                        "partner_id": contrib.partner_id.id,
-                        "journal_id": contrib.comp_journal_id.id,
-                    })
+                    matched_bill = move_obj.create(contrib_bill_vals)
                     matched_bill._onchange_partner_id()
                 move_data.setdefault(matched_bill.id, {})
                 accounts = contrib.comp_product_id.product_tmpl_id.get_product_accounts(fiscal_pos=matched_bill.fiscal_position_id)
