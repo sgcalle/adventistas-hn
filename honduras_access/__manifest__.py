@@ -12,7 +12,7 @@
     'website': 'http://www.eduwebgroup.com',
 
     'category': 'Extra Tools',
-    'version': '1.0',
+    'version': '1.1',
 
     'depends': [
         'account',
