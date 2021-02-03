@@ -14,6 +14,7 @@
     'category': 'Extra Tools',
     'version': '1.1',
 
+
     'depends': [
         'account',
         'account_reports',
