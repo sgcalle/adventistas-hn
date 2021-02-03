@@ -32,5 +32,6 @@
         'views/hr_contract_views.xml',
         'views/account_asset_views.xml',
         'views/res_users_views.xml',
+        'views/account_move_views.xml',
     ],
 }
