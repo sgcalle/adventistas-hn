@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="account_payment_view_form_inherit_group" model="ir.ui.view">
+        <field name="name">account.payment.view.form.inherit.group</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account_accountant.account_payment_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//attribute[@name='groups']" position="replace">
+                <attribute name="groups">account.group_account_manager,honduras_access.group_financial_admin</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
