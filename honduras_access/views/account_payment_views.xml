@@ -8,7 +8,7 @@
         <field name="sequence" eval="20"/>
         <field name="arch" type="xml">
             <xpath expr="//button[@name='button_journal_entries']" position="attributes">
-                <attribute name="groups">account.group_account_manager,honduras_access.group_financial_adminr</attribute>
+                <attribute name="groups" add="honduras_access.group_financial_admin" separator=","/>
             </xpath>
         </field>
     </record>
