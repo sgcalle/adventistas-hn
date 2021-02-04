@@ -272,8 +272,8 @@
 
                 <searchpanel>
                     <field name="status_id" icon="fa-columns"/>
-                    <field name="grade_level" domain="[('active_admissions', '=', True)]" icon="fa-columns"/>
-                    <field name="school_year" domain="[('active_admissions', '=', True)]" icon="fa-columns"/>
+                    <field name="grade_level" icon="fa-columns"/>
+                    <field name="school_year" icon="fa-columns"/>
                 </searchpanel>
             </search>
         </field>

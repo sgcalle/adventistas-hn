@@ -23,8 +23,8 @@
     # always loaded
     'data': [
         # Security
-        'security/ir.model.access.csv',
         'security/security_groups.xml',
+        'security/ir.model.access.csv',
 
         # Backend views
         'views/adm_application_status_views.xml',
