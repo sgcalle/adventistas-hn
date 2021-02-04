@@ -10,3 +10,4 @@ from . import medical_allergy
 from . import medical_condition
 from . import medication
 from . import relationship
+from . import services
