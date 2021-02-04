@@ -5,7 +5,7 @@
             <t t-set="skip_sent_message" t-value="True"/>
             <t t-set="title">Application</t>
             <t t-set="head">
-<!--                <script defer="defer" type="text/javascript" src="/adm/static/src/js/application/menu_progress.js"/>-->
+                <script defer="defer" type="text/javascript" src="/adm/static/src/js/application/menu_progress.js"/>
                 <link rel="stylesheet" href="/adm/static/src/css/form_application.css"/>
             </t>
             <div class="oe_struture"/>
@@ -19,7 +19,6 @@
                             </section>
                             <section class="card-body">
                                 <div class="container">
-                                    <!-- 
                                     <div class="row pt-4 pb-4">
                                         <div class="col-2">
                                             <b>Current Status:</b>
@@ -54,11 +53,11 @@
                                             </ul>
                                         </section>
                                     </div>
-                                    -->
                                     <div class="row mt-3">
                                         <p>
-                                            <strong>Welcome to American International School of Jeddah's Online
-                                                Application.</strong>
+                                            <strong>
+                                                Welcome to <t t-esc="user_env.company.name"/>'s Online Application.
+                                            </strong>
                                             We have designed our online application process to make applying as simple
                                             as possible.
                                         </p>
@@ -66,8 +65,7 @@
                                     <div class="row h3"> Instructions </div>
                                     <div class="row">
                                         <p>
-                                            Please complete the Online Application forms listed  on the top,
-                                            beginning with the <b>Student Information</b> form.
+                                            Please complete the Online Application forms listed  on the top.
                                         </p>
                                     </div>
                                     <div class="row">
@@ -84,73 +82,6 @@
                                         <p>
                                             Please click 'Save' after completing each section of the application so
                                             you do not lose your progress.
-                                        </p>
-                                    </div>
-                                    <div class="row h3"> Application Checklist </div>
-                                    <div class="row">
-
-                                        <p>
-                                            In order to complete the application process, please complete the checklist
-                                            items listed below, including submission of all supplemental application
-                                            forms.
-                                            <br/>
-                                            <ul>
-                                                <li>Submit completed Online Application.</li>
-                                                <li>
-                                                    Submit the following by uploading documents in the “Document Upload”
-                                                    area located towards the end of this process:
-                                                    <ul>
-                                                        <li>A copy of Immunization History</li>
-                                                        <li>A copy of the Student’s Passport</li>
-                                                        <li>A copy of the Guardian’s Passport</li>
-                                                        <li>A copy of the Student’s Iqama</li>
-                                                        <li>A copy of the Guardian’s Iqama</li>
-<!--                                                        <li>Letter of Conduct</li>-->
-                                                        <li>Previous two (2) year’s final report card and current
-                                                            year-to-date report card (in English)</li>
-                                                        <li>Previous School’s Official Transcript</li>
-                                                        <li>Previous school’s profile with explanation of grading
-                                                            scale</li>
-                                                        <li>Standardized Test Records</li>
-                                                        <li>Copy of Family ID (If Saudi)</li>
-                                                        <li>Attendance Report</li>
-                                                        <li>Guardian's Business Card (if applicable)</li>
-                                                    </ul>
-                                                </li>
-                                                <li>
-                                                    <strong>
-                                                        Confidential English Recommendation
-                                                    </strong> letter to be
-                                                    completed by current English Teacher. To be forwarded directly from
-                                                    school to our Admissions Office.
-                                                </li>
-                                                <li>
-                                                    <strong> 
-                                                        Confidential Math Recommendation
-                                                    </strong> letter to be completed by current Math Teacher.
-                                                    To be forwarded directly from school to our Admissions Office.
-                                                </li>
-                                            </ul>
-                                        </p>
-                                    </div>
-                                    <div class="row">
-                                        <p>
-                                            Admissions assessment is required for all applicants who are accepted.
-                                            Placement decisions are made by the Admissions Committee and based upon the
-                                            results of the assessment and review of submitted records.
-                                        </p>
-                                    </div>
-                                    <div class="row h3"> Registration and Enrollment </div>
-                                    <div class="row">
-                                        <p>
-                                            After receiving acceptance notification, parents will be provided
-                                            information necessary to complete the admissions process.
-                                        </p>
-                                    </div>
-                                    <div class="row">
-                                        <p>
-                                            We appreciate your interest and look forward to meeting you. If you have any
-                                            questions, please feel free to contact us at +966122328668 Ext. 128 or 129.
                                         </p>
                                     </div>
                                     <div class="row">
