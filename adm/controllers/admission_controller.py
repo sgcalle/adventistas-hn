@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import http
+from odoo import http, SUPERUSER_ID, api
 from odoo.http import request
 from odoo.addons.adm.models.application.admission_application \
     import Application
@@ -19,6 +19,7 @@ class AdmissionController(http.Controller):
 
     def compute_view_render_params(self, application_id: Application):
         application_id = application_id.sudo()
+        sudo_env = api.Environment(request.env.cr, SUPERUSER_ID, request.env.context)
 
         # relationship_types = (AdmissionController
         #                       ._get_values_for_selection_fields(
@@ -75,6 +76,8 @@ class AdmissionController(http.Controller):
             'school_year_ids': school_year_ids,
             'relationship_types': relationship_types,
             'marital_status_types': marital_status_types,
+            'user_env': request.env,
+            'sudo_env': sudo_env,
             # 'custody_types': custody_types,
             }
 
