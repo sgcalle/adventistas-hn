@@ -78,7 +78,6 @@ class AdmissionController(http.Controller):
             'marital_status_types': marital_status_types,
             'user_env': request.env,
             'sudo_env': sudo_env,
-            # 'custody_types': custody_types,
             }
 
     @staticmethod
