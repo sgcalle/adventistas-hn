@@ -12,6 +12,7 @@
                 <page string="School information">
                     <group>
                         <field name="district_code_id"/>
+                        <field name="school_year_id"/>
                     </group>
                 </page>
             </notebook>

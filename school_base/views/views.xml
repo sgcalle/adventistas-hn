@@ -53,6 +53,16 @@
         </field>
     </record>
 
+    <record model="ir.ui.view" id="view_service_tree">
+        <field name="name">Services</field>
+        <field name="model">school_base.service</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
     <record model="ir.ui.view" id="view_sub_status_tree">
         <field name="name">Substatus</field>
         <field name="model">school_base.enrollment.sub_status</field>

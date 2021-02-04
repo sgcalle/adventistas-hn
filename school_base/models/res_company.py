@@ -13,3 +13,4 @@ class Company(models.Model):
     school_code_id = fields.Many2one('school_base.school_code', string="School code")
     district_code_name = fields.Char(related="district_code_id.name")
     date_sincro_contacts = fields.Datetime(help="Used to know the last time that was synchronized")
+    school_year_id = fields.Many2one('school_base.school_year', string="Current School Year")
