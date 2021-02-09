@@ -22,10 +22,10 @@ class SaleOrder(models.Model):
         store=True)
     invoice_payment_state = fields.Selection(string="Invoice Payment Status",
         selection=[
-            ("no", "No Bill"),
-            ("draft", "Draft Bill"),
-            ("unpaid", "Unpaid Bill"),
-            ("paid", "Paid Bill")],
+            ("no", "No Invoice"),
+            ("draft", "Draft Invoice"),
+            ("unpaid", "Unpaid Invoice"),
+            ("paid", "Paid Invoice")],
         compute="_compute_invoice_payment_state",
         store=True)
 
