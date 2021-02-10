@@ -133,6 +133,8 @@ class Admission(http.Controller):
 
             invoice_address_1 = params.get("txtInvoiceAddress_1", False)
             invoice_address_2 = params.get("txtInvoiceAddress_2", False)
+            street_address_1 = params.get("txtStreetAddress", False)
+            street_address_2 = params.get("txtStreetAddress2", False)
 
             family_1 = ''
             if 'selFamily_1' in params:
@@ -158,7 +160,9 @@ class Admission(http.Controller):
                     "family_ids": [(6,0,[family_id.id])],
                     "country_id":country_id,
                     'mobile': mobile_1,
-                    'email': email_1
+                    'email': email_1,
+                    'street': street_address_1,
+                    'street2': street_address_2,
                 })
             else:
                 family_id = PartnerEnv.sudo().search([('id', '=', family_1)])
