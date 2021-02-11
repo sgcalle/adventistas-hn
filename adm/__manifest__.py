@@ -18,7 +18,7 @@
     'version': '0.7',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'school_base', 'mail', 'website', 'contacts'],
+    'depends': ['base', 'school_base', 'mail', 'website', 'contacts','school_finance'],
 
     # always loaded
     'data': [
