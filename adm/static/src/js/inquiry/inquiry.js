@@ -178,6 +178,19 @@ odoo.define('adm.inquiry', require => {
                 $(this).parent().next().find("select").val(-1);
             })
         });
+//        document.querySelectorAll(".selStudentSchoolCode").forEach(function (element) {
+//            element.addEventListener("change", function () {
+//                var schoolCodeID = $(this).find("option:selected").data("school_code");
+//                $(this).parent().next().find("select option").each(function (element) {
+//                    var school_option_id = $(this).data("school_code");
+//                    if (schoolCodeID != -1 && schoolCodeID == school_option_id)
+//                        $(this).removeClass('d-none')
+//                    else
+//                        $(this).addClass('d-none')
+//                })
+//                $(this).parent().next().find("select").val(-1);
+//            })
+//        });
         document.querySelectorAll("#selSource").forEach(function (element) {
             element.addEventListener("change", function () {
                 if ($(this).find("option:selected").data("other") != undefined)

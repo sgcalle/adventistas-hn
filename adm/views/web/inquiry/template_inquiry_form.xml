@@ -701,18 +701,18 @@
                                         </div>
                                         <div class="row">
                                             <div class="form-group col">
-                                                <label for="selStudentSchoolCode">
+                                                <label for="selStudent1SchoolCode">
                                                     School code
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <select class="custom-select selectSchoolCode"
+                                                <select class="custom-select selStudentSchoolCode" id="selStudent1SchoolCode"
                                                         name="selStudentSchoolCode" required="required">
                                                     <option value="-1" selected="true" disabled="disabled">-Select a
                                                         School code-
                                                     </option>
-                                                    <t t-foreach="grade_levels" t-as="grade_level">
-                                                        <option t-att-data-id="grade_level.school_code_id.id">
-                                                            <t t-esc="grade_level.school_code_id.name"/>
+                                                    <t t-foreach="grade_levels.mapped('school_code_id')" t-as="school_code">
+                                                        <option t-att-value="school_code.id" t-att-data-school_code="school_code.id">
+                                                            <t t-esc="school_code.name"/>
                                                         </option>
                                                     </t>
                                                 </select>
