@@ -139,7 +139,11 @@ class Contact(models.Model):
     # Fields for current student status, grade leve, status, etc...
     school_code_id = fields.Many2one('school_base.school_code', string='Current school code')
     grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level")
+
+    school_year_id = fields.Many2one('school_base.school_year', string="School year", help="The school year where the student is enrolled")
+
     student_status = fields.Char("Student status (Deprecated)", help="(This field is deprecated)")
+
     # student_status_id = fields.Many2one("school_base.enrollment.status", string="Student status")
 
     # Fields for next student status, grade leve, status, etc...

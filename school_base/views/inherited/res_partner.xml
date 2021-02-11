@@ -166,6 +166,8 @@
                                                 <group>
                                                     <!--<field name="withdraw_date"/>-->
                                                     <field name="withdraw_reason_id"/>
+                                                    <field name="school_year_id"/>
+                                                    
                                                     <separator colspan="2"/>
 
                                                     <label for="reenrollment_status_id"/>
