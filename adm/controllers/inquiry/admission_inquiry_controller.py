@@ -101,7 +101,6 @@ class Admission(http.Controller):
                     'check_family_id': False,
                     'family_name': '',
                     'parent': False,
-
                 })
                 return response
             else:
@@ -124,7 +123,13 @@ class Admission(http.Controller):
             first_name = params["txtFirstName_1"]
             middle_name = params["txtMiddleName_1"]
             last_name = params["txtLastName_1"]
-            country_id = int(params["selCountry_1"])
+            citizenship_1 = int(params["selCountry_1"])
+
+            # Family address
+            country_id = int(params["selCountry"])
+            state_id = int(params["selState"])
+            city = params["txtCity"]
+            zip = params["txtZip"]
 
             mobile_1 = params["txtCellPhone_1"]
             email_1 = params["txtEmail_1"]
@@ -147,10 +152,20 @@ class Admission(http.Controller):
                     "is_family": True,
                     'mobile': mobile_1,
                     'email': email_1,
+                    'home_address_ids': [(0, 0,
+                                      {
+                                          'street': street_address_1,
+                                          'street2': street_address_2,
+                                          'city': city,
+                                          'zip': zip,
+                                          'country_id': country_id,
+                                          'state_id': state_id
+                                      })]
                 }
 
             if family_1 is '':
                 family_id = PartnerEnv.sudo().create(partner_body)
+                home_address_id = family_id.home_address_ids[0]
                 parent_id_1 = PartnerEnv.sudo().create({
                     "name": full_name,
                     "first_name": first_name,
@@ -159,11 +174,12 @@ class Admission(http.Controller):
                     "parent_id": family_id.id,
                     "function": "parent",
                     "family_ids": [(6,0,[family_id.id])],
-                    "country_id":country_id,
+                    "citizenship": citizenship_1,
                     'mobile': mobile_1,
                     'email': email_1,
                     'street': street_address_1,
                     'street2': street_address_2,
+                    'home_address_id': home_address_id.id
                 })
             else:
                 family_id = PartnerEnv.sudo().search([('id', '=', family_1)])
@@ -191,7 +207,7 @@ class Admission(http.Controller):
                 first_name = params["txtFirstName_2"]
                 middle_name = params["txtMiddleName_2"]
                 last_name = params["txtLastName_2"]
-                country_id = int(params["selCountry_2"])
+                citizenship_2 = int(params["selCountry_2"])
                 full_name = "{}, {}{}".format(params["txtLastName_2"], params["txtFirstName_2"],
                                               "" if not params["txtMiddleName_2"] else " {}".format(
                                                   params["txtMiddleName_2"]))
@@ -211,9 +227,10 @@ class Admission(http.Controller):
                         "parent_id": family_id.id,
                         "function": "parent",
                         "family_ids": [(6, 0, [family_id.id])],
-                        "country_id": country_id,
+                        "citizenship": citizenship_2,
                         'mobile': mobile_2,
-                        'email': email_2
+                        'email': email_2,
+                        'home_address_id': home_address_id.id
                     })
 
                 parents_ids_created.append(parent_id_2.id)
@@ -239,6 +256,8 @@ class Admission(http.Controller):
         middle_name_list = post_parameters().getlist("txtStudentMiddleName")
         birthday_list = post_parameters().getlist("txtStudentBirthday")
         current_grade_level_list = post_parameters().getlist("selStudentCurrentGradeLevel")
+        current_school_code_list = post_parameters().getlist("selStudentSchoolCode")
+        current_school_year_list = post_parameters().getlist("selStudentSchoolYear")
  
         InquiryEnv = http.request.env["adm.inquiry"]
 
@@ -249,6 +268,8 @@ class Admission(http.Controller):
             last_name = last_name_list[index_student]
             birthday = birthday_list[index_student]
             current_grade_level = current_grade_level_list[index_student]
+            current_school_code = current_school_code_list[index_student]
+            current_school_year = current_school_year_list[index_student]
             full_name_student = "{}, {}{}".format(last_name, first_name, "" if not middle_name else " {}".format(middle_name))
             service_ids = []
             for service in post_parameters().getlist("txtStudent%sExtraServices" % index_student):
@@ -267,14 +288,17 @@ class Admission(http.Controller):
                 "first_name": first_name,
                 "middle_name": middle_name,
                 "last_name": last_name,
-                "parent_id": family_id.id,
                 "function": "student",
                 "person_type": "student",
+                'school_code_id': current_school_code and int(current_school_code) or False,
+                'school_year_id': current_school_year and int(current_school_year) or False,
+                'grade_level_id': current_grade_level and int(current_grade_level) or False,
                 "family_ids": [(6, 0, [family_id.id])],
                 'date_of_birth': birthday,
                 'mobile': mobile_1,
                 'email': email_1,
                 'family_res_finance_ids': family_res_finance,
+                'home_address_id': home_address_id.id
             })
             family_id.write({'member_ids': [(4, id_student.id)]})
 
@@ -285,6 +309,7 @@ class Admission(http.Controller):
                 'middle_name': middle_name,
                 'last_name': last_name,
                 'current_grade_level_id': current_grade_level and int(current_grade_level) or False,
+                'school_year_id': current_school_code and int(current_school_code) or False,
                 'responsible_id': [(6,0,parents_ids_created)],
                 'extra_service_ids': service_ids,
                 'sources_id': source_id,
