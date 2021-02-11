@@ -253,6 +253,14 @@ class Admission(http.Controller):
             for service in post_parameters().getlist("txtStudent%sExtraServices" % index_student):
                 if service:
                     service_ids.append(int(service))
+            family_res_finance = []
+            for category_id in http.request.env['product.category'].sudo().search([('parent_id', '=', False)]):
+                family_res_finance.append((0,0,
+                                           {
+                                               'family_id': family_id.id,
+                                               'category_id': category_id.id,
+                                               'percent': 100
+                                            }))
             id_student = PartnerEnv.sudo().create({
                 "name": full_name_student,
                 "first_name": first_name,
@@ -265,6 +273,7 @@ class Admission(http.Controller):
                 'date_of_birth': birthday,
                 'mobile': mobile_1,
                 'email': email_1,
+                'family_res_finance_ids': family_res_finance,
             })
             family_id.write({'member_ids': [(4, id_student.id)]})
 
