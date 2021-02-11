@@ -119,8 +119,6 @@ class Contact(models.Model):
     race = fields.Char("Race")
     gender = fields.Many2one("school_base.gender", string="Gender")
 
-    date_of_birth = fields.Date("date_of_birth")
-
     medical_allergies_ids = fields.One2many("school_base.medical_allergy", "partner_id", string="Medical Allergies")
     medical_conditions_ids = fields.One2many("school_base.medical_condition", "partner_id", string="Medical conditions")
     medical_medications_ids = fields.One2many("school_base.medical_medication", "partner_id",
@@ -129,9 +127,6 @@ class Contact(models.Model):
     citizenship = fields.Many2one("res.country", string="Citizenship")
     identification = fields.Char("ID number")
     salutation = fields.Char("Salutation")
-    # marital_status = fields.Selection(
-    #     [("married", "Married"), ("single", "Single"), ("divorced", "Divorced"), ("widowed", "Widowed")],
-    #     string="Marital Status")
 
     marital_status = fields.Many2one('school_base.marital_status', string='Marital status')
     occupation = fields.Char("Occupation")
@@ -156,6 +151,10 @@ class Contact(models.Model):
     # student_next_status_id2 = fields.Many2one("school_base.enrollment.status", string="Student next status")
 
     # School information
+    home_address_ids = fields.One2many("school_base.home_address", 'family_id', string="Home Addresses",)
+    family_home_address_ids = fields.One2many(related='family_ids.home_address_ids', string="Family Home Addresses",)
+    home_address_id = fields.Many2one("school_base.home_address", string="Home Address")
+
     homeroom = fields.Char("Homeroom")
     class_year = fields.Char("Class year")
     student_sub_status_id = fields.Many2one(
@@ -194,6 +193,50 @@ class Contact(models.Model):
     condition_ids = fields.One2many("school_base.condition", "partner_id",
                                     string="Conditions")
 
+    # This fields are mainly used for the onchange method below
+    home_address_name = fields.Char(realated='home_address_id.name')
+    home_address_country_id = fields.Many2one(realated='home_address_id.country_id')
+    home_address_state_id = fields.Many2one(realated='home_address_id.state_id')
+
+    home_address_city = fields.Char(realated='home_address_id.city')
+    home_address_zip = fields.Char(realated='home_address_id.zip')
+    home_address_street = fields.Char(realated='home_address_id.street')
+    home_address_street2 = fields.Char(realated='home_address_id.street2')
+    home_address_phone = fields.Char(realated='home_address_id.phone')
+
+    @api.onchange('parent_id', 'home_address_id',
+                  'home_address_country_id', 
+                  'home_address_state_id',
+                  'home_address_city',
+                  'home_address_street',
+                  'home_address_street2',
+                  'home_address_phone',
+                  )
+    def onchange_parent_id(self):
+        res = super(Contact, self).onchange_parent_id()
+        if not self.home_address_id:
+            return
+        res = res or {}
+        address_fields = self._address_fields()
+        if any(self.home_address_id[key] for key in address_fields):
+            def convert(value):
+                return value.id if isinstance(value, models.BaseModel) else value
+            res['value'] = {key: convert(self.home_address_id[key]) for key in address_fields}
+        return res
+
+    @api.onchange('home_address_id', 'home_address_phone')
+    def _phone_sync_from_home_address(self):
+        for partner in self:
+            if partner.home_address_id.phone:
+                partner.phone = partner.home_address_id.phone
+
+    def _fields_sync(self, values):
+        super(Contact, self)._fields_sync(values)
+        if values.get('home_address_id'):
+            self._phone_sync_from_home_address()
+            onchange_vals = self.onchange_parent_id().get('value', {})
+            self.update_address(onchange_vals)
+
     @api.depends("facts_id")
     def _converts_facts_id_to_int(self):
         for partner_id in self:
@@ -203,15 +246,12 @@ class Contact(models.Model):
     def _check_facts_id(self):
         for partner_id in self:
             if partner_id.facts_id:
-
                 if not partner_id.facts_id.isdigit():
                     raise ValidationError("Facts id needs to be an number")
 
-                should_be_unique = self.search_count(
-                    [("facts_id", "=", partner_id.facts_id)])
+                should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_id), ('is_family', '=', partner_id.is_family)])
                 if should_be_unique > 1:
-                    raise ValidationError(
-                        "Another contact has the same facts id!")
+                    raise ValidationError("Another contact has the same facts id! (%s)" % partner_id.facts_id)
                     
     @api.depends("facts_udid")
     def _converts_facts_udid_id_to_int(self):
@@ -229,7 +269,7 @@ class Contact(models.Model):
 
                 should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
                 if should_be_unique > 1:
-                    raise ValidationError("Another contact has the same facts id!")
+                    raise ValidationError("Another contact has the same facts udid! (%s)" % partner_id.facts_udid)
 
     @api.depends("facts_udid")
     def _converts_facts_udid_id_to_int(self):
@@ -237,17 +277,17 @@ class Contact(models.Model):
             partner_id.facts_udid_int = int(
                 partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
 
-    @api.constrains("facts_udid")
-    def _check_facts_udid_id(self):
-        for partner_id in self:
-            if partner_id.facts_udid:
-
-                if not partner_id.facts_udid.isdigit():
-                    raise ValidationError("Facts id needs to be an number")
-
-                should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
-                if should_be_unique > 1:
-                    raise ValidationError("Another contact has the same facts id!")
+    # @api.constrains("facts_udid")
+    # def _check_facts_udid_id(self):
+    #     for partner_id in self:
+    #         if partner_id.facts_udid:
+    #
+    #             if not partner_id.facts_udid.isdigit():
+    #                 raise ValidationError("Facts id needs to be an number")
+    #
+    #             should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
+    #             if should_be_unique > 1:
+    #                 raise ValidationError("Another contact has the same facts id!")
 
     @api.model
     def format_name(self, first_name, middle_name, last_name):

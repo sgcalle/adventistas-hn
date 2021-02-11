@@ -5,8 +5,6 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-
-
             <xpath expr="//field[@name='name']/parent::h1" position="after">
                 <group attrs="{'invisible': [('is_company', '=', True)]}">
                     <field name="first_name"/>
@@ -32,7 +30,8 @@
 
             <field name="company_type" position="before">
                 <div>
-                    <field name="person_type" class="mt0 mb0" readonly="1" style="font-size: xx-large;color: #875a7b; font-weight: bold;"/>
+                    <field name="person_type" class="mt0 mb0" readonly="1"
+                           style="font-size: xx-large;color: #875a7b; font-weight: bold;"/>
                 </div>
             </field>
 
@@ -208,6 +207,17 @@
                                         <field name="comment"/>
                                     </tree>
                                 </field>
+                            </group>
+                        </page>
+
+                        <page string="Home addresses" attrs="{'invisible': [('is_family', '!=', True)]}">
+                            <field name="home_address_ids"/>
+                        </page>
+
+                        <page string="Home address" attrs="{'invisible': [('is_family', '=', True)]}">
+                            <group>
+                                <field name="family_home_address_ids" invisible="1"/>
+                                <field name="home_address_id" domain="[('id', 'in', family_home_address_ids)]"/>
                             </group>
                         </page>
                     </notebook>

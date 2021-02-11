@@ -43,6 +43,7 @@ class GradeLevel(models.Model):
 
     name = fields.Char(string="Name", required=True)
     sequence = fields.Integer(default=1)
+    next_grade_level_id = fields.Many2one("school_base.grade_level", string="Next grade level")
     school_code_id = fields.Many2one("school_base.school_code", string="School code")
     district_code_id = fields.Many2one(related="school_code_id.district_code_id")
     user_type_id = fields.Many2one('school_base.grade_level.type')
@@ -97,7 +98,7 @@ class WithdrawReason(models.Model):
     key = fields.Char(string="Key")
 
 
-class Status(models.Model):
+class EnrollmentStatus(models.Model):
     """ SubStatus for students """
     _name = 'school_base.enrollment.status'
     _description = "Enrollment Status"
@@ -107,7 +108,7 @@ class Status(models.Model):
     note = fields.Char(string="Description")
 
 
-class SubStatus(models.Model):
+class EnrollmentSubStatus(models.Model):
     """ SubStatus for students """
     _name = 'school_base.enrollment.sub_status'
     _description = "Enrollment sub status"
