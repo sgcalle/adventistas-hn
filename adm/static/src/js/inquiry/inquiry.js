@@ -8,19 +8,27 @@ odoo.define('adm.inquiry', require => {
 
     let studentCount = 1;
 
+    function recomputaTabStudent() {
+        $('#studentsNavbar').find('li').each((i, el) => {
+            const $el = $(el);
+            $el.children('a.student').html('Student '+(i+1)+'');
+        });
+        $('#studentsNavbar').find('li > a.student').last().click();
+        $('#studentsCount').val($('#studentsNavbar').find('li > a.student').length);
+    }
     function removeStudent(idStudent) {
         $(`#navStudent${idStudent}`).remove();
         $(`#student${idStudent}`).remove();
+        recomputaTabStudent();
     }
 
     function addStudent() {
         studentCount++;
         var htmlTab =
             `<li class="nav-item" style="position: relative" id="navStudent${studentCount}">
-        <a class="nav-link" id="student${studentCount}-tab" data-toggle="tab" href="#student${studentCount}"
+        <a class="nav-link student" id="student${studentCount}-tab" data-toggle="tab" href="#student${studentCount}"
             role="tab" aria-controls="student${studentCount}" aria-selected="false">Student ${studentCount}</a>
-            <i class="fa fa-times" style="position: absolute; top: -0.5em; right: 0.1em; font-size: 1.4em; color: orangered; cursor: pointer;"
-            onclick="removeStudent(${studentCount})"></i>
+            <i data-tabRemove="${studentCount}" class="fa fa-times remove-tab" style="position: absolute; top: -0.5em; right: 0.1em; font-size: 1.4em; color: orangered; cursor: pointer;""></i>
     </li>`;
 
 
@@ -39,23 +47,30 @@ odoo.define('adm.inquiry', require => {
         $(studentClonnable).removeClass("active");
         $(studentClonnable).removeClass("show");
 
-        $(studentClonnable).find("#txtStudent1FirstName").attr("name", "txtStudent" + studentCount + "FirstName")
-        $(studentClonnable).find("#txtStudent1MiddleName").attr("name", "txtStudent" + studentCount + "MiddleName")
-        $(studentClonnable).find("#txtStudent1LastName").attr("name", "txtStudent" + studentCount + "LastName")
-        $(studentClonnable).find("#txtStudent1Birthday").attr("name", "txtStudent" + studentCount + "Birthday")
-        $(studentClonnable).find("#selStudent1Gender").attr("name", "selStudent" + studentCount + "Gender")
-        $(studentClonnable).find("#selStudent1Nativelanguage").attr("name", "selStudent" + studentCount + "Nativelanguage")
-        $(studentClonnable).find("#selStudent1SchoolYear").attr("name", "selStudent" + studentCount + "SchoolYear")
-        $(studentClonnable).find("#selStudent1GradeLevel").attr("name", "selStudent" + studentCount + "GradeLevel")
-        $(studentClonnable).find("#selStudent1CurrentGradeLevel").attr("name", "selStudent" + studentCount + "CurrentGradeLevel")
-        $(studentClonnable).find("#txtStudent1CurrentSchool").attr("name", "txtStudent" + studentCount + "CurrentSchool")
-        $(studentClonnable).find("#txtStudent1FromEnglishSchool").attr("name", "txtStudent" + studentCount + "FromEnglishSchool")
-        $(studentClonnable).find(".txtStudent1ExtraServices").attr("name", "txtStudent" + studentCount + "ExtraServices")
-        $(studentClonnable).find(".txtStudent1ExtraServices").attr("id", "txtStudent" + studentCount + "ExtraServices")
-        $(studentClonnable).find("#fileStudent1Photo").attr("name", "fileStudent" + studentCount + "Photo")
-        $(studentClonnable).find("#fileStudent1BirthCert").attr("name", "fileStudent" + studentCount + "BirthCert")
-        $(studentClonnable).find("#fileStudent1ReportCard").attr("name", "fileStudent" + studentCount + "ReportCard")
-        $(studentClonnable).find("#fileStudent1ImmunizationRecord").attr("name", "fileStudent" + studentCount + "ImmunizationRecord")
+        $(studentClonnable).find('input[id]').each((i, el) => {
+            const $el = $(el);
+            const newId = el.id + '-' + studentCount;
+            $(studentClonnable).find(`label[for=${el.id}]`).attr('for', newId);
+            el.id = newId
+        });
+//        $(studentClonnable).find("#txtStudent1FirstName").attr("id", "txtStudent" + studentCount + "FirstName")
+//        $(studentClonnable).find("#txtStudent1MiddleName").attr("id", "txtStudent" + studentCount + "MiddleName")
+//        $(studentClonnable).find("#txtStudent1LastName").attr("id", "txtStudent" + studentCount + "LastName")
+//        $(studentClonnable).find("#txtStudent1Birthday").attr("id", "txtStudent" + studentCount + "Birthday")
+//        $(studentClonnable).find("#selStudent1Gender").attr("id", "selStudent" + studentCount + "Gender")
+//        $(studentClonnable).find("#selStudent1Nativelanguage").attr("id", "selStudent" + studentCount + "Nativelanguage")
+//        $(studentClonnable).find("#selStudent1SchoolYear").attr("id", "selStudent" + studentCount + "SchoolYear")
+//        $(studentClonnable).find("#selStudent1GradeLevel").attr("id", "selStudent" + studentCount + "GradeLevel")
+//        $(studentClonnable).find("#selStudent1CurrentGradeLevel").attr("id", "selStudent" + studentCount + "CurrentGradeLevel")
+//        $(studentClonnable).find("#txtStudent1CurrentSchool").attr("id", "txtStudent" + studentCount + "CurrentSchool")
+//        $(studentClonnable).find("#txtStudent1FromEnglishSchool").attr("id", "txtStudent" + studentCount + "FromEnglishSchool")
+//        $(studentClonnable).find("#txtStudent1FromEnglishSchool").attr("label", "txtStudent" + studentCount + "FromEnglishSchool")
+//        $(studentClonnable).find(".txtStudent1ExtraServices").attr("name", "txtStudent" + studentCount + "ExtraServices")
+//        $(studentClonnable).find(".txtStudent1ExtraServices").attr("id", "txtStudent" + studentCount + "ExtraServices")
+//        $(studentClonnable).find("#fileStudent1Photo").attr("name", "fileStudent" + studentCount + "Photo")
+//        $(studentClonnable).find("#fileStudent1BirthCert").attr("name", "fileStudent" + studentCount + "BirthCert")
+//        $(studentClonnable).find("#fileStudent1ReportCard").attr("name", "fileStudent" + studentCount + "ReportCard")
+//        $(studentClonnable).find("#fileStudent1ImmunizationRecord").attr("name", "fileStudent" + studentCount + "ImmunizationRecord")
 
         $(studentClonnable).find("input").each(function () {
             var input_type = $(this).attr("type")
@@ -65,6 +80,7 @@ odoo.define('adm.inquiry', require => {
                 $(this).val("");
             }
         });
+
 
         document.querySelectorAll(".selectSchoolYear").forEach(function (element) {
             element.addEventListener("change", function () {
@@ -79,6 +95,7 @@ odoo.define('adm.inquiry', require => {
                 $(this).parent().next().find("select").val(-1);
             })
         });
+        recomputaTabStudent();
     }
 
     function showOnlyCountrysStates() {
@@ -150,7 +167,7 @@ odoo.define('adm.inquiry', require => {
         showOnlyCountrysStates();
 
         // Event Handlers
-        document.getElementById("add-tab").addEventListener("click", addStudent);
+        //document.getElementById("add-tab").addEventListener("click", addStudent);
         document.getElementById("selCountry").addEventListener("change", showOnlyCountrysStates);
 
         document.getElementById('showSecondParent').addEventListener('click', toggleSecondParent);
@@ -158,6 +175,13 @@ odoo.define('adm.inquiry', require => {
         $('#checkbox_family_id').on('click',hideDataParents)
         $('#txtInvoiceAddress_1').click(1,invoiceAddress)
         $('#txtInvoiceAddress_2').click(2,invoiceAddress)
+
+        $('#add-tab').on('click',addStudent)
+
+        $(document).on('click', '.remove-tab', function () {
+            removeStudent($(this).attr('data-tabRemove'))
+        });
+
 
         document.querySelectorAll(".custom-file-input").forEach(function (element) {
             element.addEventListener("change", function () {

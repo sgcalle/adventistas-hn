@@ -112,6 +112,7 @@ class Inquiry(models.Model):
     status_type = fields.Selection(string="Status Type", related="status_id.type_id")
 
     application_id = fields.Many2one("adm.application")
+    from_english_school = fields.Boolean(string="From English School?")
     forcing = False
 
     extra_service_ids = fields.Many2many(string="Extra Services",
@@ -317,6 +318,8 @@ class Inquiry(models.Model):
             "partner_id": self.partner_id.id,
             "grade_level": self.grade_level_id.id,
             "school_year": self.school_year_id.id,
+            "extra_service_ids": self.extra_service_ids.ids,
+            "from_english_school": self.from_english_school,
             "medical_conditions_ids": medical_base,
             "family_id": self.partner_id.get_families()[0].id,
             "responsible_user_id": first_user.id

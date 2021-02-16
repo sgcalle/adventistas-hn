@@ -255,6 +255,8 @@ class Admission(http.Controller):
         last_name_list = post_parameters().getlist("txtStudentLastName")
         middle_name_list = post_parameters().getlist("txtStudentMiddleName")
         birthday_list = post_parameters().getlist("txtStudentBirthday")
+        gender_list = post_parameters().getlist("selStudentGender")
+
         current_grade_level_list = post_parameters().getlist("selStudentCurrentGradeLevel")
         current_school_code_list = post_parameters().getlist("selStudentSchoolCode")
         current_school_year_list = post_parameters().getlist("selStudentSchoolYear")
@@ -267,6 +269,7 @@ class Admission(http.Controller):
             middle_name = middle_name_list[index_student]
             last_name = last_name_list[index_student]
             birthday = birthday_list[index_student]
+            gender = gender_list[index_student]
             current_grade_level = current_grade_level_list[index_student]
             current_school_code = current_school_code_list[index_student]
             current_school_year = current_school_year_list[index_student]
@@ -295,6 +298,7 @@ class Admission(http.Controller):
                 'grade_level_id': current_grade_level and int(current_grade_level) or False,
                 "family_ids": [(6, 0, [family_id.id])],
                 'date_of_birth': birthday,
+                'gender': gender and int(gender) or False,
                 'mobile': mobile_1,
                 'email': email_1,
                 'family_res_finance_ids': family_res_finance,

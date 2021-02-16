@@ -621,7 +621,7 @@
                             <section class="card-body">
                                 <ul class="nav nav-tabs" id="studentsNavbar" role="tablist">
                                     <li class="nav-item" id="student1-tab-li">
-                                        <a class="nav-link active" id="student1-tab" data-toggle="tab"
+                                        <a class="nav-link active student" id="student1-tab" data-toggle="tab"
                                            href="#student1" role="tab" aria-controls="student1" aria-selected="true">
                                             Student 1
                                         </a>
@@ -673,8 +673,8 @@
                                                        name="txtStudentBirthday" required="required"/>
                                             </div>
                                             <div class="form-group col">
-                                                <label for="txtStudent1Birthday">Gender</label>
-                                                <select class="custom-select" name="selStudentGender">
+                                                <label for="selStudent1Gender">Gender</label>
+                                                <select class="custom-select" id="selStudent1Gender" name="selStudentGender">
                                                     <t t-foreach="gender" t-as="gender_item">
                                                         <option t-att-value="gender_item.id">
                                                             <t t-esc="gender_item.name"/>
@@ -687,7 +687,7 @@
                                             <div class="form-group col">
                                                 <label for="sel_std_native_language">Native Language</label>
 
-                                                <select id="selStudent1Nativelanguage" name="selStudent1Nativelanguage"
+                                                <select id="selStudent1Nativelanguage" name="selStudentNativelanguage"
                                                         class="form-control" required="required">
                                                     <option value="">Select a language
                                                     </option>
@@ -764,7 +764,7 @@
                                                 </label>
                                                 <input type="checkbox" class="form-control switch-input"
                                                        id="txtStudent1FromEnglishSchool"
-                                                       name="txtStudent1FromEnglishSchool"/>
+                                                       name="txtStudentFromEnglishSchool"/>
                                                 <label for="txtStudent1FromEnglishSchool" class="switch ml-2">
                                                     <span class="switch-label" data-on="Yes" data-off="No"></span>
                                                     <span class="switch-handle"></span>
@@ -774,7 +774,7 @@
                                                 <label>Extra Services</label>
                                                 <div t-foreach="services" t-as="service">
                                                     <input type="checkbox" class="txtStudent1ExtraServices"
-                                                           name="txtStudent1ExtraServices"
+                                                           name="txtStudentExtraServices"
                                                            id="txtStudent1ExtraServices" t-att-value="service.id"/>
                                                     <span>
                                                         <t t-esc="service.name"/>
