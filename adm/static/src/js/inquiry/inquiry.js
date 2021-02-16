@@ -14,7 +14,7 @@ odoo.define('adm.inquiry', require => {
             $el.children('a.student').html('Student '+(i+1)+'');
         });
         $('#studentsNavbar').find('li > a.student').last().click();
-        $('#studentsCount').val($('#studentsNavbar').find('li > a.student').length);
+        $('#studentsCount').val($('#studentsNavbar').find('li > a').length-1);
     }
     function removeStudent(idStudent) {
         $(`#navStudent${idStudent}`).remove();
