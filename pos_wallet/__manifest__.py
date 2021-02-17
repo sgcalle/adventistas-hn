@@ -20,8 +20,12 @@
         'data/assets.xml',
 
         'views/views.xml',
+
         'views/inherited/pos_session_views.xml',
         'views/inherited/pos_config.xml',
+        'views/inherited/wallet_category_views.xml',
+
+        'views/pos_payment_method_views.xml',
     ],
 
     'qweb': [
