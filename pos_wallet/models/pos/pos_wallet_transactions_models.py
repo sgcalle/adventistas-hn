@@ -57,7 +57,7 @@ class PosWalletWalletLoad(models.Model):
             })
         payment_miscellaneous_move_id.post()
 
-        self._create_statements_and_reconcile_with_cash_line_ids(payment_miscellaneous_move_id.line_ids.filtered("is_payment_method_cash"))
+        # self._create_statements_and_reconcile_with_cash_line_ids(payment_miscellaneous_move_id.line_ids.filtered("is_payment_method_cash"))
 
         return payment_miscellaneous_move_id
 
