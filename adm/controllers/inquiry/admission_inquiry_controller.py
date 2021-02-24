@@ -127,9 +127,9 @@ class Admission(http.Controller):
 
             # Family address
             country_id = int(params["selCountry"])
-            state_id = int(params["selState"])
+            state_id = int(params.get("selState", False))
             city = params["txtCity"]
-            zip = params["txtZip"]
+            zip = paramsget("txtZip", False)
 
             mobile_1 = params["txtCellPhone_1"]
             email_1 = params["txtEmail_1"]
@@ -258,6 +258,7 @@ class Admission(http.Controller):
         gender_list = post_parameters().getlist("selStudentGender")
 
         current_grade_level_list = post_parameters().getlist("selStudentCurrentGradeLevel")
+        interest_grade_level_list = post_parameters().getlist("selStudentInterestGradeLevel")
         current_school_code_list = post_parameters().getlist("selStudentSchoolCode")
         current_school_year_list = post_parameters().getlist("selStudentSchoolYear")
  
@@ -271,6 +272,7 @@ class Admission(http.Controller):
             birthday = birthday_list[index_student]
             gender = gender_list[index_student]
             current_grade_level = current_grade_level_list[index_student]
+            interest_grade_level = interest_grade_level_list[index_student]
             current_school_code = current_school_code_list[index_student]
             current_school_year = current_school_year_list[index_student]
             full_name_student = "{}, {}{}".format(last_name, first_name, "" if not middle_name else " {}".format(middle_name))
@@ -313,6 +315,7 @@ class Admission(http.Controller):
                 'middle_name': middle_name,
                 'last_name': last_name,
                 'current_grade_level_id': current_grade_level and int(current_grade_level) or False,
+                'grade_level_id': interest_grade_level and int(interest_grade_level) or False,
                 'school_year_id': current_school_code and int(current_school_code) or False,
                 'responsible_id': [(6,0,parents_ids_created)],
                 'extra_service_ids': service_ids,

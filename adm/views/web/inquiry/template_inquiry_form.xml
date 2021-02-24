@@ -755,6 +755,24 @@
                                                     </t>
                                                 </select>
                                             </div>
+                                            <div class="form-group col">
+                                                <label for="selStudent1InterestGradeLevel">
+                                                    Grade Level of interest
+                                                    <span class="text-danger">*</span>
+                                                </label>
+                                                <select required="required" class="custom-select"
+                                                        id="selStudent1InterestGradeLevel"
+                                                        name="selStudentInterestGradeLevel">
+                                                    <option value="-1" disabled="disabled">-Select a
+                                                        grade level-
+                                                    </option>
+                                                    <t t-foreach="grade_levels" t-as="grade_level">
+                                                        <option t-att-value="grade_level.id">
+                                                            <t t-esc="grade_level.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
                                         </div>
                                         <!--                            Extras-->
                                         <div class="row">
