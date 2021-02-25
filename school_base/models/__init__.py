@@ -10,5 +10,6 @@ from . import models
 from . import reenrollment_record
 from . import relationship
 from . import res_company
+from . import res_partner
 from . import service
 from . import setting
