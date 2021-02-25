@@ -602,7 +602,7 @@
                                                     <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a School code-</option>
                                                     <t t-foreach="grade_levels.mapped('school_code_id')" t-as="school_code">
                                                         <option t-att-value="school_code.id" t-att-data-school_code="school_code.id">
-                                                            <t t-esc="school_code.name"/>
+                                                            <t t-esc="school_code.description"/>
                                                         </option>
                                                     </t>
                                                 </select>
