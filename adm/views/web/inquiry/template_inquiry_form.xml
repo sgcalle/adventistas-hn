@@ -28,7 +28,7 @@
 
             <t t-set="title">Admissions</t>
 
-            <t t-set="head_scripts" >
+            <t t-set="head_scripts">
                 <t t-call-assets="adm.assets_inquiry" defer_load="True"/>
             </t>
             <t t-set="head" t-value="head_scripts + (head or '')"/>
@@ -36,8 +36,7 @@
             <div class="oe_struture">
 
                 <main class="container p-4">
-                    <form action="/admission/inquiry" method="post"
-                          class="s_website_form form-horizontal container-fluid mt32" enctype="multipart/form-data">
+                    <form action="/admission/inquiry" method="post" class="s_website_form form-horizontal container-fluid mt32" enctype="multipart/form-data">
                         <t t-if="not check_family_id">
                             <div class="alert alert-warning" role="alert">
                                 This Family ID not exists in the system.
@@ -50,19 +49,14 @@
                             <div class="d-flex col-12 col-md-4 mb-2" id="section_check_family">
                                 <div class="col-5 form-check d-flex align-items-center">
                                     <!--<input t-if="family_id != -1" checked="checked" type="checkbox" class="form-check-input" id="checkbox_family_id" name="checkbox_family_id" onchange="hideDataParents()"/>-->
-                                    <input t-att-checked="family_id != -1" type="checkbox" class="form-check-input"
-                                           id="checkbox_family_id" name="checkbox_family_id"
-                                           />
+                                    <input t-att-checked="family_id != -1" type="checkbox" class="form-check-input" id="checkbox_family_id" name="checkbox_family_id"/>
                                     <label class="form-check-label" for="exampleCheck1" style="padding-top: 5px;">Family
                                         exists
                                     </label>
                                 </div>
                                 <div class="col-7">
-                                    <input t-if="family_id != -1" t-att-value="family_id" type="number"
-                                           class="form-control" id="input_family_id" name="input_family_id"
-                                           placeholder="Family ID"/>
-                                    <input t-else="" type="number" class="form-control" id="input_family_id"
-                                           name="input_family_id" placeholder="Family ID" style="display: none;"/>
+                                    <input t-if="family_id != -1" t-att-value="family_id" type="number" class="form-control" id="input_family_id" name="input_family_id" placeholder="Family ID"/>
+                                    <input t-else="" type="number" class="form-control" id="input_family_id" name="input_family_id" placeholder="Family ID" style="display: none;"/>
                                 </div>
                             </div>
                             <t t-if="family_name != ''">
@@ -84,23 +78,18 @@
                                                 First Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated firstname"
-                                                   id="txtFirstName_1"
-                                                   name="txtFirstName_1" placeholder="First Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated firstname" id="txtFirstName_1" name="txtFirstName_1" placeholder="First Name" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtMiddleName_1">Middle Name</label>
-                                            <input type="text" class="form-control" id="txtMiddleName_1"
-                                                   name="txtMiddleName_1" placeholder="Middle Name"/>
+                                            <input type="text" class="form-control" id="txtMiddleName_1" name="txtMiddleName_1" placeholder="Middle Name"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtLastName_1">
                                                 Last Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated lastname"
-                                                   id="txtLastName_1"
-                                                   name="txtLastName_1" placeholder="Last Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated lastname" id="txtLastName_1" name="txtLastName_1" placeholder="Last Name" required="required"/>
                                         </div>
                                     </div>
 
@@ -110,32 +99,24 @@
                                                 Email
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="email" class="form-control checkDuplicated email"
-                                                   id="txtEmail_1" name="txtEmail_1"
-                                                   placeholder="example@email.com" required="required"/>
+                                            <input type="email" class="form-control checkDuplicated email" id="txtEmail_1" name="txtEmail_1" placeholder="example@email.com" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md-4">
                                             <label for="txtCellPhone_1">
                                                 Cell Phone
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" required="required"
-                                                   class="form-control phone checkDuplicated" id="txtCellPhone_1"
-                                                   name="txtCellPhone_1" placeholder="+01 234 56 78 90"
-                                                   pattern="\+?[0-9 -]+"/>
+                                            <input type="tel" required="required" class="form-control phone checkDuplicated" id="txtCellPhone_1" name="txtCellPhone_1" placeholder="+01 234 56 78 90" pattern="\+?[0-9 -]+"/>
                                         </div>
                                         <div class="form-group col-12 col-md-4">
                                             <label for="selCountry_1">
                                                 Country
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <select type="text" class="custom-select" id="selCountry_1"
-                                                    name="selCountry_1" placeholder="Country" required="required">
-                                                <option value="-1" disabled="disabled">-Select a country-
-                                                </option>
+                                            <select type="text" class="custom-select" id="selCountry_1" name="selCountry_1" placeholder="Country" required="required">
+                                                <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id"
-                                                            t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -144,18 +125,16 @@
                                     </div>
 
                                     <div class="row">
-                                        <hr></hr>
+                                        <hr/>
                                         <div class="form-group">
                                             <label for="txtFinancialResponsability_1">
                                                 Financial responsability
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="checkbox" class="form-control switch-input"
-                                                       id="txtFinancialResponsability_1"
-                                                       name="txtFinancialResponsability_1"/>
+                                            <input type="checkbox" class="form-control switch-input" id="txtFinancialResponsability_1" name="txtFinancialResponsability_1"/>
                                                 <label for="txtFinancialResponsability_1" class="switch ml-2">
-                                                    <span class="switch-label" data-on="Yes" data-off="No"></span>
-                                                    <span class="switch-handle"></span>
+                                                    <span class="switch-label" data-on="Yes" data-off="No"/>
+                                                    <span class="switch-handle"/>
                                                 </label>
                                         </div>
                                         <div class="form-group col">
@@ -163,17 +142,13 @@
                                                 Invoice Address
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" required="required"
-                                                   class="form-control phone checkDuplicated" id="txtCellPhone_1"
-                                                   name="txtCellPhone_1" placeholder="+01 234 56 78 90"
-                                                   pattern="\+?[0-9 -]+"/>
+                                            <input type="tel" required="required" class="form-control phone checkDuplicated" id="txtCellPhone_1" name="txtCellPhone_1" placeholder="+01 234 56 78 90" pattern="\+?[0-9 -]+"/>
                                         </div>
                                     </div>
                                 </section>
                             </section>
 
-                            <button type="button" class="btn btn-warning mt-2 hide_parent " id="showSecondParent"
-                                    style="display: none;">Show/Hide Second Parent
+                            <button type="button" class="btn btn-warning mt-2 hide_parent " id="showSecondParent" style="display: none;">Show/Hide Second Parent
                             </button>
 
                             <section class="card mt-2 hide_parent" id="section_parent_2" style="display: none;">
@@ -187,23 +162,18 @@
                                                 First Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated firstname"
-                                                   id="txtFirstName_2"
-                                                   name="txtFirstName_2" placeholder="First Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated firstname" id="txtFirstName_2" name="txtFirstName_2" placeholder="First Name" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtMiddleName_2">Middle Name</label>
-                                            <input type="text" class="form-control" id="txtMiddleName_2"
-                                                   name="txtMiddleName_2" placeholder="Middle Name"/>
+                                            <input type="text" class="form-control" id="txtMiddleName_2" name="txtMiddleName_2" placeholder="Middle Name"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtLastName_2">
                                                 Last Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated lastname"
-                                                   id="txtLastName_2"
-                                                   name="txtLastName_2" placeholder="Last Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated lastname" id="txtLastName_2" name="txtLastName_2" placeholder="Last Name" required="required"/>
                                         </div>
                                     </div>
 
@@ -213,32 +183,24 @@
                                                 Email
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="email" class="form-control checkDuplicated email"
-                                                   id="txtEmail_2" name="txtEmail_2"
-                                                   placeholder="example@email.com" required="required"/>
+                                            <input type="email" class="form-control checkDuplicated email" id="txtEmail_2" name="txtEmail_2" placeholder="example@email.com" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md-4">
                                             <label for="txtCellPhone_2">
                                                 Cell Phone
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" required="required"
-                                                   class="form-control checkDuplicated phone" id="txtCellPhone_2"
-                                                   name="txtCellPhone_2" placeholder="+01 234 56 78 90"
-                                                   pattern="\+?[0-9 -]+"/>
+                                            <input type="tel" required="required" class="form-control checkDuplicated phone" id="txtCellPhone_2" name="txtCellPhone_2" placeholder="+01 234 56 78 90" pattern="\+?[0-9 -]+"/>
                                         </div>
                                         <div class="form-group col-12 col-md-4">
                                             <label for="selCountry_2">
                                                 Country
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <select type="text" class="custom-select" id="selCountry_2"
-                                                    name="selCountry_2" placeholder="Country" required="required">
-                                                <option value="-1" disabled="disabled">-Select a country-
-                                                </option>
+                                            <select type="text" class="custom-select" id="selCountry_2" name="selCountry_2" placeholder="Country" required="required">
+                                                <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id"
-                                                            t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -261,21 +223,15 @@
                                                     *
                                                 </span>
                                             </label>
-                                            <input type="text" class="form-control" id="txtStreetAddress"
-                                                   name="txtStreet Address" placeholder="Street Address"
-                                                   required="required"/>
+                                            <input type="text" class="form-control" id="txtStreetAddress" name="txtStreet Address" placeholder="Street Address" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md-6">
                                             <label for="txtReferenceFamily_1_a">a) Reference Family 1</label>
-                                            <input type="tel" class="form-control" id="txtReferenceFamily_1_a"
-                                                   name="txtReferenceFamily_1_a"
-                                                   placeholder="Name lastname and contact phone"/>
+                                            <input type="tel" class="form-control" id="txtReferenceFamily_1_a" name="txtReferenceFamily_1_a" placeholder="Name lastname and contact phone"/>
                                         </div>
                                         <div class="form-group col-12 col-md-6">
                                             <label for="txtReferenceFamily_1_b">b) Reference Family 2</label>
-                                            <input type="tel" class="form-control" id="txtReferenceFamily_1_b"
-                                                   name="txtReferenceFamily_1_b"
-                                                   placeholder="Name lastname and contact phone"/>
+                                            <input type="tel" class="form-control" id="txtReferenceFamily_1_b" name="txtReferenceFamily_1_b" placeholder="Name lastname and contact phone"/>
                                         </div>
                                     </div>
                                 </section>
@@ -294,23 +250,18 @@
                                                 First Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated firstname"
-                                                   id="txtFirstName_1"
-                                                   name="txtFirstName_1" placeholder="First Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated firstname" id="txtFirstName_1" name="txtFirstName_1" placeholder="First Name" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtMiddleName_1">Middle Name</label>
-                                            <input type="text" class="form-control" id="txtMiddleName_1"
-                                                   name="txtMiddleName_1" placeholder="Middle Name"/>
+                                            <input type="text" class="form-control" id="txtMiddleName_1" name="txtMiddleName_1" placeholder="Middle Name"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtLastName_1">
                                                 Last Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated lastname"
-                                                   id="txtLastName_1"
-                                                   name="txtLastName_1" placeholder="Last Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated lastname" id="txtLastName_1" name="txtLastName_1" placeholder="Last Name" required="required"/>
                                         </div>
                                     </div>
 
@@ -320,32 +271,24 @@
                                                 Email
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="email" class="form-control checkDuplicated email"
-                                                   id="txtEmail_1" name="txtEmail_1"
-                                                   placeholder="example@email.com" required="required"/>
+                                            <input type="email" class="form-control checkDuplicated email" id="txtEmail_1" name="txtEmail_1" placeholder="example@email.com" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md-4">
                                             <label for="txtCellPhone_1">
                                                 Cell Phone
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" required="required"
-                                                   class="form-control phone checkDuplicated" id="txtCellPhone_1"
-                                                   name="txtCellPhone_1" placeholder="+01 234 56 78 90"
-                                                   pattern="\+?[0-9 -]+"/>
+                                            <input type="tel" required="required" class="form-control phone checkDuplicated" id="txtCellPhone_1" name="txtCellPhone_1" placeholder="+01 234 56 78 90" pattern="\+?[0-9 -]+"/>
                                         </div>
                                         <div class="form-group col-12 col-md-4">
                                             <label for="selCountry_1">
                                                 Country
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <select type="text" class="custom-select" id="selCountry_1"
-                                                    name="selCountry_1" placeholder="Country" required="required">
-                                                <option value="-1" disabled="disabled">-Select a country-
-                                                </option>
+                                            <select type="text" class="custom-select" id="selCountry_1" name="selCountry_1" placeholder="Country" required="required">
+                                                <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id"
-                                                            t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -358,12 +301,10 @@
                                             <label for="txtFinancialResponsability_1">
                                                 Financial responsability
                                             </label>
-                                            <input type="checkbox" class="form-control switch-input"
-                                                       id="txtFinancialResponsability_1"
-                                                       name="txtFinancialResponsability_1"/>
+                                            <input type="checkbox" class="form-control switch-input" id="txtFinancialResponsability_1" name="txtFinancialResponsability_1"/>
                                             <label for="txtFinancialResponsability_1" class="switch ml-2">
-                                                <span class="switch-label" data-on="Yes" data-off="No"></span>
-                                                <span class="switch-handle"></span>
+                                                <span class="switch-label" data-on="Yes" data-off="No"/>
+                                                <span class="switch-handle"/>
                                             </label>
                                         </div>
                                         <div class="form-group col-4">
@@ -371,20 +312,17 @@
                                                 Invoicing/billing address
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="checkbox" class="form-control switch-input"
-                                                       id="txtInvoiceAddress_1"
-                                                       name="txtInvoiceAddress_1"/>
+                                            <input type="checkbox" class="form-control switch-input" id="txtInvoiceAddress_1" name="txtInvoiceAddress_1"/>
                                             <label for="txtInvoiceAddress_1" class="switch ml-2">
-                                                <span class="switch-label" data-on="Yes" data-off="No"></span>
-                                                <span class="switch-handle"></span>
+                                                <span class="switch-label" data-on="Yes" data-off="No"/>
+                                                <span class="switch-handle"/>
                                             </label>
                                         </div>
                                     </div>
                                 </section>
                             </section>
 
-                            <button type="button" class="btn btn-warning mt-2 hide_parent" id="showSecondParent"
-                                   >Show/Hide Second Parent
+                            <button type="button" class="btn btn-warning mt-2 hide_parent" id="showSecondParent">Show/Hide Second Parent
                             </button>
 
                             <section class="card mt-2 hide_parent" id="section_parent_2">
@@ -398,23 +336,18 @@
                                                 First Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated firstname"
-                                                   id="txtFirstName_2"
-                                                   name="txtFirstName_2" placeholder="First Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated firstname" id="txtFirstName_2" name="txtFirstName_2" placeholder="First Name" required="required"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtMiddleName_2">Middle Name</label>
-                                            <input type="text" class="form-control" id="txtMiddleName_2"
-                                                   name="txtMiddleName_2" placeholder="Middle Name"/>
+                                            <input type="text" class="form-control" id="txtMiddleName_2" name="txtMiddleName_2" placeholder="Middle Name"/>
                                         </div>
                                         <div class="form-group col-12 col-md">
                                             <label for="txtLastName_2">
                                                 Last Name
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" class="form-control checkDuplicated lastname"
-                                                   id="txtLastName_2"
-                                                   name="txtLastName_2" placeholder="Last Name" required="required"/>
+                                            <input type="text" class="form-control checkDuplicated lastname" id="txtLastName_2" name="txtLastName_2" placeholder="Last Name" required="required"/>
                                         </div>
                                     </div>
 
@@ -424,9 +357,7 @@
                                                 Email
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="email" class="form-control checkDuplicated email"
-                                                   id="txtEmail_2" name="txtEmail_2"
-                                                   placeholder="example@email.com" required="required"/>
+                                            <input type="email" class="form-control checkDuplicated email" id="txtEmail_2" name="txtEmail_2" placeholder="example@email.com" required="required"/>
                                         </div>
 
                                         <div class="form-group col-12 col-md-4">
@@ -434,23 +365,17 @@
                                                 Cell Phone
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" required="required"
-                                                   class="form-control checkDuplicated phone" id="txtCellPhone_2"
-                                                   name="txtCellPhone_2" placeholder="+01 234 56 78 90"
-                                                   pattern="\+?[0-9 -]+"/>
+                                            <input type="tel" required="required" class="form-control checkDuplicated phone" id="txtCellPhone_2" name="txtCellPhone_2" placeholder="+01 234 56 78 90" pattern="\+?[0-9 -]+"/>
                                         </div>
                                         <div class="form-group col-12 col-md-4">
                                             <label for="selCountry_2">
                                                 Country
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <select type="text" class="custom-select" id="selCountry_2"
-                                                    name="selCountry_2" placeholder="Country" required="required">
-                                                <option value="-1" disabled="disabled">-Select a country-
-                                                </option>
+                                            <select type="text" class="custom-select" id="selCountry_2" name="selCountry_2" placeholder="Country" required="required">
+                                                <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id"
-                                                            t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -463,12 +388,10 @@
                                             <label for="txtFinancialResponsability_2">
                                                 Financial responsability
                                             </label>
-                                            <input type="checkbox" class="form-control switch-input"
-                                                       id="txtFinancialResponsability_2"
-                                                       name="txtFinancialResponsability_2"/>
+                                            <input type="checkbox" class="form-control switch-input" id="txtFinancialResponsability_2" name="txtFinancialResponsability_2"/>
                                             <label for="txtFinancialResponsability_2" class="switch ml-2">
-                                                <span class="switch-label" data-on="Yes" data-off="No"></span>
-                                                <span class="switch-handle"></span>
+                                                <span class="switch-label" data-on="Yes" data-off="No"/>
+                                                <span class="switch-handle"/>
                                             </label>
                                         </div>
                                         <div class="form-group col-4">
@@ -476,12 +399,10 @@
                                                 Invoicing/billing address
                                                 <span class="text-danger">*</span>
                                             </label>
-                                            <input type="checkbox" class="form-control switch-input"
-                                                       id="txtInvoiceAddress_2"
-                                                       name="txtInvoiceAddress_2"/>
+                                            <input type="checkbox" class="form-control switch-input" id="txtInvoiceAddress_2" name="txtInvoiceAddress_2"/>
                                             <label for="txtInvoiceAddress_2" class="switch ml-2">
-                                                <span class="switch-label" data-on="Yes" data-off="No"></span>
-                                                <span class="switch-handle"></span>
+                                                <span class="switch-label" data-on="Yes" data-off="No"/>
+                                                <span class="switch-handle"/>
                                             </label>
                                         </div>
                                     </div>
@@ -503,8 +424,7 @@
                                         </label>
                                         <select type="text" class="custom-select" id="selCountry"
                                                 name="selCountry" placeholder="Country" required="required">
-                                            <option value="-1" selected="true" disabled="disabled">-Select a country-
-                                            </option>
+                                            <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                             <t t-foreach="countries" t-as="country">
                                                 <option t-att-value="country.id">
                                                     <t t-esc="country.name"/>
@@ -513,17 +433,11 @@
                                         </select>
                                     </div>
                                     <div class="form-group col-12 col-md-6">
-                                        <label for="selState">
-                                            State
-                                            <span class="text-danger">*</span>
-                                        </label>
+                                        <label for="selState">State</label>
                                         <select class="form-control" id="selState" name="selState">
-                                            <option selected="selected" disabled="disabled">Select a
-                                                state
-                                            </option>
+                                            <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a state-</option>
                                             <t t-foreach="states" t-as="state">
-                                                <option t-att-value="state.id" t-field="state.name"
-                                                        t-att-data-country="state.country_id.id"/>
+                                                <option t-att-value="state.id" t-field="state.name" t-att-data-country="state.country_id.id"/>
                                             </t>
                                         </select>
                                     </div>
@@ -535,16 +449,14 @@
                                             City
                                             <span class="text-danger">*</span>
                                         </label>
-                                        <input type="text" class="form-control" id="txtCity" name="txtCity"
-                                               placeholder="City" required="required"/>
+                                        <input type="text" class="form-control" id="txtCity" name="txtCity" placeholder="City" required="required"/>
                                     </div>
                                     <div class="form-group col-12 col-md">
                                         <label for="txtZip">
                                             Zip
                                             <span class="text-danger">*</span>
                                         </label>
-                                        <input type="text" class="form-control" id="txtZip" name="txtZip"
-                                               maxlength="10" placeholder="Zip" required="required"/>
+                                        <input type="text" class="form-control" id="txtZip" name="txtZip" maxlength="10" placeholder="Zip" required="required"/>
                                     </div>
                                 </div>
 
@@ -556,16 +468,13 @@
                                                 *
                                             </span>
                                         </label>
-                                        <input type="text" class="form-control" id="txtStreetAddress"
-                                               name="txtStreetAddress" placeholder="Street Address"
-                                               required="required"/>
+                                        <input type="text" class="form-control" id="txtStreetAddress" name="txtStreetAddress" placeholder="Street Address" required="required"/>
                                     </div>
                                     <div class="form-group col-12 col-md">
                                         <label for="txtStreetAddress2">
                                             Street Address 2
                                         </label>
-                                        <input type="text" class="form-control" id="txtStreetAddress2"
-                                               name="txtStreetAddress2" placeholder="Street Address 2"/>
+                                        <input type="text" class="form-control" id="txtStreetAddress2" name="txtStreetAddress2" placeholder="Street Address 2"/>
                                     </div>
                                 </div>
                             </section>
@@ -582,10 +491,8 @@
                                             How did you find out about?
                                             <span class="text-danger">*</span>
                                         </label>
-                                        <select type="text" class="custom-select" id="selSource"
-                                                name="selSource" placeholder="Source" required="required">
-                                            <option value="-1" selected="true" disabled="disabled">-Select a source-
-                                            </option>
+                                        <select type="text" class="custom-select" id="selSource" name="selSource" placeholder="Source" required="required">
+                                            <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a source-</option>
                                             <t t-foreach="sources" t-as="source">
                                                 <option t-att-value="source.id" t-att-data-other="source.other">
                                                     <t t-esc="source.name"/>
@@ -597,9 +504,7 @@
                                         <label for="txtRelatedNames">
                                             Do you know someone in the school?
                                         </label>
-                                        <input type="text" class="form-control" id="txtRelatedNames"
-                                               name="txtRelatedNames"
-                                               placeholder="Person 1, Person 2, Person 3, ..."/>
+                                        <input type="text" class="form-control" id="txtRelatedNames" name="txtRelatedNames" placeholder="Person 1, Person 2, Person 3, ..."/>
                                     </div>
                                 </div>
                                 <div class="row d-none" id="contOtherSource">
@@ -607,9 +512,7 @@
                                         <label for="txtOtherSource">
                                             Other
                                         </label>
-                                        <input type="text" class="form-control d-flex" id="txtOtherSource"
-                                               name="txtOtherSource"
-                                               placeholder="Other..."/>
+                                        <input type="text" class="form-control d-flex" id="txtOtherSource" name="txtOtherSource" placeholder="Other..."/>
                                     </div>
                                 </div>
                             </section>
@@ -621,21 +524,18 @@
                             <section class="card-body">
                                 <ul class="nav nav-tabs" id="studentsNavbar" role="tablist">
                                     <li class="nav-item" id="student1-tab-li">
-                                        <a class="nav-link active student" id="student1-tab" data-toggle="tab"
-                                           href="#student1" role="tab" aria-controls="student1" aria-selected="true">
+                                        <a class="nav-link active student" id="student1-tab" data-toggle="tab" href="#student1" role="tab" aria-controls="student1" aria-selected="true">
                                             Student 1
                                         </a>
                                     </li>
                                     <li class="nav-item" id="add-tab-li">
-                                        <a class="nav-link" id="add-tab" role="tab"
-                                           style="background: #dee2e6; cursor: pointer">
-                                            <i class="fa fa-plus"></i>
+                                        <a class="nav-link" id="add-tab" role="tab" style="background: #dee2e6; cursor: pointer">
+                                            <i class="fa fa-plus"/>
                                         </a>
                                     </li>
                                 </ul>
                                 <div class="tab-content pt-3" id="studentsTabContent">
-                                    <div class="tab-pane fade show active" id="student1" role="tabpanel"
-                                         aria-labelledby="student1-tab">
+                                    <div class="tab-pane fade show active" id="student1" role="tabpanel" aria-labelledby="student1-tab">
 
                                         <div class="row">
                                             <div class="form-group col">
@@ -643,23 +543,18 @@
                                                     First Name
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control" id="txtStudent1FirstName"
-                                                       name="txtStudentFirstName" placeholder="First Name"
-                                                       required="required"/>
+                                                <input type="text" class="form-control" id="txtStudent1FirstName" name="txtStudentFirstName" placeholder="First Name" required="required"/>
                                             </div>
                                             <div class="form-group col">
                                                 <label for="txtStudent1MiddleName">Middle Name</label>
-                                                <input type="text" class="form-control" id="txtStudent1MiddleName"
-                                                       name="txtStudentMiddleName" placeholder="Middle Name"/>
+                                                <input type="text" class="form-control" id="txtStudent1MiddleName" name="txtStudentMiddleName" placeholder="Middle Name"/>
                                             </div>
                                             <div class="form-group col-12 col-md">
                                                 <label for="txtStudent1LastName">
                                                     Last Name
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control" id="txtStudent1LastName"
-                                                       name="txtStudentLastName" placeholder="Last Name"
-                                                       required="required"/>
+                                                <input type="text" class="form-control" id="txtStudent1LastName" name="txtStudentLastName" placeholder="Last Name" required="required"/>
                                             </div>
                                         </div>
 
@@ -669,8 +564,7 @@
                                                     Birthday
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <input type="date" class="form-control" id="txtStudent1Birthday"
-                                                       name="txtStudentBirthday" required="required"/>
+                                                <input type="date" class="form-control" id="txtStudent1Birthday" name="txtStudentBirthday" required="required"/>
                                             </div>
                                             <div class="form-group col">
                                                 <label for="selStudent1Gender">Gender</label>
@@ -687,8 +581,7 @@
                                             <div class="form-group col">
                                                 <label for="sel_std_native_language">Native Language</label>
 
-                                                <select id="selStudent1Nativelanguage" name="selStudentNativelanguage"
-                                                        class="form-control" required="required">
+                                                <select id="selStudent1Nativelanguage" name="selStudentNativelanguage" class="form-control" required="required">
                                                     <option value="">Select a language
                                                     </option>
                                                     <t t-foreach="adm_languages" t-as="language">
@@ -705,11 +598,8 @@
                                                     School code
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <select class="custom-select selStudentSchoolCode" id="selStudent1SchoolCode"
-                                                        name="selStudentSchoolCode" required="required">
-                                                    <option value="-1" selected="true" disabled="disabled">-Select a
-                                                        School code-
-                                                    </option>
+                                                <select class="custom-select selStudentSchoolCode" id="selStudent1SchoolCode" name="selStudentSchoolCode" required="required">
+                                                    <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a School code-</option>
                                                     <t t-foreach="grade_levels.mapped('school_code_id')" t-as="school_code">
                                                         <option t-att-value="school_code.id" t-att-data-school_code="school_code.id">
                                                             <t t-esc="school_code.name"/>
@@ -722,35 +612,11 @@
                                                     School Year
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <select class="custom-select" id="selStudent1SchoolYear"
-                                                        name="selStudentSchoolYear" required="required">
-                                                    <option value="-1" selected="true" disabled="disabled">-Select a
-                                                        school
-                                                        year-
-                                                    </option>
+                                                <select class="custom-select" id="selStudent1SchoolYear" name="selStudentSchoolYear" required="required">
+                                                    <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a school year-</option>
                                                     <t t-foreach="school_years" t-as="school_year">
                                                         <option t-att-value="school_year.id" t-att-data-schoolid="school_year.school_code_id.id">
                                                             <t t-esc="school_year.name"/>
-                                                        </option>
-                                                    </t>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="form-group col">
-                                                <label for="selStudent1CurrentGradeLevel">
-                                                    Current Grade Level
-                                                    <span class="text-danger">*</span>
-                                                </label>
-                                                <select required="required" class="custom-select"
-                                                        id="selStudent1CurrentGradeLevel"
-                                                        name="selStudentCurrentGradeLevel">
-                                                    <option value="-1" disabled="disabled">-Select a
-                                                        grade level-
-                                                    </option>
-                                                    <t t-foreach="grade_levels" t-as="grade_level">
-                                                        <option t-att-value="grade_level.id">
-                                                            <t t-esc="grade_level.name"/>
                                                         </option>
                                                     </t>
                                                 </select>
@@ -760,14 +626,10 @@
                                                     Grade Level of interest
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <select required="required" class="custom-select"
-                                                        id="selStudent1InterestGradeLevel"
-                                                        name="selStudentInterestGradeLevel">
-                                                    <option value="-1" disabled="disabled">-Select a
-                                                        grade level-
-                                                    </option>
+                                                <select required="required" class="custom-select" id="selStudent1InterestGradeLevel" name="selStudentInterestGradeLevel">
+                                                    <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a grade level-</option>
                                                     <t t-foreach="grade_levels" t-as="grade_level">
-                                                        <option t-att-value="grade_level.id">
+                                                        <option t-att-value="grade_level.id" t-att-data-school-code="grade_level.school_code_id.id">
                                                             <t t-esc="grade_level.name"/>
                                                         </option>
                                                     </t>
@@ -780,20 +642,16 @@
                                                 <label for="txtStudent1FromEnglishSchool">Currently attends school in
                                                     English?
                                                 </label>
-                                                <input type="checkbox" class="form-control switch-input"
-                                                       id="txtStudent1FromEnglishSchool"
-                                                       name="txtStudentFromEnglishSchool"/>
+                                                <input type="checkbox" class="form-control switch-input" id="txtStudent1FromEnglishSchool" name="txtStudentFromEnglishSchool"/>
                                                 <label for="txtStudent1FromEnglishSchool" class="switch ml-2">
-                                                    <span class="switch-label" data-on="Yes" data-off="No"></span>
-                                                    <span class="switch-handle"></span>
+                                                    <span class="switch-label" data-on="Yes" data-off="No"/>
+                                                    <span class="switch-handle"/>
                                                 </label>
                                             </div>
                                             <div class="form-group col">
                                                 <label>Extra Services</label>
                                                 <div t-foreach="services" t-as="service">
-                                                    <input type="checkbox" class="txtStudent1ExtraServices"
-                                                           name="txtStudentExtraServices"
-                                                           id="txtStudent1ExtraServices" t-att-value="service.id"/>
+                                                    <input type="checkbox" class="txtStudent1ExtraServices" name="txtStudentExtraServices" id="txtStudent1ExtraServices" t-att-value="service.id"/>
                                                     <span>
                                                         <t t-esc="service.name"/>
                                                     </span>
@@ -805,16 +663,13 @@
                                                 <label for="fileStudent1Photo">
                                                     Student Photo
                                                 </label>
-                                                <input type="file" accept="image/*" class="form-control"
-                                                       name="fileStudent1Photo" id="fileStudent1Photo"
-                                                       multiple="multiple"/>
+                                                <input type="file" accept="image/*" class="form-control" name="fileStudent1Photo" id="fileStudent1Photo" multiple="multiple"/>
                                             </div>
                                             <div class="form-group col">
                                                 <label for="fileStudent1BirthCert">
                                                     Birth Certificate
                                                 </label>
-                                                <input type="file" class="form-control" name="fileStudent1BirthCert"
-                                                       id="fileStudent1BirthCert" multiple="multiple"/>
+                                                <input type="file" class="form-control" name="fileStudent1BirthCert" id="fileStudent1BirthCert" multiple="multiple"/>
                                             </div>
                                         </div>
                                         <div class="row">
@@ -822,17 +677,13 @@
                                                 <label for="fileStudent1ReportCard">
                                                     Most Recent Report Card (If applicable)
                                                 </label>
-                                                <input type="file" class="form-control" name="fileStudent1ReportCard"
-                                                       id="fileStudent1ReportCard" multiple="multiple"/>
+                                                <input type="file" class="form-control" name="fileStudent1ReportCard" id="fileStudent1ReportCard" multiple="multiple"/>
                                             </div>
                                             <div class="form-group col">
                                                 <label for="fileStudent1ImmunizationRecord">Copy of Immunization
                                                     Record
                                                 </label>
-                                                <input type="file" class="form-control"
-                                                       name="fileStudent1ImmunizationRecord"
-                                                       id="fileStudent1ImmunizationRecord"
-                                                       multiple="multiple"/>
+                                                <input type="file" class="form-control" name="fileStudent1ImmunizationRecord" id="fileStudent1ImmunizationRecord" multiple="multiple"/>
                                             </div>
                                         </div>
                                     </div>
@@ -870,7 +721,6 @@
                     </div>
                 </div>
             </div>
-
         </t>
     </template>
 

@@ -8,6 +8,19 @@ odoo.define('adm.inquiry', require => {
 
     let studentCount = 1;
 
+    function showGradeLevelsBySchoolCode(event) {
+        const $currentTarget = $(event.currentTarget);
+        const $selectGradeLevels = $currentTarget.parents('[role="tabpanel"]').find('[name="selStudentInterestGradeLevel"]');
+        const schoolCodeId = $currentTarget.val();
+        
+        $selectGradeLevels.children("option:gt(0)").hide();
+        $selectGradeLevels.children("option[data-school-code='" + schoolCodeId + "']").show();
+
+        if ($selectGradeLevels.children("option:selected").is(":hidden")) {
+            $selectGradeLevels.children("option:nth(0)").prop("selected", true);
+        }
+    }
+    
     function recomputaTabStudent() {
         $('#studentsNavbar').find('li').each((i, el) => {
             const $el = $(el);
@@ -96,6 +109,7 @@ odoo.define('adm.inquiry', require => {
             })
         });
         recomputaTabStudent();
+        $(studentClonnable).find('select[name="selStudentSchoolCode"]').on('click', showGradeLevelsBySchoolCode);
     }
 
     function showOnlyCountrysStates() {
@@ -223,6 +237,8 @@ odoo.define('adm.inquiry', require => {
                     $("#contOtherSource").addClass("d-none")
             })
         });
+        $('select[name="selStudentSchoolCode"]').on('change', showGradeLevelsBySchoolCode).trigger('change');
+        console.log('asdasd');
     });
 
     // Get user location

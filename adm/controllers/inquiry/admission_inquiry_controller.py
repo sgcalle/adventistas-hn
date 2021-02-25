@@ -127,9 +127,9 @@ class Admission(http.Controller):
 
             # Family address
             country_id = int(params["selCountry"])
-            state_id = int(params.get("selState", False))
+            state_id = int(params.get("selState", False)) or False
             city = params["txtCity"]
-            zip = paramsget("txtZip", False)
+            zip = params.get("txtZip", False)
 
             mobile_1 = params["txtCellPhone_1"]
             email_1 = params["txtEmail_1"]
@@ -202,7 +202,7 @@ class Admission(http.Controller):
 
             if "txtMiddleName_2" not in params:
                 params["txtMiddleName_2"] = ""
-
+            
             if all (k in params for k in ("txtFirstName_2", "txtLastName_2", "selCountry_2", "txtCellPhone_2","txtEmail_2")):
                 first_name = params["txtFirstName_2"]
                 middle_name = params["txtMiddleName_2"]
