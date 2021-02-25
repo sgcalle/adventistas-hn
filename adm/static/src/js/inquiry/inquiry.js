@@ -245,19 +245,24 @@ odoo.define('adm.inquiry', require => {
     $.get('/adm/geolocation').then(result => {
         if (!_.isEmpty(result)) {
             // Country
-            const selCountry = document.getElementById("selCountry");
-            const countryOption = _.filter(selCountry.options, option => option.dataset.code === result.country_code)
-            if (countryOption.length) {
-                selCountry.value = countryOption[0].value;
+            const $selCountry = $('[name^=selCountry]');
+            $selCountry.each((i, selCountry) => {
+                const countryOption = _.filter(selCountry.options, option => option.dataset.code === result.country_code)
+                if (countryOption.length) {
+                    selCountry.value = countryOption[0].value;
 
-                // State
-                const selState = document.getElementById("selState");
-                const stateOption = _.filter(selCountry.options, option => option.dataset.country === countryOption[0].value
-                                             && option.dataset.code === result.region)
-                if (stateOption.length) {
-                    selState.value = stateOption[0].value;
+                    // State
+                    const $selState = $('[name^=selState]');
+                    $selState.each((i, selState) => {
+                        
+                        const stateOption = _.filter(selCountry.options, option => option.dataset.country === countryOption[0].value
+                                                     && option.dataset.code === result.region)
+                        if (stateOption.length) {
+                            selState.value = stateOption[0].value;
+                        }
+                    });
                 }
-            }
+            });
             showOnlyCountrysStates();
         }
     })

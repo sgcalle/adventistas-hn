@@ -116,7 +116,9 @@
                                             <select type="text" class="custom-select" id="selCountry_1" name="selCountry_1" placeholder="Country" required="required">
                                                 <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id"
+                                                            t-att-value="country.id"
+                                                            t-att-data-code="country.code">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -200,7 +202,9 @@
                                             <select type="text" class="custom-select" id="selCountry_2" name="selCountry_2" placeholder="Country" required="required">
                                                 <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id" 
+                                                            t-att-value="country.id"
+                                                            t-att-data-code="country.code">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -288,7 +292,9 @@
                                             <select type="text" class="custom-select" id="selCountry_1" name="selCountry_1" placeholder="Country" required="required">
                                                 <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id" 
+                                                            t-att-value="country.id"
+                                                            t-att-data-code="country.code">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -375,7 +381,9 @@
                                             <select type="text" class="custom-select" id="selCountry_2" name="selCountry_2" placeholder="Country" required="required">
                                                 <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                                 <t t-foreach="countries" t-as="country">
-                                                    <option t-att-selected="company.country_id.id == country.id" t-att-value="country.id">
+                                                    <option t-att-selected="company.country_id.id == country.id"
+                                                            t-att-value="country.id"
+                                                            t-att-data-code="country.code">
                                                         <t t-esc="country.name"/>
                                                     </option>
                                                 </t>
@@ -426,7 +434,8 @@
                                                 name="selCountry" placeholder="Country" required="required">
                                             <option selected="selected" value="" hidden="hidden" disabled="disabled">-Select a country-</option>
                                             <t t-foreach="countries" t-as="country">
-                                                <option t-att-value="country.id">
+                                                <option t-att-value="country.id"
+                                                        t-att-data-code="country.code">
                                                     <t t-esc="country.name"/>
                                                 </option>
                                             </t>
