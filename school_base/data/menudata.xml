@@ -24,12 +24,6 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <record model="ir.actions.act_window" id="action_school_configuration_services">
-        <field name="name">Services</field>
-        <field name="res_model">school_base.service</field>
-        <field name="view_mode">tree,form</field>
-    </record>
-
     <record model="ir.actions.act_window" id="action_school_configuration_placement">
         <field name="name">Placements</field>
         <field name="res_model">school_base.placement</field>
@@ -115,9 +109,6 @@
 
     <menuitem id="school_configuration_menu_district_code" action="action_school_configuration_district_codes"
               name="District code" parent="school_configuration_menu" sequence="4"/>
-
-    <menuitem id="school_configuration_menu_services" action="action_school_configuration_services"
-              name="Services" parent="school_configuration_menu"/>
 
     <!--Configuration -->
     <menuitem id="school_configuration_menu_configurations" sequence="5"

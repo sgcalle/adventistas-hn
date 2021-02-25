@@ -272,7 +272,6 @@ class PosSession(models.Model):
         super()._compute_cash_balance()
         for session in self:
             cash_payment_method_ids = session.payment_method_ids.filtered('is_cash_count')
-
             if cash_payment_method_ids:
                 cash_payment_method_ids = cash_payment_method_ids[1:]
                 transaction_total_amount = session.get_remain_cash_transaction_total_amount(cash_payment_method_ids=cash_payment_method_ids)

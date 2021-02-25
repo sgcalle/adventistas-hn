@@ -8,7 +8,7 @@ from . import medical_condition
 from . import medication
 from . import models
 from . import relationship
-from . import service
+from . import reenrollment_record
 from . import res_company
 from . import res_partner
 from . import setting

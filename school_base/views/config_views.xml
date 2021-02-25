@@ -80,6 +80,34 @@
                                 </div>
                             </div>
                         </div>
+                        <h2>Default Parameters</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-xs-12 col-6 o_setting_box">
+                                <div class="o_setting_right_pane">
+                                    <label for="current_school_year_id"/>
+<!--                                    <div class="text-muted">-->
+<!--                                        This will set the pattern used for names <br/>-->
+<!--                                        Spaces will be replaced to • only for better visualization-->
+<!--                                    </div>-->
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="current_school_year_id" />
+                                        </div>
+                                    </div>
+
+                                    <label for="enrollment_school_year_id"/>
+<!--                                    <div class="text-muted">-->
+<!--                                        This will set the pattern used for names <br/>-->
+<!--                                        Spaces will be replaced to • only for better visualization-->
+<!--                                    </div>-->
+                                    <div class="content-group">
+                                        <div class="mt16">
+                                            <field name="enrollment_school_year_id" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </xpath>

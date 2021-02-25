@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 
 class SchoolBaseHomeAddress(models.Model):
@@ -16,8 +17,19 @@ class SchoolBaseHomeAddress(models.Model):
     street = fields.Char("Street")
     street2 = fields.Char("Street2")
     phone = fields.Char("Homephone")
+    facts_id = fields.Integer("Facts ID")
 
-    family_id = fields.Many2one("res.partner", string="Family", domain="[('is_company', '=', True, ('is_family', '=', True))]")
+    family_id = fields.Many2one("res.partner", string="Family",
+                                domain="[('is_company', '=', True, ('is_family', '=', True))]")
+
+    @api.constrains("facts_id")
+    def _check_facts_id(self):
+        for home_address_id in self:
+            if home_address_id.facts_id:
+                should_be_unique = self.search_count(
+                    [("facts_id", "=", home_address_id.facts_id)])
+                if should_be_unique > 1:
+                    raise ValidationError("Another Home Address has the same facts id! (%s)" % home_address_id.facts_id)
 
     @api.onchange('country_id')
     def onchange_country_id(self):
