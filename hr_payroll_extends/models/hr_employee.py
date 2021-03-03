@@ -37,6 +37,6 @@ class HrEmployee(models.Model):
                 if contract.structure_type_id == self._context["salary_structure_type"]:
                     contracts |= contract
             res = contracts
-        if not res:
-            raise ValidationError("No contracts matched for given Salary Structure Type!")
+            if not res:
+                raise ValidationError("No contracts matched for given Salary Structure Type!")
         return res

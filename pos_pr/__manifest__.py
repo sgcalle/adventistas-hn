@@ -39,6 +39,7 @@
         'views/account_bank_statement_cashbox_views.xml',
 
         'views/res_config_settings_views.xml',
+        'views/pos_payment_method_views.xml',
     ],
 
     'qweb': [

@@ -1,20 +1,28 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
+import datetime
 
-
-# from odoo.addons.school_base.models.res_partner import SELECT_STATUS_TYPES
+from odoo.exceptions import UserError
 
 
 class SchoolCode(models.Model):
     _name = "school_base.school_code"
     _order = "sequence"
     _description = "School code"
+    _rec_name = 'display_name'
 
     name = fields.Char(string="code", required=True)
+    display_name = fields.Char(readonly=True, compute='_compute_display_name', store=True)
+    description = fields.Char("Description")
     school_name = fields.Char(string="School name")
     sequence = fields.Integer(default=1)
     district_code_id = fields.Many2one("school_base.district_code", "District Code")
+
+    @api.depends('name', 'description')
+    def _compute_display_name(self):
+        for school_code_id in self:
+            school_code_id.display_name = "%s - (%s)" % (school_code_id.name, school_code_id.description)
 
 
 class SchoolYear(models.Model):
@@ -28,6 +36,27 @@ class SchoolYear(models.Model):
     active_admissions = fields.Boolean('Active admissions')
     school_code_id = fields.Many2one("school_base.school_code", string="School code")
     district_code_id = fields.Many2one(related="school_code_id.district_code_id")
+
+    date_start = fields.Date(required=True, default=datetime.datetime.now().date())
+    date_end = fields.Date(required=True, default=datetime.datetime.now().date())
+
+    @api.constrains('date_start', 'date_end')
+    def _check_date_ranges(self):
+        for school_year_id in self:
+            school_year_ids = self.search([
+                ('school_code_id', '=', school_year_id.school_code_id.id),
+                ('id', '!=', school_year_id.id)
+            ])
+
+            # Collision detection
+            for other_school_year_id in school_year_ids:
+                if (school_year_id.date_end < other_school_year_id.date_start
+                        or school_year_id.date_start > other_school_year_id.date_end):
+                    continue
+                else:
+                    raise UserError(
+                        _("Date range collision detected between %s and %s school years in %s school code")
+                        % (school_year_id.name, other_school_year_id.name, school_year_id.school_code_id.name))
 
     @api.onchange('school_code_id')
     def _get_school_code_id_domain(self):
@@ -65,9 +94,9 @@ class SchoolBaseGradeLevelType(models.Model):
             ('elementary', _("Elementary")),
             ('middle_school', _("Middle school")),
             ('high_school', _("High school")),
-            ],
-            required=True
-        )
+        ],
+        required=True
+    )
     name = fields.Char(required=True)
 
 
@@ -114,7 +143,8 @@ class EnrollmentSubStatus(models.Model):
     _description = "Enrollment sub status"
 
     # status_id = fields.Selection(SELECT_STATUS_TYPES, string='Status')
-    status_id = fields.Selection([('1', '1')], string='Status')
+    # status_id = fields.Selection([('1', '1')], string='Status')
+    status_id = fields.Many2one('school_base.enrollment.status', String='Status')
     name = fields.Char(string="Name", required=True, translate=True)
     key = fields.Char(string="Key")
 
@@ -129,5 +159,23 @@ class MaritalStatus(models.Model):
 
 class Gender(models.Model):
     _name = "school_base.gender"
+    _description = "School base gender"
     name = fields.Char("Gender", required=True, translate=True)
     key = fields.Char("Key")
+
+
+class SchoolBaseEnrollmentHistory(models.Model):
+    _name = 'school_base.enrollment.history'
+    _description = "Enrollment history"
+    _order = 'history_date'
+
+    student_id = fields.Many2one('res.partner', required=True)
+    school_code_id = fields.Many2one('school_base.school_code')
+    school_year_id = fields.Many2one('school_base.school_year')
+    grade_level_id = fields.Many2one('school_base.grade_level')
+
+    enrollment_status_id = fields.Many2one('school_base.enrollment.status')
+    enrollment_sub_status_id = fields.Many2one('school_base.enrollment.sub_status')
+
+    note = fields.Text()
+    history_date = fields.Datetime(default=datetime.datetime.now())

@@ -10,6 +10,10 @@
                 <field name="facts_id"/>
                 <field name="school_code_id"/>
                 <field name="active_admissions"/>
+
+                <field name="date_start"/>
+                <field name="date_end"/>
+
                 <field name="district_code_id" readonly="1"/>
             </tree>
         </field>
@@ -22,6 +26,7 @@
             <tree editable="bottom">
                 <field name="sequence" widget='handle'/>
                 <field name="name"/>
+                <field name="description"/>
                 <field name="district_code_id"/>
             </tree>
         </field>
@@ -49,16 +54,6 @@
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="sequence" widget='handle'/>
-                <field name="name"/>
-            </tree>
-        </field>
-    </record>
-
-    <record model="ir.ui.view" id="view_service_tree">
-        <field name="name">Services</field>
-        <field name="model">school_base.service</field>
-        <field name="arch" type="xml">
-            <tree editable="bottom">
                 <field name="name"/>
             </tree>
         </field>

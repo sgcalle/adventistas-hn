@@ -7,8 +7,8 @@ from . import medical_allergy
 from . import medical_condition
 from . import medication
 from . import models
+from . import reenrollment_record
 from . import relationship
-from . import service
 from . import res_company
 from . import res_partner
-from . import setting
+from . import service

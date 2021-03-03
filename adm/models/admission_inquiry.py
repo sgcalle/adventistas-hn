@@ -61,7 +61,7 @@ class Inquiry(models.Model):
 
     school_year_id = fields.Many2one("school_base.school_year", string="School Year")
     current_grade_level_id = fields.Many2one("school_base.grade_level", string="Current Grade Level")
-    grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level", domain=[('active_admissions', '=', True)])
+    grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level of interest", domain=[('active_admissions', '=', True)])
     responsible_id = fields.Many2many("res.partner")
 
     preferred_degree_program = fields.Many2one("adm.degree_program",
@@ -112,6 +112,7 @@ class Inquiry(models.Model):
     status_type = fields.Selection(string="Status Type", related="status_id.type_id")
 
     application_id = fields.Many2one("adm.application")
+    from_english_school = fields.Boolean(string="From English School?")
     forcing = False
 
     extra_service_ids = fields.Many2many(string="Extra Services",
@@ -317,6 +318,8 @@ class Inquiry(models.Model):
             "partner_id": self.partner_id.id,
             "grade_level": self.grade_level_id.id,
             "school_year": self.school_year_id.id,
+            "extra_service_ids": self.extra_service_ids.ids,
+            "from_english_school": self.from_english_school,
             "medical_conditions_ids": medical_base,
             "family_id": self.partner_id.get_families()[0].id,
             "responsible_user_id": first_user.id
