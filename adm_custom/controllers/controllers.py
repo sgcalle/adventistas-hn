@@ -18,7 +18,6 @@ class AdmCustom(InquiryController):
     
     @http.route("/admission/inquiry", auth="public", methods=["POST"], website=True, csrf=False)
     def add_inquiry(self, **params):
-        return ':o'
         PartnerEnv = http.request.env['res.partner']
 
         if "txtMiddleName_1" not in params:
@@ -104,7 +103,7 @@ class AdmCustom(InquiryController):
             
             family_name =  params.get('txtFamilyName', "{} family".format(last_name))
             
-            partner_body = {
+            family_body = {
                     "name": family_name,
                     "company_type": "company",
                     "is_family": True,
@@ -122,7 +121,7 @@ class AdmCustom(InquiryController):
                 }
 
             if family_1 is '':
-                family_id = PartnerEnv.sudo().create(partner_body)
+                family_id = PartnerEnv.sudo().create(family_body)
                 home_address_id = family_id.home_address_ids[0]
                 parent_id_1 = PartnerEnv.sudo().create({
                     "name": full_name,
