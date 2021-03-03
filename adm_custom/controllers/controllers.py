@@ -3,6 +3,8 @@ from odoo import http
 from odoo.addons.adm.utils import formatting
 import base64
 
+from odoo.addons.adm.controllers.inquiry.admission_inquiry_controller import InquiryController
+
 
 def get_parameters():
     return http.request.httprequest.args
@@ -12,57 +14,11 @@ def post_parameters():
     return http.request.httprequest.form
 
 
-class InquiryController(http.Controller):
-
-    #===================================================================================================================
-    # @http.route("/")
-    # def
-    #===================================================================================================================
-
-    @http.route("/admission/inquiry", auth="public", methods=["GET"], website=True)
-    def admission_web(self, **params):
-        countries = http.request.env['res.country'].sudo()
-        states = http.request.env['res.country.state'].sudo()
-        sources = http.request.env['adm.inquiry.source'].sudo()
-        contact_times = http.request.env['adm.contact_time']
-        degree_programs = http.request.env['adm.degree_program']
-
-        grade_level = http.request.env['school_base.grade_level']
-        school_year = http.request.env['school_base.school_year']
-        service = http.request.env['school_base.service'].sudo()
-        gender_env = http.request.env['school_base.gender'].sudo()
-
-        LanguageEnv = http.request.env["adm.language"]
-        languages = LanguageEnv.browse(LanguageEnv.search([])).ids
-
-        family_id = -1
-
-        if 'family_id' in params:
-            family_id = params['family_id']
-
-        companies = http.request.env['res.company'].sudo().search([('country_id','!=',False)])
-        response = http.request.render('adm.template_admission_inquiry', {
-            'grade_levels': grade_level.search([('active_admissions', '=', True)]),
-            'school_years': school_year.search([('active_admissions', '=', True)]),
-            'services': service.search([]),
-            'sources': sources.search([]),
-            'countries': countries.search([]),
-            'states': states.search([]),
-            'gender': gender_env.search([]),
-            'check_family_id': True,
-            'family_name': '',
-            'family_id': family_id,
-            "adm_languages": languages,
-            'company': companies and companies[0],
-        })
-        return response
-
-    def all_exist(avalue, bvalue):
-        return all(any(x in y for y in bvalue) for x in avalue)
-
+class AdmCustom(InquiryController):
+    
     @http.route("/admission/inquiry", auth="public", methods=["POST"], website=True, csrf=False)
     def add_inquiry(self, **params):
-
+        return ':o'
         PartnerEnv = http.request.env['res.partner']
 
         if "txtMiddleName_1" not in params:
@@ -145,9 +101,11 @@ class InquiryController(http.Controller):
             family_1 = ''
             if 'selFamily_1' in params:
                 family_1 = params["selFamily_1"]
-
+            
+            family_name =  params.get('txtFamilyName', "{} family".format(last_name))
+            
             partner_body = {
-                    "name": "{} family".format(last_name),
+                    "name": family_name,
                     "company_type": "company",
                     "is_family": True,
                     'mobile': mobile_1,
@@ -332,4 +290,3 @@ class InquiryController(http.Controller):
 
         response = http.request.render('adm.template_inquiry_sent')
         return response
-
