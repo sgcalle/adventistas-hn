@@ -257,7 +257,6 @@ class InquiryController(http.Controller):
         birthday_list = post_parameters().getlist("txtStudentBirthday")
         gender_list = post_parameters().getlist("selStudentGender")
 
-#         current_grade_level_list = post_parameters().getlist("selStudentCurrentGradeLevel")
         interest_grade_level_list = post_parameters().getlist("selStudentInterestGradeLevel")
         current_school_code_list = post_parameters().getlist("selStudentSchoolCode")
         current_school_year_list = post_parameters().getlist("selStudentSchoolYear")
@@ -271,7 +270,6 @@ class InquiryController(http.Controller):
             last_name = last_name_list[index_student]
             birthday = birthday_list[index_student]
             gender = gender_list[index_student]
-#             current_grade_level = current_grade_level_list[index_student]
             interest_grade_level = interest_grade_level_list[index_student]
             current_school_code = current_school_code_list[index_student]
             current_school_year = current_school_year_list[index_student]
@@ -297,7 +295,6 @@ class InquiryController(http.Controller):
                 "person_type": "student",
                 'school_code_id': current_school_code and int(current_school_code) or False,
                 'school_year_id': current_school_year and int(current_school_year) or False,
-#                 'grade_level_id': current_grade_level and int(current_grade_level) or False,
                 "family_ids": [(6, 0, [family_id.id])],
                 'date_of_birth': birthday,
                 'gender': gender and int(gender) or False,

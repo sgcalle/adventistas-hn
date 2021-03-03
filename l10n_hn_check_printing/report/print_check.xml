@@ -10,6 +10,15 @@
 
 <template id="ckhn_check">
     <div class="ckhn_check">
+        <t t-if="len(page['amount_in_word']) &gt; 50">
+          <style type="text/css">
+            .ckhn_amount_in_word
+            {
+              font-size: 0.85em !important;
+              <!--color:green;-->
+            }
+          </style>
+        </t>
         <div class="ckhn_date">
             <t t-esc="page['company'].partner_id.city"/>,
             <t t-esc="page['company'].partner_id.state_id.name"/>
@@ -24,6 +33,15 @@
 
 <template id="ckhn_check_bo">
     <div class="ckhn_check">
+        <t t-if="len(page['amount_in_word']) &gt; 50">
+          <style type="text/css">
+            .ckhn_amount_in_word
+            {
+              font-size: 0.85em !important;
+              <!--color:green;-->
+            }
+          </style>
+        </t>
         <div class="ckhn_date"><t t-esc="page['payment_date_honduras']"/></div>
         <div class="ckhn_payee_name">*** <t t-esc="page['partner_name']"/> ****</div>
         <div class="ckhn_amount">*** <t t-esc="page['amount']"/> ***</div>

@@ -243,6 +243,7 @@
 
                         <page string="Home address" name="home_address"
                               attrs="{'invisible': [('is_family', '=', True)]}">
+
                             <group>
                                 <field name="family_home_address_ids" invisible="1"/>
                                 <field name="home_address_id" domain="[('id', 'in', family_home_address_ids)]"/>
