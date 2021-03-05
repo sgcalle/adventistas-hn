@@ -158,7 +158,7 @@ class NumberToTextConverter:
         billon = self._milmillones(resto)
 
         if not miles:
-            return divisor
+            return billon
 
         numero = "%s %s" % (miles, billon)
 
@@ -186,15 +186,15 @@ class NumberToTextConverter:
         if data["enteros"] == 0:
             return "CERO " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
         if data["enteros"] == 1:
-            return self._billones(data["enteros"]) + " " + self._milmillones(data["enteros"]) + " " + data["letrasMonedaSingular"] + "" + data["letrasCentavos"]
+            return self._billones(data["enteros"]) + " " + data["letrasMonedaSingular"] + "" + data["letrasCentavos"]
         else:
-            return self._billones(data["enteros"]) + " " + self._milmillones(data["enteros"]) + " " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
+            return self._billones(data["enteros"]) + " " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
 
 
 # Testing
 if __name__ == "__main__":
     converter = NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
-#     print("%i %s" % (1222111844986.89, converter.numero_a_letra(1222111844986.89)))
+    print("%i %s" % (1222111844986.89, converter.numero_a_letra(1222111844986.89)))
 
     # for i in range(0, 1000000000):
         # print("%i %s" % (i, converter.numero_a_letra(i)))
