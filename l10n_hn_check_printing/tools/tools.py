@@ -135,7 +135,22 @@ class NumberToTextConverter:
         numero = "%s %s" % (miles, centena)
 
         return numero.strip()
+    
+    def _milmillones(self, num):
+        divisor = 1000000000
+        millones = math.floor(num / divisor)
+        resto = num - (millones * divisor)
         
+        miles = self._seccion(num, divisor, "MIL MILLONES", "MIL MILLONES")
+        millon = self._millones(resto)
+
+        if not miles:
+            return millon
+        
+        numero = "%s %s" % (miles, millon)
+
+        return numero.strip()  
+    
     def numero_a_letra(self, num):
         data = {
             "numero": num,
@@ -156,9 +171,9 @@ class NumberToTextConverter:
         if data["enteros"] == 0:
             return "CERO " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
         if data["enteros"] == 1:
-            return self._millones(data["enteros"]) + " " + data["letrasMonedaSingular"] + "" + data["letrasCentavos"]
+            return self._milmillones(data["enteros"]) + " " + data["letrasMonedaSingular"] + "" + data["letrasCentavos"]
         else:
-            return self._millones(data["enteros"]) + " " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
+            return self._milmillones(data["enteros"]) + " " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
 
 
 # Testing
