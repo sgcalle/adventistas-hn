@@ -2,8 +2,8 @@
 
 import math
 
-class NumberToTextConverter:
 
+class NumberToTextConverter:
 
     def __init__(self, moneda_singular, moneda_plural, centavo_singular, centavo_plural):
         self.moneda_singular = moneda_singular
@@ -25,7 +25,7 @@ class NumberToTextConverter:
             9: "NUEVE",
         }
         return unidades.get(num, "")
-    
+
     def _decenas(self, num):
 
         decena = math.floor(num / 10)
@@ -64,7 +64,7 @@ class NumberToTextConverter:
                 numero = self._unidades(unidad)
 
         return numero
-    
+
     def _centenas(self, num):
         centena = math.floor(num / 100)
         decena = num - (centena * 100)
@@ -73,7 +73,7 @@ class NumberToTextConverter:
 
         if centena == 1:
             if decena > 0:
-                numero = "CIENTO %s" % self._decenas(decena) 
+                numero = "CIENTO %s" % self._decenas(decena)
             else:
                 numero = "CIEN"
         elif centena > 1:
@@ -105,7 +105,6 @@ class NumberToTextConverter:
                 numero = singular
 
         return numero
-    
 
     def _miles(self, num):
         divisor = 1000
@@ -117,9 +116,8 @@ class NumberToTextConverter:
 
         if not miles:
             return centena
-        
-        return "%s %s" % (miles, centena)
 
+        return "%s %s" % (miles, centena)
 
     def _millones(self, num):
         divisor = 1000000
@@ -131,53 +129,72 @@ class NumberToTextConverter:
 
         if not miles:
             return centena
-        
+
         numero = "%s %s" % (miles, centena)
 
         return numero.strip()
-    
+
     def _milmillones(self, num):
         divisor = 1000000000
         millones = math.floor(num / divisor)
         resto = num - (millones * divisor)
-        
+
         miles = self._seccion(num, divisor, "MIL MILLONES", "MIL MILLONES")
         millon = self._millones(resto)
 
         if not miles:
             return millon
-        
+
         numero = "%s %s" % (miles, millon)
 
-        return numero.strip()  
-    
+        return numero.strip()
+
+    def _billones(self, num):
+        divisor = 1000000000000
+        milmillones = math.floor(num / divisor)
+        resto = num - (milmillones * divisor)
+
+        miles = self._seccion(num, divisor, "UN BILLON", "BILLONES")
+        billon = self._milmillones(resto)
+
+        if not miles:
+            return divisor
+
+        numero = "%s %s" % (miles, billon)
+
+        return numero.strip()
+
     def numero_a_letra(self, num):
         data = {
             "numero": num,
             "enteros": math.floor(num),
             "centavos": (((round(num * 100)) - (math.floor(num) * 100))),
             "letrasCentavos": "",
-            "letrasMonedaPlural": self.moneda_plural, #"PESOS", 'Dólares', 'Bolívares', 'etcs'
-            "letrasMonedaSingular": self.moneda_singular, #"PESO", 'Dólar', 'Bolivar', 'etc'
+            "letrasMonedaPlural": self.moneda_plural,  # "PESOS", 'Dólares', 'Bolívares', 'etcs'
+            "letrasMonedaSingular": self.moneda_singular,  # "PESO", 'Dólar', 'Bolivar', 'etc'
 
             "letrasMonedaCentavoPlural": self.centavo_plural,
             "letrasMonedaCentavoSingular": self.centavo_singular,
         }
 
         if data["centavos"] > 0:
-            data["letrasCentavos"] = " CON " + (self._millones(data["centavos"]) + " " + data["letrasMonedaCentavoSingular"] \
-                                                if data["centavos"] == 1 else self._millones(data["centavos"]) + " " + data["letrasMonedaCentavoPlural"]) 
+            data["letrasCentavos"] = " CON " + (
+                self._millones(data["centavos"]) + " " + data["letrasMonedaCentavoSingular"] \
+                    if data["centavos"] == 1 else self._millones(data["centavos"]) + " " + data[
+                    "letrasMonedaCentavoPlural"])
 
         if data["enteros"] == 0:
             return "CERO " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
         if data["enteros"] == 1:
-            return self._milmillones(data["enteros"]) + " " + data["letrasMonedaSingular"] + "" + data["letrasCentavos"]
+            return self._billones(data["enteros"]) + " " + self._milmillones(data["enteros"]) + " " + data["letrasMonedaSingular"] + "" + data["letrasCentavos"]
         else:
-            return self._milmillones(data["enteros"]) + " " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
+            return self._billones(data["enteros"]) + " " + self._milmillones(data["enteros"]) + " " + data["letrasMonedaPlural"] + "" + data["letrasCentavos"]
 
 
 # Testing
 if __name__ == "__main__":
     converter = NumberToTextConverter("LP.", "LPS.", "CTV.", "CTVS.")
-    for i in range(0, 1000000000):
-        print("%i %s" % (i, converter.numero_a_letra(i)))
+#     print("%i %s" % (1222111844986.89, converter.numero_a_letra(1222111844986.89)))
+
+    # for i in range(0, 1000000000):
+        # print("%i %s" % (i, converter.numero_a_letra(i)))
