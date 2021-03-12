@@ -18,13 +18,13 @@ class SaleOrderReconcilePaymentWizard(models.TransientModel):
     # Fields declaration #
     ######################
     sale_order_id = fields.Many2one(string="Sale Order",
-                                    comodel_name="sale.order")
+        comodel_name="sale.order")
     payment_id = fields.Many2one(string="Payment Record",
-                                comodel_name="sale.order.payment")
+        comodel_name="sale.order.payment")
     amount_to_reconcile = fields.Float(string="Amount to Pay",
-                                        required=True)
+        required=True)
     date_reconciled = fields.Date(string="Date", 
-                                    default=lambda _: fields.Date.today())
+        default=lambda _: fields.Date.today())
 
     ##############################
     # Compute and search methods #

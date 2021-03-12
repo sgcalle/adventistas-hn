@@ -10,8 +10,8 @@
                         string="Register Payment" 
                         attrs="{'invisible': ['|', ('state', '!=', 'sale'), ('invoice_status', '==', 'invoiced')]}" 
                         options="{}" />
-                <field name="len_reconcilable_payment_ids" invisible="1" readonly="1" modifiers="{'invisible':true,'readonly':true}" />
-                <field name="amount_due_after_reconcile" invisible="1" readonly="1" modifiers="{'invisible':true,'readonly':true}" />
+                <field name="len_reconcilable_payment_ids" invisible="1" readonly="1" />
+                <field name="amount_due_after_reconcile" invisible="1" readonly="1" />
             </xpath>
 
             <xpath expr="//sheet/notebook/page[@name='other_information']" position="before">
@@ -27,14 +27,14 @@
                     </field>
 
                     <group name="note_group" cols="6">
-                        <group class="oe_subtotal_footer oe_right" colspan="2" name="group_reconciled_total" modifiers="{}">
-                            <div class="oe_subtotal_footer_separator oe_inline o_td_label" modifiers="{}">
-                                <label for="reconciled_total" modifiers="{}"/>
+                        <group class="oe_subtotal_footer oe_right" colspan="2" name="group_reconciled_total">
+                            <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                <label for="reconciled_total"/>
                             </div>
-                            <field name="reconciled_total" nolabel="1" class="oe_subtotal_footer_separator" modifiers="{'readonly':true}"/>
+                            <field name="reconciled_total" nolabel="1" class="oe_subtotal_footer_separator"/>
                         </group>    
                     </group>
-                    <div class="oe_clear" modifiers="{}"/>
+                    <div class="oe_clear"/>
                 </page>
 
                 <page string="Reconcilable Payments" attrs="{'invisible': ['|', ('len_reconcilable_payment_ids', '==', 0), ('amount_total', '==', 0)]}">
@@ -50,7 +50,7 @@
                             <button string="Reconcile" name="action_reconcile" type="object"/>
                         </tree>
                     </field>
-                    <div class="oe_clear" modifiers="{}"/>
+                    <div class="oe_clear"/>
                 </page>
             </xpath>
 
@@ -59,16 +59,14 @@
                         string="Less: Total Reconciled Amount"
                         widget="monetary" 
                         options="{'currency_field': 'currency_id'}" 
-                        attrs="{'invisible': [('reconciled_total', '==', 0)]}"
-                        modifiers="{'readonly':true}"/>
+                        attrs="{'invisible': [('reconciled_total', '=', 0)]}"/>
 
                 <field name="amount_due_after_reconcile" 
                     string="Total Amount after Reconciliation"
                     class="oe_subtotal_footer_separator" 
                     widget="monetary" 
                     options="{'currency_field': 'currency_id'}" 
-                    attrs="{'invisible': [('reconciled_total', '==', 0)]}"
-                    modifiers="{'readonly':true}"/>
+                    attrs="{'invisible': [('reconciled_total', '=', 0)]}"/>
             </xpath>
         </field>
     </record>

@@ -16,14 +16,16 @@ class SaleOrderPaymentReconcile(models.Model):
     ######################
     # Fields declaration #
     ######################
-    currency_id = fields.Many2one(comodel_name="res.currency")
+    currency_id = fields.Many2one(string="Currency",
+        comodel_name="res.currency")
     sale_order_id = fields.Many2one(string="Sale Order",
-                                    comodel_name="sale.order")
-    payment_id = fields.Many2one(string="Payment Record",
-                                comodel_name="sale.order.payment")
+        comodel_name="sale.order")
+    payment_id = fields.Many2one(string="Payment",
+        comodel_name="sale.order.payment")
     amount_reconciled = fields.Monetary(string="Amount Reconciled")
     date_reconciled = fields.Date(string="Date", 
-                                    default=lambda _: fields.Date.today())
+        default=lambda _: fields.Date.today(),
+        required=True)
 
     ##############################
     # Compute and search methods #

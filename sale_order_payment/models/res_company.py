@@ -2,7 +2,6 @@
 
 from odoo import models, fields, api
 
-
 class ResCompany(models.Model):
     ######################
     # Private attributes #
@@ -17,8 +16,7 @@ class ResCompany(models.Model):
     # Fields declaration #
     ######################
     create_invoice_on_so_fully_paid_enabled = fields.Boolean(string="Automatic Invoice Creation", 
-                                                            help="Enable / Disable Automatic " + 
-                                                                "Invoice Creation when Sales Order Was Fully Paid")
+        help="Enable / Disable automatic invoice creation when Sales Order is Fully Paid")
 
     ##############################
     # Compute and search methods #

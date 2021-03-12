@@ -20,7 +20,7 @@
                     </group>
                     <group>
                         <field name="reconciled_payment_ids" widget="one2many" mode="tree" 
-                        readonly="1" nolabel="1">
+                            readonly="1" nolabel="1">
                             <tree>
                                 <field name="sale_order_id" string="Sale Order Id"/>
                                 <field name="amount_reconciled" />

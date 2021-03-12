@@ -2,7 +2,6 @@
 
 from odoo import models, fields, api
 
-
 class SaleOrderPayment(models.Model):
     ######################
     # Private attributes #
@@ -17,20 +16,25 @@ class SaleOrderPayment(models.Model):
     ######################
     # Fields declaration #
     ######################
-    account_payment_id = fields.Many2one(comodel_name="account.payment")
-    partner_id = fields.Many2one(comodel_name="res.partner")
-    currency_id = fields.Many2one(comodel_name="res.currency")
+    account_payment_id = fields.Many2one(string="Related Invoice Payment",
+        comodel_name="account.payment")
+    partner_id = fields.Many2one(string="Payment",
+        comodel_name="res.partner")
+    currency_id = fields.Many2one(string="Currency",
+        comodel_name="res.currency")
     journal_id = fields.Many2one(string="Journal",
-                                comodel_name="account.journal")
-    reconciled_payment_ids = fields.One2many(string="Reconciled Payments",
-                                            inverse_name="payment_id",
-                                            comodel_name="sale.order.payment.reconcile")
+        comodel_name="account.journal")
+    reconciled_payment_ids = fields.One2many(string="Reconciliations",
+        inverse_name="payment_id",
+        comodel_name="sale.order.payment.reconcile")
     payment_date = fields.Date(string="Date", 
-                                default=lambda _: fields.Date.today())
+        default=lambda _: fields.Date.today(),
+        required=True)
     memo = fields.Char(string="Memo")
     amount_paid = fields.Monetary(string="Amount Paid")
     reconcilable_amount = fields.Monetary(string="Reconcilable Amount",
-                                            compute="_compute_reconcilable_amount")
+        compute="_compute_reconcilable_amount",
+        store=True)
 
     ##############################
     # Compute and search methods #

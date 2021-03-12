@@ -2,7 +2,6 @@
 
 from odoo import models, fields, api
 
-
 class SaleOrder(models.Model):
     ######################
     # Private attributes #
@@ -16,23 +15,22 @@ class SaleOrder(models.Model):
     ######################
     # Fields declaration #
     ######################
-    reconciled_payment_ids = fields.One2many(string="Reconciled Payments",
-                                            inverse_name="sale_order_id",
-                                            comodel_name="sale.order.payment.reconcile")
+    reconciled_payment_ids = fields.One2many(string="Reconciliations",
+        inverse_name="sale_order_id",
+        comodel_name="sale.order.payment.reconcile")
     reconciled_total = fields.Monetary(string="Total Reconciled Amount",
-                                        compute="_compute_reconciled_total")
+        compute="_compute_reconciled_total")
     reconcilable_payment_ids = fields.Many2many(string="Reconcilable Payments",
-                                                compute="_compute_reconcilable_payments",
-                                                readonly=True,
-                                                comodel_name="sale.order.payment")
+        compute="_compute_reconcilable_payments",
+        comodel_name="sale.order.payment")
     len_reconcilable_payment_ids = fields.Integer(compute="_compute_len_reconcilable_payment_ids",
-                                                    readonly=True)
+        readonly=True)
     amount_due_after_reconcile = fields.Monetary(string="Amount Due",
-                                                compute="_compute_amount_due_after_reconcile",
-                                                readonly=True)
+        compute="_compute_amount_due_after_reconcile",
+        readonly=True)
     payments_with_reconcile = fields.Many2many(readonly=True,
-                                                compute="_compute_payments_with_reconcile",
-                                                comodel_name="sale.order.payment")                                           
+        compute="_compute_payments_with_reconcile",
+        comodel_name="sale.order.payment")                                           
 
     ##############################
     # Compute and search methods #
@@ -51,9 +49,7 @@ class SaleOrder(models.Model):
         so_payment = self.env["sale.order.payment"]
 
         for so in self:
-            so_payments = [sp.id 
-                            for sp in so_payment.search([("partner_id", "=", so.partner_id.id)])
-                            if sp.reconcilable_amount > 0]
+            so_payments = so_payment.search([("partner_id", "=", so.partner_id.id),("reconcilable_amount",">",0)]).ids
 
             if so_payments:
                 so.reconcilable_payment_ids = [(6, 0, so_payments)]
