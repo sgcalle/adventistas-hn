@@ -5,13 +5,11 @@
         <field name="model">res.company</field>
         <field name="inherit_id" ref="base.view_company_form" />
         <field name="arch" type="xml">
-            <xpath expr="//sheet/notebook/page[@name='wallet']" position="after">
-                <page string="Configuration" name="configuration">
-                    <group string="Sale Order Payment" name="sale_order_payment">
-                        <field name="create_invoice_on_so_fully_paid_enabled" string="Automatic Invoice Creation" />
+            <group name="social_media" position="after">
+                    <group string="Sales Order Payment" name="sale_order_payment">
+                        <field name="create_invoice_on_so_fully_paid_enabled" string="Automatic Invoice Creation"/>
                     </group>
-                </page>
-            </xpath>
+            </group>
         </field>
     </record>
 </odoo>

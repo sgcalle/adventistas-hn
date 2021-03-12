@@ -17,16 +17,19 @@ class SaleOrderRegisterPaymentWizard(models.TransientModel):
     ######################
     # Fields declaration #
     ######################
-    partner_id = fields.Many2one(comodel_name="res.partner")
-    sale_order_id = fields.Many2one(comodel_name="sale.order")
+    partner_id = fields.Many2one(string="Customer",
+        comodel_name="res.partner")
+    sale_order_id = fields.Many2one(string="Sales Order",
+        comodel_name="sale.order")
     payment_date = fields.Date(string="Date", 
-                                default=lambda _: fields.Date.today())
+        default=lambda _: fields.Date.today(),
+        required=True)
     amount_to_pay = fields.Float(string="Amount to Pay",
-                                required=True)
+        required=True)
     journal_id = fields.Many2one(string="Journal",
-                                comodel_name="account.journal",
-                                required=True,
-                                domain=[("type", "=", "bank")])
+        comodel_name="account.journal",
+        required=True,
+        domain="[('type','in',['bank','cash'])]")
     memo = fields.Char(string="Memo")
 
     ##############################
