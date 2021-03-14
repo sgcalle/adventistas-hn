@@ -39,7 +39,8 @@ class SaleAdvancePaymentInv(models.TransientModel):
         sale_order = self.env["sale.order"].browse(self.env.context.get("active_ids", []))
         
         for so in sale_order:
-            so._create_invoice_with_reconciliation()
+            if so.reconciled_total > 0:
+                so._create_invoice_with_reconciliation()
 
         return res
 

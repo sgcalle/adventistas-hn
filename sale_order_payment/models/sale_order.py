@@ -97,12 +97,18 @@ class SaleOrder(models.Model):
             "type": "ir.actions.act_window",
             "domain": "[]",
             "context": {
-                "default_amount_to_pay": self.amount_total,
+                "default_amount_to_pay": self.amount_due_after_reconcile,
                 "default_memo": self.name,
                 "default_sale_order_id": self.id,
                 "default_partner_id": self.partner_id.id
             }
         }
+
+    def action_cancel(self):
+        for payment in self.payments_with_reconcile:
+            payment.action_cancel()
+
+        return super(SaleOrder, self).action_cancel()
 
     ####################
     # Business methods #
@@ -116,10 +122,15 @@ class SaleOrder(models.Model):
             ["&", ("name", "=", "Manual"), ("payment_type", "=", "inbound")]
         )
 
-        invoice = account_move_obj.browse(invoice_id)
-        
-        if not invoice:
+        if invoice_id:
+            # Automatic creation of invoice
+            invoice = account_move_obj.browse(invoice_id)
+        else:
+            # From create invoice wizard
             invoice = self.invoice_ids[-1]
+
+        if invoice.state == "draft":
+            invoice.action_post()
 
         for payment in self.payments_with_reconcile:
             account_payment = account_payment_obj.create({
@@ -137,7 +148,8 @@ class SaleOrder(models.Model):
 
             account_payment.post()
 
-            invoice.js_assign_outstanding_line(account_payment.move_line_ids[0].id)
+            for line in account_payment.move_line_ids:
+                if line.account_internal_type == "receivable":
+                    invoice.js_assign_outstanding_line(line.id)
 
-            payment.reconciled_payment_ids = [(2, p.id) for p in payment.reconciled_payment_ids]
             payment.unlink()

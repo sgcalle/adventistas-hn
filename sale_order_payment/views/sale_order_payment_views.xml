@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="sale_order_payment_view_tree" model="ir.ui.view">
+        <field name="name">sale.order.payment.view.tree</field>
+        <field name="model">sale.order.payment</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="partner_id" string="Customer" />
+                <field name="journal_id"/>
+                <field name="payment_date"/>
+                <field name="memo"/>
+                <field name="amount_paid"/>
+                <field name="reconcilable_amount"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="sale_order_payment_view_form" model="ir.ui.view">
         <field name="name">sale.order.payment.view.form</field>
         <field name="model">sale.order.payment</field>
         <field name="arch" type="xml">
             <form string="Sale Order Register">
-                <header name="header" />
+                <header name="header">
+                    <button name="action_cancel" type="object" class="oe_highlight" 
+                        string="Cancel Payment" 
+                        options="{}" />
+                </header>
+
                 <sheet>
                     <group>
                         <group>
                             <field name="journal_id" />
-                            <field name="partner_id" />
+                            <field name="partner_id" string="Customer" />
                         </group>
                         <group>
                             <field name="amount_paid" string="Amount" />
@@ -32,4 +52,18 @@
             </form>
         </field>
     </record>
+
+    <record id="sale_order_payment_action" model="ir.actions.act_window">
+        <field name="name">Sale Order Payments</field>
+        <field name="res_model">sale.order.payment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem 
+        id="sale_order_payment_menu" 
+        name="Sale Order Payments" 
+        action="sale_order_payment_action" 
+        parent="sale.sale_order_menu" sequence="10" />
 </odoo>
