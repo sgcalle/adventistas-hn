@@ -19,8 +19,12 @@ class SaleOrderPaymentReconcile(models.Model):
     currency_id = fields.Many2one(string="Currency",
         comodel_name="res.currency")
     sale_order_id = fields.Many2one(string="Sale Order",
+        require=True,
+        ondelete="cascade",
         comodel_name="sale.order")
     payment_id = fields.Many2one(string="Payment",
+        require=True,
+        ondelete="cascade",
         comodel_name="sale.order.payment")
     amount_reconciled = fields.Monetary(string="Amount Reconciled")
     date_reconciled = fields.Date(string="Date", 
@@ -43,9 +47,11 @@ class SaleOrderPaymentReconcile(models.Model):
         res = super(SaleOrderPaymentReconcile, self).create(vals)
 
         for record in res:
-            if self.env.company.create_invoice_on_so_fully_paid_enabled:
+            so = record.sale_order_id
+
+            if self.env.company.create_invoice_on_so_fully_paid_enabled and so.amount_due_after_reconcile <= 0:
                 invoice = record.sale_order_id._create_invoices()
-                record.sale_order_id._create_invoice_with_reconciliation(invoice_id=invoice.id)
+                so._create_invoice_with_reconciliation(invoice_id=invoice.id)
     
     ##################
     # Action methods #

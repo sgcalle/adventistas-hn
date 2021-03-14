@@ -18,7 +18,7 @@ class SaleOrderPayment(models.Model):
     ######################
     account_payment_id = fields.Many2one(string="Related Invoice Payment",
         comodel_name="account.payment")
-    partner_id = fields.Many2one(string="Payment",
+    partner_id = fields.Many2one(string="Customer",
         comodel_name="res.partner")
     currency_id = fields.Many2one(string="Currency",
         comodel_name="res.currency")
@@ -76,6 +76,15 @@ class SaleOrderPayment(models.Model):
                 "default_payment_id": self.id,
                 "default_amount_to_reconcile": self.reconcilable_amount
             }
+        }
+
+    def action_cancel(self):
+        self.ensure_one()
+        self.unlink()
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "reload"
         }
 
     ####################
