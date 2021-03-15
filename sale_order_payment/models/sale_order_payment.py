@@ -63,6 +63,12 @@ class SaleOrderPayment(models.Model):
     def action_reconcile(self):
         # ! Needs 'sale_order_id' in context.
         
+        wizard_obj = self.env["sale.order.reconcile.payment.wizard"]
+        wizard = wizard_obj.create({
+            "sale_order_id": self.env.context.get("sale_order_id"),
+            "payment_id": self.id,
+            "amount_to_reconcile": self.reconcilable_amount
+        })
         return {
             "name": "Sale Order Reconcile Payment Wizard",
             "view_mode": "form",
@@ -71,11 +77,7 @@ class SaleOrderPayment(models.Model):
             "res_model": "sale.order.reconcile.payment.wizard",
             "type": "ir.actions.act_window",
             "domain": "[]",
-            "context": {
-                "default_sale_order_id": self.env.context.get("sale_order_id"),
-                "default_payment_id": self.id,
-                "default_amount_to_reconcile": self.reconcilable_amount
-            }
+            "res_id": wizard.id,
         }
 
     def action_cancel(self):

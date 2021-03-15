@@ -39,9 +39,6 @@ class SaleOrderReconcilePaymentWizard(models.TransientModel):
             if record.amount_to_reconcile <= 0:
                 raise ValidationError("Amount to Reconcile should not be 0.")
 
-            # if record.amount_to_reconcile > record.sale_order_id.amount_total:
-            #     raise ValidationError("Amount to Reconcile is greater than the Sale Order's total!")
-
     #########################
     # CRUD method overrides #
     #########################
