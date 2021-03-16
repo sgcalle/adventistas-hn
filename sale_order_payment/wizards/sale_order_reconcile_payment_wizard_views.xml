@@ -4,7 +4,7 @@
         <field name="name">sale.order.reconcile.payment.wizard.view.form</field>
         <field name="model">sale.order.reconcile.payment.wizard</field>
         <field name="arch" type="xml">
-            <form string="Sale Order Reconcile Payment Wizard">
+            <form string="Sales Order Reconcile Payment Wizard">
                 <group>
                     <group>
                         <field name="sale_order_id" readonly="1" />

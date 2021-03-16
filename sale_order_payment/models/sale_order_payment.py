@@ -18,9 +18,9 @@ class SaleOrderPayment(models.Model):
     # Fields declaration #
     ######################
     state = fields.Selection(string="State",
-        selection=[("valid", "Valid"), ("paid", "Paid"), ("cancelled", "Cancelled")],
+        selection=[("valid", "Valid"), ("cancelled", "Cancelled")],
         default="valid")
-    account_payment_id = fields.Many2one(string="Related Account Payment",
+    account_payment_id = fields.Many2one(string="Related Invoice Payment",
         comodel_name="account.payment")
     partner_id = fields.Many2one(string="Customer",
         comodel_name="res.partner")
@@ -66,8 +66,6 @@ class SaleOrderPayment(models.Model):
     # Action methods #
     ##################
     def action_reconcile(self):
-        # ! Needs 'sale_order_id' in context.
-        
         wizard_obj = self.env["sale.order.reconcile.payment.wizard"]
         wizard = wizard_obj.create({
             "sale_order_id": self.env.context.get("sale_order_id"),
@@ -76,7 +74,7 @@ class SaleOrderPayment(models.Model):
         })
 
         return {
-            "name": "Sale Order Reconcile Payment Wizard",
+            "name": "Sales Order Reconcile Payment Wizard",
             "view_mode": "form",
             "view_type": "form",
             "target": "new",
@@ -88,19 +86,13 @@ class SaleOrderPayment(models.Model):
 
     def action_cancel(self):
         self.ensure_one()
-
-        if self.state == "paid":
-            raise ValidationError("You can't cancel a journaled payment.")
-
+        if self.account_payment_id:
+            raise ValidationError("You can't cancel a sales order payment with a related invoice payment.")
         self.state = "cancelled"
         self.reconciled_payment_ids.unlink()
 
     def action_reset_to_valid(self):
         self.ensure_one()
-        
-        if self.state == "paid":
-            raise ValidationError("You can't revert a payment back to Valid if it is already journaled.")
-
         self.state = "valid"
 
     ####################

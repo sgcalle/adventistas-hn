@@ -8,7 +8,7 @@
             <xpath expr="//header/button[@name='action_quotation_send']" position="before">
                 <button name="action_sale_order_payment" type="object" class="oe_highlight" 
                         string="Register Payment" 
-                        attrs="{'invisible': ['|', ('state', '!=', 'sale'), ('invoice_status', '==', 'invoiced')]}" 
+                        attrs="{'invisible': ['|', ('state', 'not in', ['sale','done']), ('invoice_status', '==', 'invoiced')]}" 
                         options="{}" />
                 <field name="len_reconcilable_payment_ids" invisible="1" readonly="1" />
                 <field name="amount_due_after_reconcile" invisible="1" readonly="1" />
@@ -19,7 +19,7 @@
                     <field name="reconciled_payment_ids" widget="section_and_note_one2many" mode="tree" 
                         readonly="1">
                         <tree>
-                            <field name="payment_id" string="Sale Order Payment Id"/>
+                            <field name="payment_id" string="Sales Order Payment ID"/>
                             <field name="amount_reconciled" />
                             <field name="date_reconciled" />
                             <button string="Unreconcile" name="action_unreconcile" type="object" />
