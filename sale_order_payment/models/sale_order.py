@@ -21,7 +21,7 @@ class SaleOrder(models.Model):
     reconciled_total = fields.Monetary(string="Total Reconciled Amount",
         compute="_compute_reconciled_total")
     reconcilable_payment_ids = fields.Many2many(string="Reconcilable Payments",
-        compute="_compute_reconcilable_payments",
+        compute="_compute_reconcilable_payment_ids",
         comodel_name="sale.order.payment")
     len_reconcilable_payment_ids = fields.Integer(compute="_compute_len_reconcilable_payment_ids",
         readonly=True)
@@ -30,7 +30,7 @@ class SaleOrder(models.Model):
         readonly=True)
     payments_with_reconcile = fields.Many2many(readonly=True,
         compute="_compute_payments_with_reconcile",
-        comodel_name="sale.order.payment")                                           
+        comodel_name="sale.order.payment")                    
 
     ##############################
     # Compute and search methods #
@@ -45,11 +45,11 @@ class SaleOrder(models.Model):
 
             so.reconciled_total = total
 
-    def _compute_reconcilable_payments(self):
+    def _compute_reconcilable_payment_ids(self):
         so_payment = self.env["sale.order.payment"]
 
         for so in self:
-            so_payments = so_payment.search([("partner_id", "=", so.partner_id.id),("reconcilable_amount",">",0)]).ids
+            so_payments = so_payment.search([("state", "=", "valid"), ("partner_id", "=", so.partner_id.id),("reconcilable_amount",">",0)]).ids
 
             if so_payments:
                 so.reconcilable_payment_ids = [(6, 0, so_payments)]
@@ -133,23 +133,24 @@ class SaleOrder(models.Model):
             invoice.action_post()
 
         for payment in self.payments_with_reconcile:
-            account_payment = account_payment_obj.create({
-                "payment_type": "inbound",
-                "partner_type": "customer",
-                "partner_id": self.partner_id.id,
-                "amount": payment.amount_paid,
-                "journal_id": payment.journal_id.id,
-                "payment_method_id": manual_payment.id
-            })
+            if payment.state == "valid":
+                account_payment = account_payment_obj.create({
+                    "payment_type": "inbound",
+                    "partner_type": "customer",
+                    "partner_id": self.partner_id.id,
+                    "amount": payment.amount_paid,
+                    "journal_id": payment.journal_id.id,
+                    "payment_method_id": manual_payment.id
+                })
 
-            payment.update({
-                "account_payment_id": account_payment.id
-            })
+                payment.update({
+                    "account_payment_id": account_payment.id
+                })
 
-            account_payment.post()
+                account_payment.post()
 
-            for line in account_payment.move_line_ids:
-                if line.account_internal_type == "receivable":
-                    invoice.js_assign_outstanding_line(line.id)
+                for line in account_payment.move_line_ids:
+                    if line.account_internal_type == "receivable":
+                        invoice.js_assign_outstanding_line(line.id)
 
-            payment.unlink()
+                payment.state = "paid"
