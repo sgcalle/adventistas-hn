@@ -49,7 +49,10 @@ class SaleOrder(models.Model):
         so_payment = self.env["sale.order.payment"]
 
         for so in self:
-            so_payments = so_payment.search([("state", "=", "valid"), ("partner_id", "=", so.partner_id.id),("reconcilable_amount",">",0)]).ids
+            so_payments = so_payment.search([
+                ("state", "=", "valid"),
+                ("partner_id", "=", so.partner_id.id),
+                ("reconcilable_amount",">",0)]).ids
 
             if so_payments:
                 so.reconcilable_payment_ids = [(6, 0, so_payments)]
@@ -89,7 +92,7 @@ class SaleOrder(models.Model):
     ##################
     def action_sale_order_payment(self):
         return {
-            "name": "Sale Order Payment Wizard",
+            "name": "Sales Order Payment Wizard",
             "view_mode": "form",
             "view_type": "form",
             "target": "new",
@@ -118,9 +121,8 @@ class SaleOrder(models.Model):
 
         account_move_obj = self.env["account.move"]
         account_payment_obj = self.env["account.payment"]
-        manual_payment = self.env["account.payment.method"].search(
-            ["&", ("name", "=", "Manual"), ("payment_type", "=", "inbound")]
-        )
+        manual_payment = self.env["account.payment.method"].search([
+            ("name", "=", "Manual"), ("payment_type", "=", "inbound")])
 
         if invoice_id:
             # Automatic creation of invoice
@@ -134,23 +136,21 @@ class SaleOrder(models.Model):
 
         for payment in self.payments_with_reconcile:
             if payment.state == "valid":
-                account_payment = account_payment_obj.create({
-                    "payment_type": "inbound",
-                    "partner_type": "customer",
-                    "partner_id": self.partner_id.id,
-                    "amount": payment.amount_paid,
-                    "journal_id": payment.journal_id.id,
-                    "payment_method_id": manual_payment.id
-                })
-
-                payment.update({
-                    "account_payment_id": account_payment.id
-                })
-
-                account_payment.post()
+                account_payment = payment.account_payment_id
+                if not account_payment:
+                    account_payment = account_payment_obj.create({
+                        "payment_type": "inbound",
+                        "partner_type": "customer",
+                        "partner_id": self.partner_id.id,
+                        "amount": payment.amount_paid,
+                        "journal_id": payment.journal_id.id,
+                        "payment_method_id": manual_payment.id
+                    })
+                    payment.update({
+                        "account_payment_id": account_payment.id
+                    })
+                    account_payment.post()
 
                 for line in account_payment.move_line_ids:
                     if line.account_internal_type == "receivable":
                         invoice.js_assign_outstanding_line(line.id)
-
-                payment.state = "paid"

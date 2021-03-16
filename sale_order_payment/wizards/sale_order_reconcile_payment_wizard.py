@@ -17,7 +17,7 @@ class SaleOrderReconcilePaymentWizard(models.TransientModel):
     ######################
     # Fields declaration #
     ######################
-    sale_order_id = fields.Many2one(string="Sale Order",
+    sale_order_id = fields.Many2one(string="Sales Order",
         comodel_name="sale.order")
     payment_id = fields.Many2one(string="Payment Record",
         comodel_name="sale.order.payment")

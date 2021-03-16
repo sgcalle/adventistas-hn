@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Sale Order Payment",
+    'name': "Sales Order Payment",
 
     'summary': """ Register payment inside Sales Order """,
 

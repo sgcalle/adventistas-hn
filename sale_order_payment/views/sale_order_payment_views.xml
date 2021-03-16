@@ -21,41 +21,40 @@
         <field name="name">sale.order.payment.view.form</field>
         <field name="model">sale.order.payment</field>
         <field name="arch" type="xml">
-            <form string="Sale Order Register">
+            <form string="Sales Order Register">
                 <header name="header">
                     <button name="action_cancel" type="object" class="oe_highlight" 
                         string="Cancel Payment" 
-                        attrs="{'invisible': [('state', 'in', ['cancelled', 'paid'])]}"
+                        attrs="{'invisible': ['|',('state','in',['cancelled']),('account_payment_id','!=',False)]}"
                         options="{}" />
 
                     <button name="action_reset_to_valid" type="object" class="oe_highlight" 
                         string="Reset to Valid" 
-                        attrs="{'invisible': [('state', 'in', ['valid', 'paid'])]}"
+                        attrs="{'invisible': [('state', 'in', ['valid'])]}"
                         options="{}" />
                     
                     <field name="state" widget="statusbar" 
-                        statusbar_visible="valid,paid,cancelled" 
+                        statusbar_visible="valid,cancelled" 
                         modifiers="{'readonly':true}"/>
                 </header>
 
                 <sheet>
                     <group>
                         <group>
-                            <field name="journal_id" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}"/>
-                            <field name="partner_id" string="Customer" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
+                            <field name="journal_id" attrs="{'readonly': ['|',('state','in',['cancelled']),('account_payment_id','!=',False)]}" />
+                            <field name="partner_id" string="Customer" attrs="{'readonly': ['|',('state','in',['cancelled']),('account_payment_id','!=',False)]}" />
                         </group>
                         <group>
                             <field name="account_payment_id" readonly="1" />
-                            <field name="amount_paid" string="Amount" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
-                            <field name="payment_date" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
-                            <field name="memo" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
+                            <field name="amount_paid" string="Amount" attrs="{'readonly': ['|',('state','in',['cancelled']),('account_payment_id','!=',False)]}" />
+                            <field name="payment_date" attrs="{'readonly': ['|',('state','in',['cancelled']),('account_payment_id','!=',False)]}" />
+                            <field name="memo" attrs="{'readonly': ['|',('state','in',['cancelled']),('account_payment_id','!=',False)]}" />
                         </group>
                     </group>
                     <group>
-                        <field name="reconciled_payment_ids" widget="one2many" mode="tree" 
-                            readonly="1" nolabel="1">
+                        <field name="reconciled_payment_ids" widget="one2many" mode="tree" readonly="1" nolabel="1">
                             <tree>
-                                <field name="sale_order_id" string="Sale Order Id"/>
+                                <field name="sale_order_id"/>
                                 <field name="amount_reconciled" />
                                 <field name="date_reconciled" />
                             </tree>
@@ -70,16 +69,15 @@
         <field name="name">sale.order.payment.view.search</field>
         <field name="model">sale.order.payment</field>
         <field name="arch" type="xml">
-            <search string="Sale Order Payment">
+            <search string="Sales Order Payment">
                 <field name="partner_id"/>
                 <field name="memo"/>
 
                 <filter string="Valid" name="valid" domain="[('state', '=', 'valid')]"/>
-                <filter string="Paid" name="paid" domain="[('state', '=', 'paid')]"/>
                 <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
                 <separator/>
-                <filter string="Is Journaled" name="is_journaled" domain="[('account_payment_id','!=', False)]"/>
-                <filter string="Is Not Journaled" name="is_not_journaled" domain="[('account_payment_id','=', False)]"/>
+                <filter string="With Invoice Payment" name="is_journaled" domain="[('account_payment_id','!=', False)]"/>
+                <filter string="No Invoice Payment" name="is_not_journaled" domain="[('account_payment_id','=', False)]"/>
 
                 <group expand="0" string="Group By">
                     <filter string="State" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
@@ -91,7 +89,7 @@
     </record>
 
     <record id="sale_order_payment_action" model="ir.actions.act_window">
-        <field name="name">Sale Order Payments</field>
+        <field name="name">Sales Order Payments</field>
         <field name="res_model">sale.order.payment</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[]</field>
@@ -100,7 +98,7 @@
 
     <menuitem 
         id="sale_order_payment_menu" 
-        name="Sale Order Payments" 
+        name="Sales Order Payments" 
         action="sale_order_payment_action" 
         parent="sale.sale_order_menu" sequence="10" />
 </odoo>

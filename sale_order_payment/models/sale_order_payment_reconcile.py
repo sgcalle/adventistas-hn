@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-
+from odoo.exceptions import UserError
 
 class SaleOrderPaymentReconcile(models.Model):
     ######################
@@ -17,8 +17,9 @@ class SaleOrderPaymentReconcile(models.Model):
     # Fields declaration #
     ######################
     currency_id = fields.Many2one(string="Currency",
-        comodel_name="res.currency")
-    sale_order_id = fields.Many2one(string="Sale Order",
+        comodel_name="res.currency",
+        related="sale_order_id.currency_id")
+    sale_order_id = fields.Many2one(string="Sales Order",
         require=True,
         ondelete="cascade",
         comodel_name="sale.order")
@@ -58,6 +59,8 @@ class SaleOrderPaymentReconcile(models.Model):
     ##################
     def action_unreconcile(self):
         for record in self:
+            if record.payment_id.account_payment_id:
+                raise UserError("Cannot unreconcile a payment with a related Invoice Payment.")
             record.unlink()
 
     ####################
