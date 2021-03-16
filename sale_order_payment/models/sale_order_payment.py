@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class SaleOrderPayment(models.Model):
     ######################
@@ -16,14 +17,18 @@ class SaleOrderPayment(models.Model):
     ######################
     # Fields declaration #
     ######################
-    account_payment_id = fields.Many2one(string="Related Invoice Payment",
+    state = fields.Selection(string="State",
+        selection=[("valid", "Valid"), ("paid", "Paid"), ("cancelled", "Cancelled")],
+        default="valid")
+    account_payment_id = fields.Many2one(string="Related Account Payment",
         comodel_name="account.payment")
     partner_id = fields.Many2one(string="Customer",
         comodel_name="res.partner")
     currency_id = fields.Many2one(string="Currency",
         comodel_name="res.currency")
     journal_id = fields.Many2one(string="Journal",
-        comodel_name="account.journal")
+        comodel_name="account.journal",
+        domain="[('type','in',['bank','cash'])]")
     reconciled_payment_ids = fields.One2many(string="Reconciliations",
         inverse_name="payment_id",
         comodel_name="sale.order.payment.reconcile")
@@ -69,6 +74,7 @@ class SaleOrderPayment(models.Model):
             "payment_id": self.id,
             "amount_to_reconcile": self.reconcilable_amount
         })
+
         return {
             "name": "Sale Order Reconcile Payment Wizard",
             "view_mode": "form",
@@ -82,12 +88,20 @@ class SaleOrderPayment(models.Model):
 
     def action_cancel(self):
         self.ensure_one()
-        self.unlink()
 
-        return {
-            "type": "ir.actions.client",
-            "tag": "reload"
-        }
+        if self.state == "paid":
+            raise ValidationError("You can't cancel a journaled payment.")
+
+        self.state = "cancelled"
+        self.reconciled_payment_ids.unlink()
+
+    def action_reset_to_valid(self):
+        self.ensure_one()
+        
+        if self.state == "paid":
+            raise ValidationError("You can't revert a payment back to Valid if it is already journaled.")
+
+        self.state = "valid"
 
     ####################
     # Business methods #

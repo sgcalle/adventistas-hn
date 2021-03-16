@@ -7,10 +7,12 @@
             <tree>
                 <field name="partner_id" string="Customer" />
                 <field name="journal_id"/>
+                <field name="account_payment_id" string="Account Payment" />
                 <field name="payment_date"/>
                 <field name="memo"/>
                 <field name="amount_paid"/>
                 <field name="reconcilable_amount"/>
+                <field name="state" />
             </tree>
         </field>
     </record>
@@ -23,19 +25,30 @@
                 <header name="header">
                     <button name="action_cancel" type="object" class="oe_highlight" 
                         string="Cancel Payment" 
+                        attrs="{'invisible': [('state', 'in', ['cancelled', 'paid'])]}"
                         options="{}" />
+
+                    <button name="action_reset_to_valid" type="object" class="oe_highlight" 
+                        string="Reset to Valid" 
+                        attrs="{'invisible': [('state', 'in', ['valid', 'paid'])]}"
+                        options="{}" />
+                    
+                    <field name="state" widget="statusbar" 
+                        statusbar_visible="valid,paid,cancelled" 
+                        modifiers="{'readonly':true}"/>
                 </header>
 
                 <sheet>
                     <group>
                         <group>
-                            <field name="journal_id" />
-                            <field name="partner_id" string="Customer" />
+                            <field name="journal_id" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}"/>
+                            <field name="partner_id" string="Customer" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
                         </group>
                         <group>
-                            <field name="amount_paid" string="Amount" />
-                            <field name="payment_date" />
-                            <field name="memo" />
+                            <field name="account_payment_id" readonly="1" />
+                            <field name="amount_paid" string="Amount" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
+                            <field name="payment_date" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
+                            <field name="memo" attrs="{'readonly': [('state', 'in', ['cancelled', 'paid'])]}" />
                         </group>
                     </group>
                     <group>
@@ -50,6 +63,30 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="sale_order_payment_view_search" model="ir.ui.view">
+        <field name="name">sale.order.payment.view.search</field>
+        <field name="model">sale.order.payment</field>
+        <field name="arch" type="xml">
+            <search string="Sale Order Payment">
+                <field name="partner_id"/>
+                <field name="memo"/>
+
+                <filter string="Valid" name="valid" domain="[('state', '=', 'valid')]"/>
+                <filter string="Paid" name="paid" domain="[('state', '=', 'paid')]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="Is Journaled" name="is_journaled" domain="[('account_payment_id','!=', False)]"/>
+                <filter string="Is Not Journaled" name="is_not_journaled" domain="[('account_payment_id','=', False)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="State" name="group_by_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Customer" name="group_by_partner_id" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Payment Date" name="group_by_payment_date" domain="[]" context="{'group_by': 'payment_date'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
