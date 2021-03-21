@@ -28,17 +28,20 @@ class SaleOrder(models.Model):
             ("paid", "Paid Invoice")],
         compute="_compute_invoice_payment_state",
         store=True)
+    remaining_amount = fields.Monetary(string="Remaining Amount",
+        compute="_compute_remaining_amount",
+        store=True)
 
-    @api.depends("invoice_ids", "invoice_ids.state", "invoice_ids.invoice_payment_state")
+    @api.depends("invoice_ids", "invoice_ids.state", "invoice_ids.amount_residual", "invoice_ids.invoice_payment_state")
     def _compute_invoice_payment_state(self):
         for order in self:
             invoices = order.invoice_ids.filtered(lambda x: x.type in ["out_invoice", "out_receipt"] and x.state != "cancel")
             result = "no"
             if invoices.filtered(lambda x: x.state == "draft"):
                 result = "draft"
-            elif invoices.filtered(lambda x: x.invoice_payment_state not in ["paid"]):
+            elif invoices.filtered(lambda x: x.invoice_payment_state not in ["paid"] or x.amount_residual > 0):
                 result = "unpaid"
-            elif invoices.filtered(lambda x: x.invoice_payment_state in ["paid"]):
+            elif invoices.filtered(lambda x: x.invoice_payment_state in ["paid"] or x.amount_residual <= 0):
                 result = "paid"
             order.invoice_payment_state = result
 
@@ -56,6 +59,19 @@ class SaleOrder(models.Model):
                 date_due = order.date_order + relativedelta(days=diff)
             order.computed_invoice_date_due = date_due
     
+    @api.depends("invoice_ids", "invoice_ids.state", "invoice_ids.amount_residual", "invoice_ids.invoice_payment_state")
+    def _compute_remaining_amount(self):
+        for so in self:
+            invoices = so.invoice_ids.filtered(lambda x: x.type in ["out_invoice", "out_receipt"] and x.state != "cancel")
+            invoice_total = 0
+
+            amount_total = so.amount_total
+
+            for invoice in invoices:
+                invoice_total += amount_total - invoice.amount_residual
+
+            so.remaining_amount = abs(invoice_total - amount_total)
+
     def _compute_days_amount(self):
         for order in self:
             result_30_days = 0.0
