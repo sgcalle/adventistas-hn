@@ -26,7 +26,7 @@
         <field name="res_model">sale.order</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="sale_order_view_tree"/>
-        <field name="domain">[('invoice_payment_state','!=','paid'),('state','in',['sale','done']),('remaining_amount', '>', 0)]</field>
+        <field name="domain">[('state','in',['sale','done']),('remaining_amount','>',0)]</field>
         <field name="context">{}</field>
     </record>
 
