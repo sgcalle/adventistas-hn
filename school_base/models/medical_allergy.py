@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 18, 2020
 
 @author: LuisMora
-'''
+"""
 from odoo import models, fields
 
 

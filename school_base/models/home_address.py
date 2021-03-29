@@ -19,7 +19,8 @@ class SchoolBaseHomeAddress(models.Model):
     phone = fields.Char("Homephone")
     facts_id = fields.Integer("Facts ID")
 
-    family_id = fields.Many2one("res.partner", string="Family", domain="[('is_company', '=', True, ('is_family', '=', True))]")
+    family_id = fields.Many2one("res.partner", string="Family",
+                                domain="[('is_company', '=', True, ('is_family', '=', True))]")
 
     @api.constrains("facts_id")
     def _check_facts_id(self):

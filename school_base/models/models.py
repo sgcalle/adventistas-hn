@@ -135,6 +135,14 @@ class EnrollmentStatus(models.Model):
     name = fields.Char(string="Name", required=True, translate=True)
     key = fields.Char(string="Key")
     note = fields.Char(string="Description")
+    type = fields.Selection([
+        ('admission', 'Admission'),
+        ('enrolled', 'Enrolled'),
+        ('graduate', 'Graduate'),
+        ('inactive', 'Inactive'),
+        ('pre_enrolled', 'Pre-Enrolled'),
+        ('withdrawn', 'Withdrawn'),
+        ])
 
 
 class EnrollmentSubStatus(models.Model):
