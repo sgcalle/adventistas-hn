@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <record id="res_users_view_inherit_school" model="ir.ui.view">
+        <field name="name">res.users.view.inherit.school</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form" />
+        <field name="arch" type="xml">
+            <page name="access_rights" position="inside">
+                <group string="Multi School" name="multi_school">
+                    <field name="district_code_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    <field name="district_code_id" context="{'user_preference': 0}"/>
+
+                    <field name="school_code_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    <field name="school_code_id" context="{'user_preference': 0}"/>
+                </group>
+            </page>
+        </field>
+    </record>
+
     <record model="ir.ui.view" id="view_res_partner_school_fields_form_view">
         <field name="name">view.res.partner.school.fields.form.view</field>
         <field name="model">res.partner</field>
