@@ -274,9 +274,9 @@ odoo.define('districtCode_base.SwitchSchoolMenu', function (require) {
 
     });
 
-// if (session.display_switch_districtCode_menu) {
-    SystrayMenu.Items.push(SwitchSchoolMenu);
-// }
+    if (session.display_switch_school_menu) {
+        SystrayMenu.Items.push(SwitchSchoolMenu);
+    }
 
     return SwitchSchoolMenu;
 
