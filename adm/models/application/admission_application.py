@@ -204,7 +204,7 @@ class Application(models.Model):
 
     # Relationships
     relationship_ids = fields.One2many(string="Relationship",
-                                       related="partner_id.relationship_ids",
+                                       related="partner_id.self_relationship_ids",
                                        readonly=False)
     custodial_relationship_ids = fields.Many2many('school_base.relationship',
                                                   string="Custodials",
