@@ -27,6 +27,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/relationships_rules.xml',
+        'security/res_partner_rules.xml',
 
         'data/menudata.xml',
         'data/name_sorting.xml',
