@@ -12,7 +12,7 @@ def post_parameters():
     return http.request.httprequest.form
 
 
-class InquiryController(http.Controller):
+class Admission(http.Controller):
 
     #===================================================================================================================
     # @http.route("/")
@@ -23,17 +23,11 @@ class InquiryController(http.Controller):
     def admission_web(self, **params):
         countries = http.request.env['res.country'].sudo()
         states = http.request.env['res.country.state'].sudo()
-        sources = http.request.env['adm.inquiry.source'].sudo()
         contact_times = http.request.env['adm.contact_time']
         degree_programs = http.request.env['adm.degree_program']
 
         grade_level = http.request.env['school_base.grade_level']
         school_year = http.request.env['school_base.school_year']
-        service = http.request.env['school_base.service'].sudo()
-        gender_env = http.request.env['school_base.gender'].sudo()
-
-        LanguageEnv = http.request.env["adm.language"]
-        languages = LanguageEnv.browse(LanguageEnv.search([])).ids
 
         family_id = -1
 
@@ -43,16 +37,10 @@ class InquiryController(http.Controller):
         companies = http.request.env['res.company'].sudo().search([('country_id','!=',False)])
         response = http.request.render('adm.template_admission_inquiry', {
             'grade_levels': grade_level.search([('active_admissions', '=', True)]),
-            'school_years': school_year.search([('active_admissions', '=', True)]),
-            'services': service.search([]),
-            'sources': sources.search([]),
             'countries': countries.search([]),
-            'states': states.search([]),
-            'gender': gender_env.search([]),
             'check_family_id': True,
             'family_name': '',
             'family_id': family_id,
-            "adm_languages": languages,
             'company': companies and companies[0],
         })
         return response
@@ -62,24 +50,10 @@ class InquiryController(http.Controller):
 
     @http.route("/admission/inquiry", auth="public", methods=["POST"], website=True, csrf=False)
     def add_inquiry(self, **params):
-
         PartnerEnv = http.request.env['res.partner']
 
         if "txtMiddleName_1" not in params:
             params["txtMiddleName_1"] = ""
-
-        if "txtRelatedNames" not in params:
-            params["txtRelatedNames"] = ""
-
-        source_id = False
-        if "selSource" in params:
-            source_id = int(params["selSource"])
-
-        other_source = False
-        if "txtOtherSource" in params:
-            other_source = params["txtOtherSource"]
-
-        known_people_in_school = params["txtRelatedNames"]
 
         if 'checkbox_family_id' in params and params["checkbox_family_id"] == 'on':
             family_id_fact = params["input_family_id"]
@@ -93,11 +67,7 @@ class InquiryController(http.Controller):
 
                 response = http.request.render('adm.template_admission_inquiry', {
                     'grade_levels': grade_level.search([('active_admissions', '=', True)]),
-                    'school_years': school_year.search([]),
-                    'services': service.search([]),
                     'countries': countries.search([]),
-                    'states': states.search([]),
-                    'sources_id': source_id,
                     'check_family_id': False,
                     'family_name': '',
                     'parent': False,
@@ -123,24 +93,10 @@ class InquiryController(http.Controller):
             first_name = params["txtFirstName_1"]
             middle_name = params["txtMiddleName_1"]
             last_name = params["txtLastName_1"]
-            citizenship_1 = int(params["selCountry_1"])
-
-            # Family address
-            country_id = int(params["selCountry"])
-            state_id = int(params.get("selState", False)) or False
-            city = params["txtCity"]
-            zip = params.get("txtZip", False)
+            country_id = int(params["selCountry_1"])
 
             mobile_1 = params["txtCellPhone_1"]
             email_1 = params["txtEmail_1"]
-
-            financial_responsability_1 = params.get("txtFinancialResponsability_1", False)
-            financial_responsability_2 = params.get("txtFinancialResponsability_2", False)
-
-            invoice_address_1 = params.get("txtInvoiceAddress_1", False)
-            invoice_address_2 = params.get("txtInvoiceAddress_2", False)
-            street_address_1 = params.get("txtStreetAddress", False)
-            street_address_2 = params.get("txtStreetAddress2", False)
 
             family_1 = ''
             if 'selFamily_1' in params:
@@ -152,157 +108,99 @@ class InquiryController(http.Controller):
                     "is_family": True,
                     'mobile': mobile_1,
                     'email': email_1,
-                    'home_address_ids': [(0, 0,
-                                      {
-                                          'street': street_address_1,
-                                          'street2': street_address_2,
-                                          'city': city,
-                                          'zip': zip,
-                                          'country_id': country_id,
-                                          'state_id': state_id
-                                      })]
                 }
 
             if family_1 is '':
                 family_id = PartnerEnv.sudo().create(partner_body)
-                home_address_id = family_id.home_address_ids[0]
                 parent_id_1 = PartnerEnv.sudo().create({
-                    "name": full_name,
+                    # "name": full_name,
                     "first_name": first_name,
                     "middle_name": middle_name,
                     "last_name": last_name,
                     "parent_id": family_id.id,
                     "function": "parent",
                     "family_ids": [(6,0,[family_id.id])],
-                    "citizenship": citizenship_1,
+                    "country_id":country_id,
                     'mobile': mobile_1,
                     'email': email_1,
-                    'street': street_address_1,
-                    'street2': street_address_2,
-                    'home_address_id': home_address_id.id
-                })
+                    })
+                parent_id_1.auto_format_name()
             else:
                 family_id = PartnerEnv.sudo().search([('id', '=', family_1)])
                 parent_id_1 = PartnerEnv.sudo().search([('email','=',email_1),('function', '=', 'parent')])[0]
 
             parents_ids_created = []
-            family_write_data = {
-                "member_ids": [],
-                "financial_res_ids": [],
-                "invoice_address_id": False
-            }
-            family_write_data["member_ids"].append((4, parent_id_1.id))
-            # family_id.write({'member_ids': [(4,parent_id_1.id)]})
-            if financial_responsability_1:
-                family_write_data["financial_res_ids"].append((4, parent_id_1.id))
-            if invoice_address_1:
-                family_write_data["invoice_address_id"] = parent_id_1.id
-
+            family_id.write({'member_ids': [(4,parent_id_1.id)]})
             parents_ids_created.append(parent_id_1.id)
 
             if "txtMiddleName_2" not in params:
                 params["txtMiddleName_2"] = ""
-            
-            if all (k in params for k in ("txtFirstName_2", "txtLastName_2", "selCountry_2", "txtCellPhone_2","txtEmail_2")):
+
+            if all(k in params for k in ("txtFirstName_2", "txtLastName_2", "selCountry_2", "txtCellPhone_2","txtEmail_2")):
                 first_name = params["txtFirstName_2"]
                 middle_name = params["txtMiddleName_2"]
                 last_name = params["txtLastName_2"]
-                citizenship_2 = int(params["selCountry_2"])
-                full_name = "{}, {}{}".format(params["txtLastName_2"], params["txtFirstName_2"],
-                                              "" if not params["txtMiddleName_2"] else " {}".format(
-                                                  params["txtMiddleName_2"]))
+                country_id = int(params["selCountry_2"])
+                # full_name = "{}, {}{}".format(params["txtLastName_2"], params["txtFirstName_2"],
+                #                               "" if not params["txtMiddleName_2"] else " {}".format(
+                #                                   params["txtMiddleName_2"]))
                 mobile_2 = params["txtCellPhone_2"]
                 email_2 = params["txtEmail_2"]
-
 
                 if len(PartnerEnv.sudo().search([('email', '=', email_2), ('function', '=', 'parent')])) > 0:
                     parent_id_2 = PartnerEnv.sudo().search([('email', '=', email_2), ('function', '=', 'parent')])[0]
                     parent_id_2.write({'family_ids': [(4,family_id.id)]})
                 else:
                     parent_id_2 = PartnerEnv.sudo().create({
-                        "name": full_name,
+                        # "name": full_name,
                         "first_name": first_name,
                         "middle_name": middle_name,
                         "last_name": last_name,
                         "parent_id": family_id.id,
                         "function": "parent",
                         "family_ids": [(6, 0, [family_id.id])],
-                        "citizenship": citizenship_2,
+                        "country_id": country_id,
                         'mobile': mobile_2,
                         'email': email_2,
-                        'home_address_id': home_address_id.id
-                    })
+                        })
+                    parent_id_2.auto_format_name()
 
                 parents_ids_created.append(parent_id_2.id)
-                # family_id.write({'member_ids': [(4, parent_id_2.id)]})
-                family_write_data["member_ids"].append((4, parent_id_2.id))
-                if financial_responsability_2:
-                    family_write_data["financial_res_ids"].append((4, parent_id_2.id))
-                if invoice_address_2:
-                    family_write_data["invoice_address_id"] = parent_id_2.id
-
-            family_id.write(family_write_data)
-
-
-
+                family_id.write({'member_ids': [(4, parent_id_2.id)]})
         # Create students
         id_students = list()
         students_total = int(params["studentsCount"])
-        if 'service_count' in params:
-            service_count = 1  # int(params["service_count"])
 
         first_name_list = post_parameters().getlist("txtStudentFirstName")
         last_name_list = post_parameters().getlist("txtStudentLastName")
         middle_name_list = post_parameters().getlist("txtStudentMiddleName")
         birthday_list = post_parameters().getlist("txtStudentBirthday")
-        gender_list = post_parameters().getlist("selStudentGender")
-
-        interest_grade_level_list = post_parameters().getlist("selStudentInterestGradeLevel")
-        current_school_code_list = post_parameters().getlist("selStudentSchoolCode")
-        current_school_year_list = post_parameters().getlist("selStudentSchoolYear")
+        current_grade_level_list = post_parameters().getlist("selStudentCurrentGradeLevel")
  
         InquiryEnv = http.request.env["adm.inquiry"]
-
 
         for index_student in range(students_total):
             first_name = first_name_list[index_student]
             middle_name = middle_name_list[index_student]
             last_name = last_name_list[index_student]
             birthday = birthday_list[index_student]
-            gender = gender_list[index_student]
-            interest_grade_level = interest_grade_level_list[index_student]
-            current_school_code = current_school_code_list[index_student]
-            current_school_year = current_school_year_list[index_student]
+            current_grade_level = current_grade_level_list[index_student]
             full_name_student = "{}, {}{}".format(last_name, first_name, "" if not middle_name else " {}".format(middle_name))
-            service_ids = []
-            for service in post_parameters().getlist("txtStudent%sExtraServices" % index_student):
-                if service:
-                    service_ids.append(int(service))
-            family_res_finance = []
-            for category_id in http.request.env['product.category'].sudo().search([('parent_id', '=', False)]):
-                family_res_finance.append((0,0,
-                                           {
-                                               'family_id': family_id.id,
-                                               'category_id': category_id.id,
-                                               'percent': 100
-                                            }))
+ 
             id_student = PartnerEnv.sudo().create({
-                "name": full_name_student,
+                # "name": full_name_student,
                 "first_name": first_name,
                 "middle_name": middle_name,
                 "last_name": last_name,
+                "parent_id": family_id.id,
                 "function": "student",
                 "person_type": "student",
-                'school_code_id': current_school_code and int(current_school_code) or False,
-                'school_year_id': current_school_year and int(current_school_year) or False,
                 "family_ids": [(6, 0, [family_id.id])],
                 'date_of_birth': birthday,
-                'gender': gender and int(gender) or False,
                 'mobile': mobile_1,
                 'email': email_1,
-                'family_res_finance_ids': family_res_finance,
-                'home_address_id': home_address_id.id
-            })
+                })
+            id_student.auto_format_name()
             family_id.write({'member_ids': [(4, id_student.id)]})
 
             # Create an inquiry for each new student
@@ -311,15 +209,9 @@ class InquiryController(http.Controller):
                 'first_name': first_name,
                 'middle_name': middle_name,
                 'last_name': last_name,
-#                 'current_grade_level_id': current_grade_level and int(current_grade_level) or False,
-                'grade_level_id': interest_grade_level and int(interest_grade_level) or False,
-                'school_year_id': current_school_code and int(current_school_code) or False,
+                'current_grade_level_id': current_grade_level and int(current_grade_level) or False,
                 'responsible_id': [(6,0,parents_ids_created)],
-                'extra_service_ids': service_ids,
-                'sources_id': source_id,
-                'source_other': other_source,
-                'known_people_in_school': known_people_in_school
-            })
+                })
             
             id_student.inquiry_id = new_inquiry.id
             id_students.append(id_student)
