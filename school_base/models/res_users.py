@@ -10,4 +10,8 @@ class ResUsers(models.Model):
     school_code_id = fields.Many2one('school_base.school_code', string="School code")
 
     district_code_ids = fields.Many2many('school_base.district_code', string="District codes")
+    company_district_code_ids = fields.Many2many('school_base.district_code',
+        related='company_ids.district_code_ids')
     school_code_ids = fields.Many2many('school_base.school_code', string="School codes")
+    company_school_code_ids = fields.Many2many('school_base.school_code',
+        related='company_ids.school_code_ids')

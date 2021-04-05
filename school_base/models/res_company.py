@@ -11,10 +11,14 @@ class Company(models.Model):
 
     district_code_id = fields.Many2one("school_base.district_code", "District code")
     district_code_ids = fields.Many2many("school_base.district_code", string="District codes")
+    district_school_code_ids = fields.One2many(
+        "school_base.district_code",
+        related="district_code_ids.school_code_ids")
 
     school_code_id = fields.Many2one('school_base.school_code', string="School code")
-    school_code_ids = fields.Many2many('school_base.school_code', string="School codes",
-                                       store=True, compute='_compute_school_code_ids')
+    school_code_ids = fields.Many2many(
+        'school_base.school_code', string="School codes",
+        store=True, compute='_compute_school_code_ids')
     district_code_name = fields.Char(related="district_code_id.name")
     date_sincro_contacts = fields.Datetime(help="Used to know the last time that was synchronized")
 
