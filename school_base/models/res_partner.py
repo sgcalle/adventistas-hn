@@ -148,6 +148,13 @@ class ResPartner(models.Model):
 
     # - Academic
     # Fields for current student status, grade leve, status, etc...
+    school_code_ids = fields.Many2many('school_base.school_code')
+    school_grade_ids = fields.One2many(
+        'school_base.partner_school_grade', 'partner_id')
+    grade_level_ids = fields.Many2many(
+        'school_base.grade_level', compute='compute_grade_levels',
+        store=True)
+
     school_code_id = fields.Many2one(
         'school_base.school_code', string='Current school code')
     grade_level_id = fields.Many2one(
@@ -246,7 +253,7 @@ class ResPartner(models.Model):
         'school_base.school_year', string="Reenollment school year", store=True,
         compute='_compute_reenrollment_status')
 
-    school_placement_id = fields.Many2one(
+    placement_id = fields.Many2one(
         'school_base.placement', string="Placement")
     # - Finance
     financial_res_ids = fields.Many2many(
@@ -278,10 +285,43 @@ class ResPartner(models.Model):
     ##############################
     # Compute and search methods #
     ##############################
+    @api.depends('school_grade_ids')
+    def compute_grade_levels(self):
+        for partner_id in self:
+            partner_id.grade_level_ids =\
+                partner_id.mapped('school_grade_ids.grade_level_id')
 
     ############################
     # Constrains and onchanges #
     ############################
+    @api.onchange('school_code_ids')
+    def onchange_school_code_ids(self):
+        for partner_id in self:
+            # We remove all
+            school_code_ids = partner_id.school_code_ids._origin
+
+            # Add those which aren't in the list
+            school_codes_to_add = (
+                    school_code_ids
+                    - partner_id.school_grade_ids.mapped('school_code_id'))
+
+            # Remove those that aren't in the school codes list
+            school_codes_to_remove = (
+                    partner_id.school_grade_ids.mapped('school_code_id')
+                    - school_code_ids)
+
+            records_to_remove = partner_id.school_grade_ids.filtered(
+                lambda school_grade:
+                    school_grade.school_code_id in school_codes_to_remove)
+
+            # We add news
+            self.env['school_base.partner_school_grade'].create([{
+                'school_code_id': school_code.id,
+                'partner_id': partner_id.id,
+                'grade_level_id': False
+                } for school_code in school_codes_to_add])
+
+            partner_id.school_grade_ids -= records_to_remove
 
     #########################
     # CRUD method overrides #

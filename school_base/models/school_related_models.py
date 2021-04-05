@@ -1,9 +1,28 @@
 # -*- coding: utf-8 -*-
 
+"""
+Author: Luis Malavé
+Date: 2021-04-05
+Yes, I know that Odoo tips say dont do this...
+But... I am just grouping things together to get some kind of order without
+modifying the __init__ over and over again...
+"""
+
 from odoo import models, fields, api, _
 import datetime
 
 from odoo.exceptions import UserError
+
+
+class DistrictCode(models.Model):
+    """ District code """
+    _name = "school_base.district_code"
+    _description = "District code"
+    _order = "sequence"
+
+    name = fields.Char(string="Name", required=True)
+    sequence = fields.Integer(default=1)
+    school_code_ids = fields.One2many("school_base.school_code", "district_code_id", string="School code")
 
 
 class SchoolCode(models.Model):
@@ -18,6 +37,7 @@ class SchoolCode(models.Model):
     school_name = fields.Char(string="School name")
     sequence = fields.Integer(default=1)
     district_code_id = fields.Many2one("school_base.district_code", "District Code")
+    grade_level_ids = fields.One2many("school_base.grade_level", 'school_code_id')
 
     @api.depends('name', 'description')
     def _compute_display_name(self):
@@ -85,6 +105,50 @@ class GradeLevel(models.Model):
         return {'domain': {'school_code_id': [('id', 'in', school_code_ids)]}}
 
 
+class SchoolBasePartnerSchoolGrade(models.Model):
+    """ It is used as M:N table """
+
+    ######################
+    # Private Attributes #
+    ######################
+    _name = 'school_base.partner_school_grade'
+    _description = "Partner school grade"
+
+    ###################
+    # Default methods #
+    ###################
+
+    ######################
+    # Fields declaration #
+    ######################
+
+    partner_id = fields.Many2one('res.partner')
+    school_code_id = fields.Many2one('school_base.school_code')
+    school_code_grade_level_ids = fields.One2many(
+        'school_base.grade_level', related='school_code_id.grade_level_ids')
+    grade_level_id = fields.Many2one('school_base.grade_level')
+
+    ##############################
+    # Compute and search methods #
+    ##############################
+
+    ############################
+    # Constrains and onchanges #
+    ############################
+
+    #########################
+    # CRUD method overrides #
+    #########################
+
+    ##################
+    # Action methods #
+    ##################
+
+    ####################
+    # Business methods #
+    ####################
+
+
 class SchoolBaseGradeLevelType(models.Model):
     _name = 'school_base.grade_level.type'
     _description = "Grade level type"
@@ -98,17 +162,6 @@ class SchoolBaseGradeLevelType(models.Model):
         required=True
     )
     name = fields.Char(required=True)
-
-
-class DistrictCode(models.Model):
-    """ District code """
-    _name = "school_base.district_code"
-    _description = "District code"
-    _order = "sequence"
-
-    name = fields.Char(string="Name", required=True)
-    sequence = fields.Integer(default=1)
-    school_code_ids = fields.One2many("school_base.school_code", "district_code_id", string="School code")
 
 
 class Placement(models.Model):

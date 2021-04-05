@@ -12,11 +12,14 @@ from . import ir_rule
 from . import medical_allergy
 from . import medical_condition
 from . import medication
-from . import models
+
 from . import relationship
 from . import reenrollment_record
 from . import res_company
 from . import res_partner
 from . import res_users
+
+from . import school_related_models
+
 from . import service
 from . import setting
