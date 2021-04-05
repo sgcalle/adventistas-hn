@@ -1,6 +1,8 @@
 import json
-
+import logging
 from odoo import http
+
+_logger = logging.getLogger(__name__)
 
 # Updated 2020/12/14
 # By Luis
@@ -68,7 +70,7 @@ class AdmisionController(http.Controller):
              "doctor_address", "permission_to_treat", "blood_type",
              "medical_conditions_ids", "medical_allergies_ids",
              "medical_medications_ids",
-             "relationship_ids", "partner_id", "name", "house_address_ids",
+             # "relationship_ids", "partner_id", "name", "home_address_ids",
              "sibling_ids",
              ])
 
@@ -109,9 +111,7 @@ class AdmisionController(http.Controller):
 
             # Sacamos datos de las relationship    
             # Array para las relationships  
-            record["relationship"] = (application_id.relationship_ids
-                                      .read(["partner_2",
-                                             "relationship_type"]))
+            record["relationship"] = (application_id.self_relationship_ids.read(["partner_relation_id", "relationship_type"]))
 
             # Sacamos datos del previous school
             # if record["previous_school_ids"]:
@@ -148,13 +148,13 @@ class AdmisionController(http.Controller):
             record["previousSchool"] = datosPrev_values
 
             # Array para los datos de las direcciones    
-            record["address"] = (application_id.house_address_ids
-                                 .read(["name",
-                                        "country_id",
-                                        "state_id",
-                                        "street",
-                                        "zip",
-                                        ]))
+            # record["address"] = (application_id.home_address_ids
+            #                      .read(["name",
+            #                             "country_id",
+            #                             "state_id",
+            #                             "street",
+            #                             "zip",
+            #                             ]))
 
             # Sacamos datos de las medicals conditions
             # if record["medical_conditions_ids"]:  
@@ -253,3 +253,30 @@ class AdmisionController(http.Controller):
                 })
 
         return json.dumps(data)
+    
+    @http.route("/admission/applications/change_status", auth="public", methods=["POST"],
+                cors='*', csrf=False)
+       
+    # define una funcion principal 
+    def change_status(self, **kw):
+        data = json.loads(kw["data"])
+        application = http.request.env['adm.application'].sudo()
+        application_record = application.browse(data)
+        permitidas_url = http.request.env['ir.config_parameter'].sudo().get_param('allow_urls','')
+        origen_url = '-1'
+
+        if('HTTP_ORIGIN' in http.request.httprequest.headers.environ):
+            origen_url = http.request.httprequest.headers.environ['HTTP_ORIGIN']
+
+        if(origen_url is '-1' or origen_url not in permitidas_url):
+            return 'Denied access'
+
+        status_id = http.request.env['adm.application.status'].sudo().search([('type_id','=','import_completed')]).id
+        
+        _logger.info(str(application_record.status_type))
+        application_record.write({
+                'status_id': status_id
+                })
+        _logger.info("application moved correctly %s to state %s" % (application_record.mapped('name'), application_record.mapped('status_type')))
+#         return json.dumps(data)
+        return str(data)

@@ -1,19 +1,20 @@
-'''
+"""
 Created on Feb 14, 2020
 
 @author: LuisMora
-'''
+"""
 
 from odoo import fields, models
 
 
 class PreviousSchoolDescription(models.Model):
-    _name = 'adm.previous_school_description'
+    _name = 'adm.previous.school.description'
     _description = "Adm Previous school description"
 
     application_id = fields.Many2one("adm.application")
 
     name = fields.Char("Name")
+    phone = fields.Char("Phone")
     street = fields.Char("Street")
     city = fields.Char("City")
     zip = fields.Char("ZIP")

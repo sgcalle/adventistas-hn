@@ -11,4 +11,5 @@ class AdmissionPortal(CustomerPortal):
         values.update({
             'application_count': len(request.env.user.application_ids)
             })
+
         return values

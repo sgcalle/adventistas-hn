@@ -21,8 +21,14 @@
 }
 @media (max-height: 719px) {
   .card-sticky-save {
-    bottom: 0;
+    top: 0;
   }
 }
 
 /*# sourceMappingURL=main.css.map */
+/**
+ * FilePond Custom Styles
+ */
+.filepond--root .filepond--credits {
+  display: none !important;
+}

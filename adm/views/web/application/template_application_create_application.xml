@@ -3,6 +3,9 @@
 
     <template id="template_application_family_select_item">
         <li class="o_adm_family_select_item m-2 p-0" t-att-data-family-id="family_id.id">
+            <div class="p-2 d-flex justify-content-center">
+                <input type="radio" name="familyResponsibleCheckbox" t-att-value="family_id.id" />
+            </div>
             <img t-attf-src="data:image/*;base64,{{family_id and family_id.image_1920}}"
                  onerror="this.src = '/adm/static/img/contact_photo_placeholder.png';"
                  alt="avatar"/>
@@ -24,18 +27,71 @@
                     <form>
                         <div class="modal-body">
                             <section class="container">
-                                <div class="form-group row">
-                                    <label for="inputPassword" class="col-sm-2 col-form-label">Family Name</label>
+                                <div class="form-row form-group">
+                                    <div class="form-check">
+                                        <input autocomplete="off" class="form-check-input" type="checkbox"
+                                               id="notBelongToThisFamiliy"/>
+                                        <label class="form-check-label" for="notBelongToThisFamiliy">
+                                            I don't belong to this family
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Just create a new name -->
+                                <div class="form-row form-group js_new_family_form" >
+                                    <label for="newFamilyName" class="col-form-label col-sm-2">Family Name</label>
                                     <div class="col-sm-10">
-                                        <input type="text" name="family_name" class="form-control" id="inputPassword"
+                                        <input type="text" name="family_name" class="form-control" id="newFamilyName"
                                                placeholder="name"/>
                                     </div>
                                 </div>
+
+                                <!-- Only shown when parent doesn't belong to this family -->
+                                <div class="row js_other_family_responsible_email d-none">
+                                    <p>
+                                        A mail will be sent to the email below confirming its participation in
+                                        the application flow.
+                                    </p>
+                                </div>
+                                <div class="d-none form-row form-group js_other_family_responsible_email">
+                                    <label for="inputPassword" class="col-form-label col-sm-2">Email</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" disabled="disabled"
+                                               name="email" class="form-control" id="otherResponsibleEmail"
+                                               placeholder="email@example.com"/>
+                                    </div>
+                                </div>
+                                <div class="row js_other_family_responsible_email d-none">
+                                    <p>
+                                        Which access has this family in?
+                                    </p>
+                                </div>
+                                <div class="row js_other_family_responsible_email d-none">
+                                    <table class="table w-100">
+                                        <thead>
+                                            <tr>
+                                                <th>Check if it has access</th>
+                                                <th>Access name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><input type="checkbox" id="access_student_info"/></td>
+                                                <td><label for="access_student_info">Student Info</label></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" id="access_student_financial"/></td>
+                                                <td><label for="access_student_financial">Financial</label></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Table choosing access for the family -->
                             </section>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Save changes</button>
+                            <button type="button" class="btn btn-primary js_save_new_family">Save changes</button>
                         </div>
                     </form>
                 </div>
@@ -49,15 +105,16 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Application Family</h5>
-                        <!--                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-                        <!--                            <span aria-hidden="true">&amp;times;</span>-->
-                        <!--                        </button>-->
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&amp;times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <p>Please, select the family that belongs to the applicant:</p>
                         <div class="o_adm_family_selection d-flex flex-wrap">
                             <ul class="d-flex flex-wrap m-0 p-0">
-                                <t t-foreach="user_id.partner_id.family_ids" t-as="family_id">
+                                <t t-foreach="user_id.partner_id.family_ids"
+                                   t-as="family_id">
                                     <t t-call="adm.template_application_family_select_item"/>
                                 </t>
                                 <li class="o_adm_family_select_item_add m-1 p-0">
@@ -67,6 +124,9 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary js_accept_family_modal" type="button">Accept</button>
                     </div>
                 </div>
             </div>
@@ -80,6 +140,7 @@
             <t t-set="title">Application</t>
             <t t-set="head">
                 <t t-call-assets="adm.assets_application_create" defer_load="True"/>
+                <meta name="_user_partner_id" t-att-value="application_id.env.user.partner_id.id" />
             </t>
             <div class="oe_struture"/>
             <div class="oe_struture">
@@ -95,17 +156,12 @@
                             <section class="card-body">
 
                                 <div class="container">
-
-                                    <t t-if="not create_mode and application_id.status_id.type_id !='return' and application_id.status_id.type_id != 'started'">
-                                        <div class="alert alert-warning mt-3" role="alert">
-                                            The request has already been sent.
-                                        </div>
-                                    </t>
-                                    <t t-else="">
-                                        <form t-attf-action="/admission/applications/create" method="post"
+                                    <form id="form_create_application"
+                                              t-attf-action="/admission/applications/create" method="post"
                                               enctype="multipart/form-data">
                                             <div class="container">
-                                                <input type="hidden" name="family_id" t-att-value="user_id.partner_id.family_ids and user_id.partner_id.family_ids[0].id"/>
+                                                <input type="hidden" name="family_id" autocomplete="off"/>
+                                                <input type="hidden" name="invite_mail_json_list" value="[]" autocomplete="off"/>
                                                 <section class="container align-items-center mt-3">
                                                     <div class="row">
                                                         <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
@@ -189,14 +245,14 @@
                                                             Grade Level:
                                                         </label>
                                                         <input disabled="disabled" type="text" class="form-control"
-                                                               t-att-value="application_id.grade_level.name"/>
+                                                               t-att-value="application_id.grade_level_id.name"/>
                                                     </div>
                                                     <div class="col-12 col-md-6 form-group">
                                                         <label>
                                                             School Year:
                                                         </label>
                                                         <input disabled="disabled" type="text" class="form-control"
-                                                               t-att-value="application_id.school_year.name"/>
+                                                               t-att-value="application_id.school_year_id.name"/>
                                                     </div>
                                                 </section>
                                                 <section t-else="" class="row">
@@ -206,9 +262,9 @@
                                                             <span class="text-danger"> *</span>
                                                         </label>
                                                         <select required="required" class="form-control"
-                                                                name="grade_level">
+                                                                name="grade_level_id">
                                                             <t t-foreach="grade_levels" t-as="grade_level">
-                                                                <option t-att-selected="application_id.grade_level.id == grade_level.id"
+                                                                <option t-att-selected="application_id.grade_level_id.id == grade_level.id"
                                                                         t-att-value="grade_level.id">
                                                                     <t t-esc="grade_level.name"/>
                                                                 </option>
@@ -221,9 +277,9 @@
                                                             <span class="text-danger"> *</span>
                                                         </label>
                                                         <select required="required" class="form-control"
-                                                                name="school_year">
+                                                                name="school_year_id">
                                                             <t t-foreach="school_years" t-as="school_year">
-                                                                <option t-att-selected="application_id.school_year.id == school_year.id"
+                                                                <option t-att-selected="application_id.school_year_id.id == school_year.id"
                                                                         t-att-value="school_year.id">
                                                                     <t t-esc="school_year.name"/>
                                                                 </option>
@@ -374,66 +430,11 @@
                                                                t-att-value="application_id.email"/>
                                                     </div>
                                                 </section>
-                                                <!--
-                                                <section class="row">
-                                                    <div class="col-12 bg-ia-pan mt-3 mb-2 h4">
-                                                        Otros Hermanos
-                                                    </div>
-                                                </section>
-                                                <section class="row" >
-                                                    <div class="col-12 d-none" id="brother_base_div">
-                                                         <div class="col-12 col-md-4 form-group">
-                                                            <label>
-                                                                Nombre:
-                                                            </label>
-                                                            <input  type="text" name="brother_name" class="form-control"/>
-                                                         </div>
-                                                         <div class="col-12 col-md-4 form-group">
-                                                             <label>
-                                                                Edad:
-                                                             </label>
-                                                            <input  type="text" name="brother_age" class="form-control"/>
-                                                         </div>
-                                                          <div class="col-12 col-md-4 form-group">
-                                                             <label>
-                                                                Colegio en que estudia:
-                                                             </label>
-                                                            <input  type="text" name="brother_school" class="form-control"/>
-                                                         </div>
-                                                         <hr class="col-12 "></hr>
-                                                    </div>
-                                                    <div class="col-12 d-flex flex-wrap p-0" id="brother_new_div">
-                                                         <t t-foreach="application_id.brothers" t-as="brother">
-                                                            <div class="col-12 col-md-4 form-group">
-                                                                 <label>
-                                                                    Nombre:
-                                                                 </label>
-                                                                 <input  type="text" name="brother_name" class="form-control" t-att-value="brother.name"/>
-                                                            </div>
-                                                            <div class="col-12 col-md-4 form-group">
-                                                                 <label>
-                                                                    Edad:
-                                                                 </label>
-                                                                <input  type="number" name="brother_age" class="form-control" t-att-value="brother.age"/>
-                                                            </div>
-                                                            <div class="col-12 col-md-4 form-group">
-                                                                 <label>
-                                                                    Colegio en que estudia:
-                                                                 </label>
-                                                                <input  type="text" name="brother_school" class="form-control" t-att-value="brother.school"/>
-                                                            </div>
-                                                            <hr class="col-12 "></hr>
-                                                         </t>
-                                                    </div>
-                                                    <button type="button" class="ml-auto btn btn-secondary" id="add_brother_button" onclick="addBrother()">Add Brother</button>
-                                                </section>
-                                                -->
                                                 <button class="btn btn-warning btn-lg d-block ml-auto mr-auto mt-3 mb-3">
                                                     Submit changes</button>
 
                                             </div>
                                         </form>
-                                    </t>
                                 </div>
                             </section>
                         </section>

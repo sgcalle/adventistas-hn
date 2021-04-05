@@ -7,5 +7,3 @@ from . import inquiry
 from . import admission_controller
 
 from . import web_service_admission
-from . import geolocation_controller
-

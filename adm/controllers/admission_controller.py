@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import http, SUPERUSER_ID, api
+from odoo import http, api, SUPERUSER_ID
 from odoo.http import request
 from odoo.addons.adm.models.application.admission_application \
     import Application
@@ -17,24 +17,16 @@ class AdmissionController(http.Controller):
             'value': value
             } for value, name in field_selection_type.selection]
 
-    def compute_view_render_params(self, application_id: Application):
+    @staticmethod
+    def compute_view_render_params(application_id: Application):
         application_id = application_id.sudo()
-        sudo_env = api.Environment(request.env.cr, SUPERUSER_ID, request.env.context)
-
-        # relationship_types = (AdmissionController
-        #                       ._get_values_for_selection_fields(
-        #                             'adm.relationship', 'relationship_type'))
+        SUPER_ENV = api.Environment(request.env.cr, SUPERUSER_ID, {})
 
         relationship_types = request.env['school_base.relationship_type'].sudo().search([])
 
         marital_status_types = (AdmissionController
                                 ._get_values_for_selection_fields(
                                         'res.partner', 'marital_status'))
-
-        # custody_types = (AdmissionController
-        #                           ._get_values_for_selection_fields(
-        #                             'adm.relationship', 'custody'))
-
         applying_semester_values = (AdmissionController
                                     ._get_values_for_selection_fields(
                                             'adm.application', 'applying_semester'))
@@ -58,14 +50,21 @@ class AdmissionController(http.Controller):
         country_ids = request.env['res.country'].search([])
         state_ids = request.env['res.country.state'].search([])
 
+        def is_required(fieldname):
+            required_fields_name_list = application_id.get_required_fields().get_as_list_of_names()
+            return fieldname in required_fields_name_list
+
+        application_page_ids = SUPER_ENV['adm.application.page'].search(
+            [('parent_id', '=', False)])
+
         return {
             "country_ids": country_ids,
             "state_ids": state_ids,
             'contact_id': contact_id,
             'application_id': application_id,
             'application_status_ids': application_status_ids,
-            'language_ids': language_ids.ids,
-            'language_level_ids': language_level_ids.ids,
+            'language_ids': language_ids,
+            'language_level_ids': language_level_ids,
             'contact_time_ids': contact_time_ids,
             "gender_ids": gender_ids,
             'degree_program_ids': degree_program_ids,
@@ -76,8 +75,10 @@ class AdmissionController(http.Controller):
             'school_year_ids': school_year_ids,
             'relationship_types': relationship_types,
             'marital_status_types': marital_status_types,
-            'user_env': request.env,
-            'sudo_env': sudo_env,
+            'SUPER_ENV': SUPER_ENV,
+            'USER_ENV': http.request.env,
+            'is_required': is_required,
+            'application_page_ids': application_page_ids,
             }
 
     @staticmethod
@@ -105,23 +106,39 @@ class AdmissionController(http.Controller):
                     parsed_vals = [(5, 0, 0)]
                     for val_array in value:
                         if 'id' not in val_array or not val_array['id']:
-                            parsed_vals.append((0, 0,
-                                                AdmissionController
-                                                ._parse_json_to_odoo_fields(
-                                                    rel_model_env, val_array)))
+                            model_name = model_env._fields[field].comodel_name
+                            if len(model_env) == 1 and model_name == 'ir.attachment':
+                                attachment_id = \
+                                    model_env.env['ir.attachment'].sudo().create({
+                                        'name': val_array['name'],
+                                        'datas': val_array['base64_encoded_file'],
+                                        'mimetype': val_array['content_type'],
+                                        'res_id': model_env.id,
+                                        'res_model': model_env._name,
+                                        'type': 'binary',
+                                        })
+                                rel_id = attachment_id.id
+                                parsed_vals.append((4, rel_id, False))
+                            else:
+                                parsed_vals.append((0, 0,
+                                                    AdmissionController
+                                                    ._parse_json_to_odoo_fields(
+                                                        rel_model_env, val_array)))
                         else:
                             rel_id = val_array.pop('id')
                             parsed_vals.append((4, rel_id, False))
                             if len(val_array.keys()):
+                                write_values =\
+                                    AdmissionController\
+                                    ._parse_json_to_odoo_fields(
+                                        rel_model_env, val_array)
                                 rel_model_env.browse(rel_id).write(
-                                    AdmissionController
-                                    ._parse_json_to_odoo_fields(rel_model_env,
-                                                                val_array))
+                                    write_values)
+
                     value_to_json = parsed_vals
             elif isinstance(value, dict):
                 model_name = model_env._fields[field].comodel_name
                 rel_model_env = request.env[model_name].sudo()
-
                 if 'id' not in value or not value['id']:
                     if len(model_env) == 1 and model_name == 'ir.attachment':
                         attachment_id = model_env.env[
@@ -180,7 +197,7 @@ class AdmissionController(http.Controller):
 
     # noinspection PyUnusedLocal
     @http.route("/admission/applications/"
-                "<model(adm.application):application_id>/", auth="public",
+                "<model(adm.application):application_id>", auth="public",
                 methods=["PUT"], csrf=True, type='json')
     def update_application_with_json(self, application_id, **params):
         """ This is a JSON controller, this get a JSON and write

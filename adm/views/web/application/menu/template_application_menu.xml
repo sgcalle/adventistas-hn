@@ -1,81 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <template id="adm.template_application_menu">
-        <link rel="stylesheet" href="/adm/static/src/css/menu.css"/>
+
+    <template id="template_application_menu_item">
+        <t t-if="application_page_id.child_ids">
+            <li class="nav-item nav-item-menu dropdown">
+                <a class="nav-link dropdown-toggle" role="button"
+                   href="#" data-toggle="dropdown">
+                    <t t-esc="application_page_id.name"/>
+                </a>
+                <div class="dropdown-menu">
+                    <t t-foreach="application_page_id.child_ids" t-as="page_child_id">
+                        <a t-attf-href="/admission/applications/#{application_id.id}/#{page_child_id.url}"
+                           class="dropdown-item">
+                            <t t-esc="page_child_id.name"/>
+                        </a>
+                    </t>
+                </div>
+            </li>
+        </t>
+        <t t-elif="not application_page_id.parent_id">
+            <li class="nav-item nav-item-menu">
+                <a t-attf-href="/admission/applications/#{application_id.id}/#{application_page_id.url}"
+                   class="nav-link">
+                    <t t-esc="application_page_id.name"/>
+                </a>
+            </li>
+        </t>
+    </template>
+
+    <template id="template_application_menu">
+        <!--        <link rel="stylesheet" href="/adm/static/src/css/menu.css"/>-->
+        <t t-set="page_access_list"
+           t-value="application_id.current_user_access_id.page_access_ids.ids"/>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <!-- QUEDA TRABAJAR EN LA DINAMIZACION DE LOS LANGUAGES ACTUALMENTE ESTA PUESTO EN 3 IDIOMAS EN HARD CODE -->
+
             <div class="collapse navbar-collapse text-center" id="application_nav_bar">
                 <ul class="navbar-nav w-100 justify-content-center">
                     <li class="nav-item nav-item-menu" id="nav-itm-instr">
                         <a t-attf-href="/admission/applications/#{application_id.id}/"
                            class="nav-link">
-                            GENERAL INFO
+                            General info
                         </a>
                     </li>
-                    <li class="nav-item nav-item-menu" id="nav-itm-appl">
-                        <a t-attf-href="/admission/applications/#{application_id.id}/info" class="nav-link">
-                            Student Information
-                        </a>
-                    </li>
-                    <li class="nav-item nav-item-menu" id="nav-itm-acad">
-                        <a t-attf-href="/admission/applications/#{application_id.id}/schools" class="nav-link">
-                            Academic Information
-                        </a>
-                    </li>
-
-                    <li class="nav-item nav-item-menu dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdowFamily" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            FAMILY
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdowFamily">
-                            <a class="dropdown-item"
-                               t-attf-href="/admission/applications/#{application_id.id}/family/parents">
-                                PARENTS
-                            </a>
-                            <a class="dropdown-item"
-                               t-attf-href="/admission/applications/#{application_id.id}/family/siblings">
-                                SIBLINGS
-                            </a>
-                        </div>
-                    </li>
-
-                    <li class="nav-item nav-item-menu" id="nav-itm-acad">
-                        <a t-attf-href="/admission/applications/#{application_id.id}/parent-questionnaire"
-                           class="nav-link">
-                            Parent Questionnaire
-                        </a>
-                    </li>
-
-                    <li class="nav-item nav-item-menu" id="nav-itm-acad">
-                        <a t-attf-href="/admission/applications/#{application_id.id}/additional-questions"
-                           class="nav-link">
-                            Additional Questions
-                        </a>
-                    </li>
-
-                    <li class="nav-item nav-item-menu" id="nav-itm-med">
-                        <a t-attf-href="/admission/applications/#{application_id.id}/medical-info" class="nav-link">
-                            HEALTH
-                        </a>
-                    </li>
-
-                    <li class="nav-item nav-item-menu" id="nav-itm-one">
-                        <a t-attf-href="/admission/applications/#{application_id.id}/document-comun" class="nav-link">
-                            DOCUMENTS
-                        </a>
-                    </li>
-
-                    <li class="nav-item nav-item-menu" id="nav-itm-instr">
-                        <a t-attf-href="/admission/applications/#{application_id.id}/signature"
-                           class="nav-link">
-                            SIGNATURE
-                        </a>
-                    </li>
+                    <t t-foreach="application_page_ids" t-as="application_page_id">
+                        <t t-if="application_page_id.id in page_access_list"
+                           t-call="adm.template_application_menu_item"/>
+                    </t>
                 </ul>
             </div>
         </nav>
@@ -123,4 +97,29 @@
             </t>
         </t>
     </template>
+
+    <template id="template_application_family_submenu">
+        <div class="row">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#" role="tab"
+                       aria-controls="home" aria-selected="true">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                       aria-controls="profile" aria-selected="false">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab"
+                       aria-controls="contact" aria-selected="false">Contact</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">...</div>
+                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
+                <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
+            </div>
+        </div>
+    </template>
+
 </odoo>

@@ -11,9 +11,9 @@
             <t t-set="url_prev" t-value="'/admission/applications/%s/family/siblings' % application_id.id"/>
             <t t-set="url_next" t-value="'/admission/applications/%s/additional-questions' % application_id.id"/>
 
-            <div data-adm-model-fields="1">
+            <form data-adm-model-fields="1">
                 <t t-call="adm.template_application_parent_questionnaire_form"/>
-            </div>
+            </form>
         </t>
     </template>
 </odoo>

@@ -35,16 +35,6 @@ class Status(models.Model):
     task_ids = fields.One2many("adm.inquiry.task", "status_id", "Status Ids")
 
 
-class ApplicationSource(models.Model):
-    _name = "adm.inquiry.source"
-    _order = "sequence"
-
-    name = fields.Char(string="Name", translate=True)
-    description = fields.Char("Description")
-    other = fields.Boolean("Other")
-    sequence = fields.Integer(readonly=True, default=-1)
-
-
 class Inquiry(models.Model):
     _name = 'adm.inquiry'
     _description = "Inquiry"
@@ -61,7 +51,7 @@ class Inquiry(models.Model):
 
     school_year_id = fields.Many2one("school_base.school_year", string="School Year")
     current_grade_level_id = fields.Many2one("school_base.grade_level", string="Current Grade Level")
-    grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level of interest", domain=[('active_admissions', '=', True)])
+    grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level", domain=[('active_admissions', '=', True)])
     responsible_id = fields.Many2many("res.partner")
 
     preferred_degree_program = fields.Many2one("adm.degree_program",
@@ -79,10 +69,44 @@ class Inquiry(models.Model):
     email = fields.Char(string="Email", related="partner_id.email", readonly=False)
     phone = fields.Char(string="Phone", related="partner_id.phone", readonly=False)
 
+    # # Demographic  Parent 1
+    # name_parent_1 = fields.Char(string="Name", default="Undefined", readonly=True)
+    # first_name_parent_1 = fields.Char(string="First Name", default="")
+    # middle_name_parent_1 = fields.Char(string="Middle Name", default="")
+    # last_name_parent_1 = fields.Char(string="Last Name", default="")
+    # date_of_birth_parent_1 = fields.Date(string="Date of birth")
+    # gender_parent_1 = fields.Many2one("adm.gender", string="Gender")
+    # isPanamaResident_parent_1 = fields.Boolean(string="Reside en Panamá?")
+    #
+    # # Contact Parent 1
+    # email_parent_1 = fields.Char(string="Email", related="partner_id.email", readonly=False)
+    # phone_parent_1 = fields.Char(string="Phone", related="partner_id.phone", readonly=False)
+    #
+    # # Location Parent 1
+    # country_id_parent_1 = fields.Many2one("res.country", related="partner_id.country_id",
+    #                              readonly=False, string="Country")
+    #
+    # # Demographic Parent 2
+    # name_parent_2 = fields.Char(string="Name", default="Undefined", readonly=True)
+    # first_name_parent_2 = fields.Char(string="First Name", default="")
+    # middle_name_parent_2 = fields.Char(string="Middle Name", default="")
+    # last_name_parent_2 = fields.Char(string="Last Name", default="")
+    # date_of_birth_parent_2 = fields.Date(string="Date of birth")
+    # gender_parent_2 = fields.Many2one("adm.gender", string="Gender")
+    # isPanamaResident_parent_2 = fields.Boolean(string="Reside en Panamá?")
+    #
+    # # Contact Parent 2
+    # email_parent_2 = fields.Char(string="Email", related="partner_id.email", readonly=False)
+    # phone_parent_2 = fields.Char(string="Phone", related="partner_id.phone", readonly=False)
+    #
+    # # Location Parent 2
+    # country_id_parent_2 = fields.Many2one("res.country", related="partner_id.country_id",
+    #                                       readonly=False, string="Country")
+
     community_street_address = fields.Char(string="Community residence address", default="", readonly=False)
-    reference_family_1 = fields.Char(string="a) References Families", default="", readonly=False)
-    reference_family_2 = fields.Char(string="b) References Families", default="", readonly=False)
-    congregation_member = fields.Char("Congregation member", readonly=False)
+    reference_family_1 = fields.Char(string="a) Referencias Familias IAE", default="", readonly=False)
+    reference_family_2 = fields.Char(string="b) Referencias Familias IAE", default="", readonly=False)
+    congregation_member = fields.Char("Miembro de congregación", readonly=False)
 
     # School
     current_school = fields.Char(string="Current School")
@@ -102,7 +126,8 @@ class Inquiry(models.Model):
     zip = fields.Char("zip", readonly=False, related="partner_id.zip")
 
     partner_id = fields.Many2one("res.partner", string="Contact")
-    status_id = fields.Many2one("adm.inquiry.status", string="Status", 
+    image = fields.Binary("Applicant´s Photo", related="partner_id.image_1920")
+    status_id = fields.Many2one("adm.inquiry.status", string="Status",
                                 group_expand="_read_group_status_ids")
     task_ids = fields.Many2many("adm.inquiry.task")
 
@@ -112,18 +137,10 @@ class Inquiry(models.Model):
     status_type = fields.Selection(string="Status Type", related="status_id.type_id")
 
     application_id = fields.Many2one("adm.application")
-    from_english_school = fields.Boolean(string="From English School?")
     forcing = False
 
-    extra_service_ids = fields.Many2many(string="Extra Services",
-                                         comodel_name="school_base.service")
-
-    known_people_in_school = fields.Char(string="Known People in School")
-
-    sources_id = fields.Many2one("adm.inquiry.source")
-    source_other = fields.Char(string="Other Source")
-    sources_id_other = fields.Boolean(string="sources_id_other", readonly=True, related="sources_id.other")
-
+    
+    
     def message_get_suggested_recipients(self):
         recipients = super().message_get_suggested_recipients() 
         try:
@@ -261,18 +278,136 @@ class Inquiry(models.Model):
 
         
         ApplicationEnv = self.env["adm.application"] 
+        
+        #search the productID
 
+        # CONDICIONAR EL PRODUCTO POR EL GRADELEVEL
+
+#         ProductEnv = self.env["product.product"]
+#         product_id = ProductEnv.sudo().search([('name', 'like', self.grade_level_id.name)],order="create_date desc", limit=1)
 
         medical_base = []
 
+        # medical_base.append((0, 0, {
+        #     'name': 'Ambientales (Hongo,ácaros, humedad, polvo,etc).',
+        #     'comment': '',
+        # }))
+        #
+        # medical_base.append((0, 0, {
+        #     'name': 'Alimenticias',
+        #     'comment': '',
+        # }))
+        #
+        # medical_base.append((0, 0, {
+        #     'name': 'Dieta Especial',
+        #     'comment': '',
+        # }))
+        #
+        # medical_base.append((0, 0, {
+        #     'name': 'Antecedentes médico e importancia',
+        #     'comment': '',
+        # }))
+        #
+        # medical_base.append((0, 0, {
+        #     'name': '¿Que procedimientos quirúrgicos ha sido sometido?',
+        #     'comment': '',
+        # }))
+        #
+        # medical_base.append((0, 0, {
+        #     'name': '¿En algún momento ha presentado desmayo o perdida de conocimiento?',
+        #     'comment': '',
+        # }))
+        #
+        # medical_base.append((0, 0, {
+        #     'name': 'Acude con algún especialista a control regularmente, favor anotar nombre y teléfono del (los) especialista(s)','comment': '',
+        # }))
+
+
+#         if product_id:  
+#             #creating the sales order
+#             SaleOrderEnv = self.env["sale.order"]
+#             sale_order_id = SaleOrderEnv.sudo().create({
+#                     'partner_id': self.partner_id.id,
+#                     'partner_invoice_id': self.partner_id.id,
+#                     'partner_shipping_id': self.partner_id.id,
+#                     'pricelist_id': 1,
+#                     'order_line': [(0,0,{
+#                                     'product_id': int(product_id[0].id), 
+#                                 })],
+#                 })
+
+
+#             #if product exists so create a application with the sales order linked
+#             application_record = ApplicationEnv.create({
+#                 "name": self.name,
+#                 "first_name": self.first_name,
+#                 "middle_name": self.middle_name,
+#                 "last_name": self.last_name,
+#                 "date_of_birth": self.date_of_birth,
+#                 "gender": self.gender.id,
+#                 "order_id": int(sale_order_id),
+#                 "current_school": self.current_school,
+#                 "current_school_address": self.current_school_address,
+#                 "partner_id": self.partner_id.id,
+#                 "grade_level_id": self.grade_level_id.id,
+#                 "school_year_id": self.school_year_id.id,
+#                 "medical_conditions_ids": medical_base,
+#             })
+
+#         else: #No found product of admission payment, so create a application without sales order
+        application_record = ApplicationEnv.create({
+            "name": self.name,
+            "first_name": self.first_name,
+            "middle_name": self.middle_name,
+            "last_name": self.last_name,
+            "date_of_birth": self.date_of_birth,
+            "gender": self.gender.id,
+            "current_school": self.current_school,
+            "current_school_address": self.current_school_address,
+            "partner_id": self.partner_id.id,
+            "grade_level": self.grade_level_id.id,
+            "school_year": self.school_year_id.id,
+            "medical_conditions_ids": medical_base,
+        })
+
+        # Creating language
+        for language in self.language_ids:
+            
+            ApplicationLanguageEnv = self.env["adm.application.language"]
+            
+            ApplicationLanguageEnv.create({
+                "language_id": language.language_id.id,
+                "language_level_id": language.language_level_id.id,
+                "application_id": application_record.id,
+            })
+             
+        self.partner_id.application_id = application_record.id
+        self.application_id = application_record.id
+        application_record.inquiry_id = self.id
         
         PartnerEnv = self.env["res.partner"]
         UsersEnv = self.env["res.users"]
         
         parent_id = PartnerEnv.search(["&", ("parent_id", "=", self.partner_id.parent_id.id), ("function", "=", "parent")])
 
+        # parent_main_id = parent_id[0].id
+        # parent_main_name = parent_id[0].name
+        # parent_main_email = parent_id[0].email
+
+        # user = UsersEnv.search([("partner_id", "=", parent_id.id)])
+        #
+        # if not user:
+        #     user = UsersEnv.create({
+        #         "name": parent_id.name,
+        #         "partner_id": parent_id.id,
+        #         "login": parent_id.email,
+        #         "sel_groups_1_8_9": 8,
+        #     })
+        # else:
+        #     template_id = self.env.ref('adm.email_template_data_inquiry_accepted')
+
         user_created = False
-        first_user = False
+
         for parent in parent_id:
             parent_main_id = parent.id
             parent_main_name = parent.name
@@ -292,8 +427,6 @@ class Inquiry(models.Model):
                     "password": 'userdemo',
                     "sel_groups_1_8_9": 8,
                 })
-                if not first_user:
-                    first_user = user
 
         if not user_created:
             template_id = self.env.ref('adm.email_template_data_inquiry_accepted')
@@ -306,39 +439,7 @@ class Inquiry(models.Model):
                         
             self.message_post_with_template(template_id=template_id.id, res_id=self.id)
 
-        application_record = ApplicationEnv.create({
-            "name": self.name,
-            "first_name": self.first_name,
-            "middle_name": self.middle_name,
-            "last_name": self.last_name,
-            "date_of_birth": self.date_of_birth,
-            "gender": self.gender.id,
-            "current_school": self.current_school,
-            "current_school_address": self.current_school_address,
-            "partner_id": self.partner_id.id,
-            "grade_level": self.grade_level_id.id,
-            "school_year": self.school_year_id.id,
-            "extra_service_ids": self.extra_service_ids.ids,
-            "from_english_school": self.from_english_school,
-            "medical_conditions_ids": medical_base,
-            "family_id": self.partner_id.get_families()[0].id,
-            "responsible_user_id": first_user.id
-        })
-
-        # Creating language
-        for language in self.language_ids:
-            ApplicationLanguageEnv = self.env["adm.application.language"]
-
-            ApplicationLanguageEnv.create({
-                "language_id": language.language_id.id,
-                "language_level_id": language.language_level_id.id,
-                "application_id": application_record.id,
-            })
-
-        self.partner_id.application_id = application_record.id
-        self.application_id = application_record.id
-        application_record.inquiry_id = self.id
-
+    
     def write(self, values):
 
         # print(self.task_ids)
