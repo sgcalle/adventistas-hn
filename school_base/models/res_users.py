@@ -15,3 +15,5 @@ class ResUsers(models.Model):
     school_code_ids = fields.Many2many('school_base.school_code', string="School codes")
     company_school_code_ids = fields.Many2many('school_base.school_code',
         related='company_ids.school_code_ids')
+    district_school_code_ids = fields.Many2many('school_base.school_code',
+        related='district_code_ids.school_code_ids')

@@ -17,9 +17,9 @@
                            domain="[('id', 'in', district_code_ids)]"
                            context="{'user_preference': 0}"/>
 
-                    <field name="company_school_code_ids" invisible="1"/>
+                    <field name="district_school_code_ids" invisible="1"/>
                     <field name="school_code_ids"
-                           domain="[('id', 'in', company_school_code_ids)]"
+                           domain="[('id', 'in', district_school_code_ids)]"
                            widget="many2many_tags" options="{'no_create': True}"/>
 
                     <field name="school_code_id"
