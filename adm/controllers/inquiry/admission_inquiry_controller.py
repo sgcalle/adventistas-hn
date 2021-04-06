@@ -175,7 +175,6 @@ class InquiryController(http.Controller):
                 "company_type": "company",
                 "is_family": True,
                 'mobile': mobile_1,
-                'email': email_1,
                 'home_address_ids': [(0, 0, {
                     'street': street_address_1,
                     'street2': street_address_2,
@@ -348,7 +347,6 @@ class InquiryController(http.Controller):
                 'date_of_birth': birthday,
                 'gender': gender and int(gender) or False,
                 'mobile': mobile_1,
-                'email': email_1,
                 'family_res_finance_ids': family_res_finance,
                 'home_address_id': home_address_id.id,
                 })

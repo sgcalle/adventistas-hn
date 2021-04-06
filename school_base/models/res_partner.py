@@ -830,8 +830,8 @@ class ResPartner(models.Model):
                         ])
                     if email_partner and (len(email_partner) > 1 or email_partner != partner):
                         raise UserError(_(
-                            "There is other existing family with the same email "
-                            "address, please, use another one"))
+                            "There is other existing family with the same"
+                            " email address, please, use another one"))
 
     # Helpers methods
     # devuelve familias de un partner
