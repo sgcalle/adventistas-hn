@@ -291,6 +291,77 @@ class ResPartner(models.Model):
             partner_id.grade_level_ids =\
                 partner_id.mapped('school_grade_ids.grade_level_id')
 
+    @api.depends("allow_edit_student_name", "allow_edit_parent_name",
+                 "allow_edit_person_name", "person_type")
+    def _compute_allow_name_edition(self):
+        for partner_id in self:
+            # Sumulating switch statement
+            partner_id.is_name_edit_allowed = switch_statement(cases={
+                "default": partner_id.allow_edit_person_name,
+                "parent": partner_id.allow_edit_parent_name,
+                "student": partner_id.allow_edit_student_name,
+                }, value=partner_id.person_type)
+
+    @api.depends("facts_id")
+    def _converts_facts_id_to_int(self):
+        for partner_id in self:
+            partner_id.facts_id_int = int(partner_id.facts_id) if partner_id.facts_id and partner_id.facts_id.isdigit() else 0
+
+    @api.depends("facts_udid")
+    def _converts_facts_udid_id_to_int(self):
+        for partner_id in self:
+            partner_id.facts_udid_int = int(
+                partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
+
+    @api.depends("facts_udid")
+    def _converts_facts_udid_id_to_int(self):
+        for partner_id in self:
+            partner_id.facts_udid_int = int(
+                partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
+
+    @api.depends("first_name", "middle_name", "last_name")
+    def _compute_name(self):
+        self.auto_format_name()
+
+    @api.depends('reenrollment_record_ids')
+    def _compute_reenrollment_status(self):
+        for partner_id in self:
+            reenrollment_record_id = partner_id.reenrollment_record_ids.sorted('create_date', reverse=True)[:1]
+            partner_id.reenrollment_school_year_id = reenrollment_record_id.school_year_id.id
+            partner_id.reenrollment_status_id = reenrollment_record_id.reenrollment_status
+
+    def compute_self_relationship_ids(self):
+        for partner_id in self:
+            partner_id.self_relationship_ids = \
+                partner_id.family_ids.mapped('member_relationship_ids')\
+                    .filtered_domain([
+                        ('partner_individual_id', '=', partner_id.id),
+                        ('partner_individual_id.active', '=', True),
+                        ('partner_relation_id.active', '=', True),
+                        ])
+
+            parent_types = ['parent', 'father', 'mother']
+            sibling_types = ['brother', 'sister', 'sibling']
+
+            parent_ids = partner_id.self_relationship_ids.filtered_domain([
+                ('relationship_type_id.type', 'in', parent_types)
+                ])
+            sibling_ids = partner_id.self_relationship_ids.filtered_domain([
+                ('relationship_type_id.type', 'in', sibling_types)
+                ])
+            other_ids = partner_id.self_relationship_ids \
+                .filtered_domain([
+                ('relationship_type_id.type', 'not in'
+                 , parent_types + sibling_types)
+                ])
+
+            custody_ids = partner_id.self_relationship_ids.filtered('custody')
+
+            partner_id.parent_relationship_ids = parent_ids
+            partner_id.sibling_relationship_ids = sibling_ids
+            partner_id.other_relationship_ids = other_ids
+            partner_id.custodial_relationship_ids = custody_ids
+
     ############################
     # Constrains and onchanges #
     ############################
@@ -323,47 +394,12 @@ class ResPartner(models.Model):
 
             partner_id.school_grade_ids -= records_to_remove
 
-    #########################
-    # CRUD method overrides #
-    #########################
-
-    ##################
-    # Action methods #
-    ##################
-
-    ####################
-    # Business methods #
-    ####################
-
-    # Overwritten fields
-    # Name should be readonly
-    def _retrieve_allow_name_edit_from_config(self):
-        self.allow_edit_student_name = bool(
-            self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_student_name", False))
-        self.allow_edit_parent_name = bool(
-            self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_parent_name", False))
-        self.allow_edit_person_name = bool(
-            self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_person_name", False))
-
-    @api.depends("allow_edit_student_name",
-                 "allow_edit_parent_name",
-                 "allow_edit_person_name",
-                 "person_type")
-    def _compute_allow_name_edition(self):
-        for partner_id in self:
-            # Sumulating switch statement
-            partner_id.is_name_edit_allowed = switch_statement(cases={
-                "default": partner_id.allow_edit_person_name,
-                "parent": partner_id.allow_edit_parent_name,
-                "student": partner_id.allow_edit_student_name,
-                }, value=partner_id.person_type)
-
     @api.onchange("person_type")
     def _onchange_person_type(self):
         self._compute_allow_name_edition()
 
     @api.onchange('parent_id', 'home_address_id',
-                  'home_address_country_id', 
+                  'home_address_country_id',
                   'home_address_state_id',
                   'home_address_city',
                   'home_address_street',
@@ -387,35 +423,6 @@ class ResPartner(models.Model):
             if partner.home_address_id.phone:
                 partner.phone = partner.home_address_id.phone
 
-    def _fields_sync(self, values):
-        super(ResPartner, self)._fields_sync(values)
-        if values.get('home_address_id'):
-            self._phone_sync_from_home_address()
-            onchange_vals = self.onchange_parent_id().get('value', {})
-            self.update_address(onchange_vals)
-
-    @api.depends("facts_id")
-    def _converts_facts_id_to_int(self):
-        for partner_id in self:
-            partner_id.facts_id_int = int(partner_id.facts_id) if partner_id.facts_id and partner_id.facts_id.isdigit() else 0
-
-    @api.constrains("facts_id")
-    def _check_facts_id(self):
-        for partner_id in self:
-            if partner_id.facts_id:
-                if not partner_id.facts_id.isdigit():
-                    raise ValidationError("Facts id needs to be an number")
-
-                should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_id), ('is_family', '=', partner_id.is_family)])
-                if should_be_unique > 1:
-                    raise ValidationError("Another contact has the same facts id! (%s)" % partner_id.facts_id)
-                    
-    @api.depends("facts_udid")
-    def _converts_facts_udid_id_to_int(self):
-        for partner_id in self:
-            partner_id.facts_udid_int = int(
-                partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
-
     @api.constrains("facts_udid")
     def _check_facts_udid_id(self):
         for partner_id in self:
@@ -428,23 +435,204 @@ class ResPartner(models.Model):
                 if should_be_unique > 1:
                     raise ValidationError("Another contact has the same facts udid! (%s)" % partner_id.facts_udid)
 
-    @api.depends("facts_udid")
-    def _converts_facts_udid_id_to_int(self):
+    @api.constrains("facts_id")
+    def _check_facts_id(self):
         for partner_id in self:
-            partner_id.facts_udid_int = int(
-                partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
+            if partner_id.facts_id:
+                if not partner_id.facts_id.isdigit():
+                    raise ValidationError("Facts id needs to be an number")
 
-    # @api.constrains("facts_udid")
-    # def _check_facts_udid_id(self):
-    #     for partner_id in self:
-    #         if partner_id.facts_udid:
-    #
-    #             if not partner_id.facts_udid.isdigit():
-    #                 raise ValidationError("Facts id needs to be an number")
-    #
-    #             should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
-    #             if should_be_unique > 1:
-    #                 raise ValidationError("Another contact has the same facts id!")
+                should_be_unique = self.search_count(
+                    [("facts_id", "=", partner_id.facts_id),
+                     ('is_family', '=', partner_id.is_family)])
+                if should_be_unique > 1:
+                    raise ValidationError(
+                        "Another contact has the same facts id! (%s)" % partner_id.facts_id)
+
+    @api.onchange("first_name", "middle_name", "last_name")
+    def _onchange_name_fields(self):
+        self.auto_format_name()
+
+    @api.constrains('member_relationship_ids')
+    def _constrains_member_relationship_ids(self):
+        for partner in self:
+            rel_ids_pairs = (
+                partner.member_relationship_ids
+                    .filtered(lambda r: r.partner_relation_id.active and r.partner_individual_id.active)
+                    .mapped(lambda rel: (rel.partner_individual_id.id, rel.partner_relation_id.id))
+            )
+            for rel_pair in rel_ids_pairs:
+                if rel_ids_pairs.count(rel_pair) > 1:
+                    raise UserError(_("Duplicated member relationships is not supported"))
+    #########################
+    # CRUD method overrides #
+    #########################
+    @api.model
+    def create(self, values):
+        """ Student custom creation for family relations and other stuffs """
+
+        # Some constant for making more readeable the code
+        # ACTION_TYPE = 0
+        # TYPE_REPLACE = 6
+        TYPE_ADD_EXISTING = 4
+        # TYPE_REMOVE_NO_DELETE = 3
+
+        if "name" not in values:
+            first_name = values["first_name"] if "first_name" in values else ""
+            middle_name = values[
+                "first_name"] if "middle_name" in values else ""
+            last_name = values["last_name"] if "last_name" in values else ""
+
+            values["name"] = self.format_name(first_name, middle_name,
+                                              last_name)
+        partners = super().create(values)
+
+        partners.check_school_fields_integrity()
+
+        ctx = self._context
+        for record in partners:
+            if "member_id" in ctx:
+                if ctx.get("member_id"):
+                    record.write({
+                        "member_ids": [
+                            [TYPE_ADD_EXISTING, ctx.get("member_id"), False]]
+                        })
+                else:
+                    raise UserError(
+                        _("Contact should be save before adding families"))
+
+        return partners
+
+    def write(self, values):
+        """ Student custom creation for family relations and other stuffs """
+
+        # Some constant for making more readeable the code
+        ACTION_TYPE = 0
+        TYPE_CREATE = 0
+        TYPE_REPLACE = 6
+        TYPE_ADD_EXISTING = 4
+        TYPE_REMOVE_NO_DELETE = 3
+        TYPE_REMOVE_DELETE = 2
+
+        for partner_id in self:
+            if "family_ids" in values:
+                for m2m_action in values["family_ids"]:
+                    if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
+                        family_ids = self.browse(m2m_action[2])
+                        removed_family_ids = partner_id.family_ids - family_ids
+                        new_family_ids = family_ids - partner_id.family_ids
+
+                        # Adding myself as a family's member
+
+                        for family_id in new_family_ids:
+                            new_relationship_values = []
+                            for member in family_id.member_ids:
+                                if not family_id.member_relationship_ids.filtered(lambda r: r.partner_individual_id == member and r.partner_relation_id == partner_id):
+                                    new_relationship_values.append((TYPE_CREATE, 0, {
+                                        'partner_individual_id': member.id,
+                                        'partner_relation_id': partner_id.id,
+                                        }))
+                                if not family_id.member_relationship_ids.filtered(lambda r: r.partner_individual_id == partner_id and r.partner_relation_id == member):
+                                    new_relationship_values.append((TYPE_CREATE, 0, {
+                                        'partner_individual_id': partner_id.id,
+                                        'partner_relation_id': member.id,
+                                        }))
+
+                            family_id.write({
+                                'member_ids': [[TYPE_ADD_EXISTING, partner_id.id, False]],
+                                'member_relationship_ids': new_relationship_values,
+                                })
+
+                        # Removing myself as a family's member
+                        relations_to_remove = \
+                            removed_family_ids.member_relationship_ids \
+                                .filtered_domain([
+                                '|',
+                                ('partner_individual_id', '=', partner_id.id),
+                                ('partner_relation_id', '=', partner_id.id)
+                                ])
+
+                        removed_family_ids.write({
+                            'member_ids': [[TYPE_REMOVE_NO_DELETE, partner_id.id, False]],
+                            'member_relationship_ids': [(TYPE_REMOVE_DELETE, relation.id, 0) for relation in relations_to_remove],
+                            })
+
+            if "member_ids" in values:
+                for m2m_action in values["member_ids"]:
+                    if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
+                        member_ids = self.browse(set(m2m_action[2]))
+                        removed_member_ids = partner_id.member_ids - member_ids
+
+                        # Adding myself as a family of the member
+                        member_ids.write({
+                            "family_ids": [
+                                (TYPE_ADD_EXISTING, partner_id.id, False)],
+                            })
+                        new_member_ids = member_ids - partner_id.member_ids
+                        relationship_values = values.get('member_relationship_ids', [])
+                        for new_member_id in new_member_ids:
+                            for member in member_ids.filtered(lambda m: m != new_member_id):
+                                if not partner_id.member_relationship_ids.filtered(lambda m: m.partner_individual_id == member and m.partner_relation_id == new_member_id):
+                                    relationship_values.append((TYPE_CREATE, 0, {
+                                        'partner_individual_id': member.id,
+                                        'partner_relation_id': new_member_id.id,
+                                        }))
+                                if not partner_id.member_relationship_ids.filtered(lambda m: m.partner_relation_id == member and m.partner_individual_id == new_member_id):
+                                    relationship_values.append((TYPE_CREATE, 0, {
+                                        'partner_individual_id': new_member_id.id,
+                                        'partner_relation_id': member.id,
+                                        }))
+
+                        # Remove duplicated
+                        no_duplicated = set(map(lambda rel: (rel[0], rel[1], tuple(rel[2].items())), relationship_values))
+                        relationship_values = list(map(lambda rel: (rel[0], rel[1], dict(rel[2])), no_duplicated))
+
+                        # Removing myself as a family of the member
+                        relations_to_remove = \
+                            partner_id.member_relationship_ids \
+                                .filtered_domain([
+                                '|',
+                                ('partner_individual_id', 'in', removed_member_ids.ids),
+                                ('partner_relation_id', 'in', removed_member_ids.ids)
+                                ])
+                        removed_member_ids.write({
+                            "family_ids": [
+                                [TYPE_REMOVE_NO_DELETE, partner_id.id, False]],
+                            })
+                        relationship_values.extend([
+                            (TYPE_REMOVE_DELETE, relation.id, 0)
+                            for relation in relations_to_remove])
+                        values['member_relationship_ids'] = relationship_values
+
+        res = super().write(values)
+        # self.generate_missing_relationships
+        self.check_school_fields_integrity()
+        return res
+
+    ##################
+    # Action methods #
+    ##################
+
+    ####################
+    # Business methods #
+    ####################
+
+    # Overwritten fields
+    # Name should be readonly
+    def _retrieve_allow_name_edit_from_config(self):
+        self.allow_edit_student_name = bool(
+            self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_student_name", False))
+        self.allow_edit_parent_name = bool(
+            self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_parent_name", False))
+        self.allow_edit_person_name = bool(
+            self.env["ir.config_parameter"].sudo().get_param("school_base.allow_edit_person_name", False))
+
+    def _fields_sync(self, values):
+        super(ResPartner, self)._fields_sync(values)
+        if values.get('home_address_id'):
+            self._phone_sync_from_home_address()
+            onchange_vals = self.onchange_parent_id().get('value', {})
+            self.update_address(onchange_vals)
 
     @api.model
     def format_name(self, first_name, middle_name, last_name):
@@ -491,53 +679,6 @@ class ResPartner(models.Model):
             else:
                 partner_id.name = partner_id.name
 
-    @api.onchange("first_name", "middle_name", "last_name")
-    def _onchange_name_fields(self):
-        self.auto_format_name()
-
-    @api.depends("first_name", "middle_name", "last_name")
-    def _compute_name(self):
-        self.auto_format_name()
-
-    @api.depends('reenrollment_record_ids')
-    def _compute_reenrollment_status(self):
-        for partner_id in self:
-            reenrollment_record_id = partner_id.reenrollment_record_ids.sorted('create_date', reverse=True)[:1]
-            partner_id.reenrollment_school_year_id = reenrollment_record_id.school_year_id.id
-            partner_id.reenrollment_status_id = reenrollment_record_id.reenrollment_status
-
-    def compute_self_relationship_ids(self):
-        for partner_id in self:
-            partner_id.self_relationship_ids = \
-                partner_id.family_ids.mapped('member_relationship_ids')\
-                .filtered_domain([
-                    ('partner_individual_id', '=', partner_id.id),
-                    ('partner_individual_id.active', '=', True),
-                    ('partner_relation_id.active', '=', True),
-                    ])
-
-            parent_types = ['parent', 'father', 'mother']
-            sibling_types = ['brother', 'sister', 'sibling']
-
-            parent_ids = partner_id.self_relationship_ids.filtered_domain([
-                ('relationship_type_id.type', 'in', parent_types)
-                ])
-            sibling_ids = partner_id.self_relationship_ids.filtered_domain([
-                ('relationship_type_id.type', 'in', sibling_types)
-                ])
-            other_ids = partner_id.self_relationship_ids\
-                .filtered_domain([
-                ('relationship_type_id.type', 'not in'
-                  , parent_types + sibling_types)
-                ])
-
-            custody_ids = partner_id.self_relationship_ids.filtered('custody')
-
-            partner_id.parent_relationship_ids = parent_ids
-            partner_id.sibling_relationship_ids = sibling_ids
-            partner_id.other_relationship_ids = other_ids
-            partner_id.custodial_relationship_ids = custody_ids
-    
     def _set_parent_relationships(self):
         """ If you remove someone as parents
             Normally you expect that the person still belong to the family
@@ -648,18 +789,6 @@ class ResPartner(models.Model):
                         family_id.member_ids += other.partner_relation_id
                 rel_to_remove.mapped('partner_relation_id').active = False
 
-    @api.constrains('member_relationship_ids')
-    def _constrains_member_relationship_ids(self):
-        for partner in self:
-            rel_ids_pairs = (
-                partner.member_relationship_ids
-                .filtered(lambda r: r.partner_relation_id.active and r.partner_individual_id.active)
-                .mapped(lambda rel: (rel.partner_individual_id.id, rel.partner_relation_id.id))
-                )
-            for rel_pair in rel_ids_pairs:
-                if rel_ids_pairs.count(rel_pair) > 1:
-                    raise UserError(_("Duplicated member relationships is not supported"))
-
     def generate_missing_relationships(self):
         for family_id in self.filtered('is_family'):
             relationship_values = []
@@ -681,148 +810,6 @@ class ResPartner(models.Model):
                 no_duplicated = set(map(lambda rel: (rel[0], rel[1], tuple(rel[2].items())), relationship_values))
                 relationship_values = list(map(lambda rel: (rel[0], rel[1], dict(rel[2])), no_duplicated))
                 family_id.write({'member_relationship_ids': relationship_values})
-
-    @api.model
-    def create(self, values):
-        """ Student custom creation for family relations and other stuffs """
-
-        # Some constant for making more readeable the code
-        # ACTION_TYPE = 0
-        # TYPE_REPLACE = 6
-        TYPE_ADD_EXISTING = 4
-        # TYPE_REMOVE_NO_DELETE = 3
-
-        if "name" not in values:
-            first_name = values["first_name"] if "first_name" in values else ""
-            middle_name = values[
-                "first_name"] if "middle_name" in values else ""
-            last_name = values["last_name"] if "last_name" in values else ""
-
-            values["name"] = self.format_name(first_name, middle_name,
-                                              last_name)
-        partners = super().create(values)
-
-        partners.check_school_fields_integrity()
-
-        ctx = self._context
-        for record in partners:
-            if "member_id" in ctx:
-                if ctx.get("member_id"):
-                    record.write({
-                        "member_ids": [
-                            [TYPE_ADD_EXISTING, ctx.get("member_id"), False]]
-                        })
-                else:
-                    raise UserError(
-                        _("Contact should be save before adding families"))
-
-        return partners
-
-    def write(self, values):
-        """ Student custom creation for family relations and other stuffs """
-
-        # Some constant for making more readeable the code
-        ACTION_TYPE = 0
-        TYPE_CREATE = 0
-        TYPE_REPLACE = 6
-        TYPE_ADD_EXISTING = 4
-        TYPE_REMOVE_NO_DELETE = 3
-        TYPE_REMOVE_DELETE = 2
-
-        for partner_id in self:
-            if "family_ids" in values:
-                for m2m_action in values["family_ids"]:
-                    if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
-                        family_ids = self.browse(m2m_action[2])
-                        removed_family_ids = partner_id.family_ids - family_ids
-                        new_family_ids = family_ids - partner_id.family_ids
-
-                        # Adding myself as a family's member
-
-                        for family_id in new_family_ids:
-                            new_relationship_values = []
-                            for member in family_id.member_ids:
-                                if not family_id.member_relationship_ids.filtered(lambda r: r.partner_individual_id == member and r.partner_relation_id == partner_id):
-                                    new_relationship_values.append((TYPE_CREATE, 0, {
-                                        'partner_individual_id': member.id,
-                                        'partner_relation_id': partner_id.id,
-                                        }))
-                                if not family_id.member_relationship_ids.filtered(lambda r: r.partner_individual_id == partner_id and r.partner_relation_id == member):
-                                    new_relationship_values.append((TYPE_CREATE, 0, {
-                                        'partner_individual_id': partner_id.id,
-                                        'partner_relation_id': member.id,
-                                        }))
-
-                            family_id.write({
-                                'member_ids': [[TYPE_ADD_EXISTING, partner_id.id, False]],
-                                'member_relationship_ids': new_relationship_values,
-                                })
-
-                        # Removing myself as a family's member
-                        relations_to_remove = \
-                            removed_family_ids.member_relationship_ids\
-                            .filtered_domain([
-                                '|',
-                                ('partner_individual_id', '=', partner_id.id),
-                                ('partner_relation_id', '=', partner_id.id)
-                                ])
-
-                        removed_family_ids.write({
-                            'member_ids': [[TYPE_REMOVE_NO_DELETE, partner_id.id, False]],
-                            'member_relationship_ids': [(TYPE_REMOVE_DELETE, relation.id, 0) for relation in relations_to_remove],
-                            })
-
-            if "member_ids" in values:
-                for m2m_action in values["member_ids"]:
-                    if m2m_action[ACTION_TYPE] == TYPE_REPLACE:
-                        member_ids = self.browse(set(m2m_action[2]))
-                        removed_member_ids = partner_id.member_ids - member_ids
-
-                        # Adding myself as a family of the member
-                        member_ids.write({
-                            "family_ids": [
-                                (TYPE_ADD_EXISTING, partner_id.id, False)],
-                            })
-                        new_member_ids = member_ids - partner_id.member_ids
-                        relationship_values = values.get('member_relationship_ids', [])
-                        for new_member_id in new_member_ids:
-                            for member in member_ids.filtered(lambda m: m != new_member_id):
-                                if not partner_id.member_relationship_ids.filtered(lambda m: m.partner_individual_id == member and m.partner_relation_id == new_member_id):
-                                    relationship_values.append((TYPE_CREATE, 0, {
-                                        'partner_individual_id': member.id,
-                                        'partner_relation_id': new_member_id.id,
-                                        }))
-                                if not partner_id.member_relationship_ids.filtered(lambda m: m.partner_relation_id == member and m.partner_individual_id == new_member_id):
-                                    relationship_values.append((TYPE_CREATE, 0, {
-                                        'partner_individual_id': new_member_id.id,
-                                        'partner_relation_id': member.id,
-                                        }))
-
-                        # Remove duplicated
-                        no_duplicated = set(map(lambda rel: (rel[0], rel[1], tuple(rel[2].items())), relationship_values))
-                        relationship_values = list(map(lambda rel: (rel[0], rel[1], dict(rel[2])), no_duplicated))
-
-                        # Removing myself as a family of the member
-                        relations_to_remove = \
-                            partner_id.member_relationship_ids\
-                            .filtered_domain([
-                                '|',
-                                ('partner_individual_id', 'in', removed_member_ids.ids),
-                                ('partner_relation_id', 'in', removed_member_ids.ids)
-                                ])
-                        removed_member_ids.write({
-                            "family_ids": [
-                                [TYPE_REMOVE_NO_DELETE, partner_id.id, False]],
-                            })
-                        relationship_values.extend([
-                            (TYPE_REMOVE_DELETE, relation.id, 0)
-                            for relation in relations_to_remove])
-                        values['member_relationship_ids'] = relationship_values
-
-        res = super().write(values)
-        # self.generate_missing_relationships
-        self.check_school_fields_integrity()
-        return res
 
     def check_school_fields_integrity(self):
         for partner in self:
@@ -852,12 +839,23 @@ class ResPartner(models.Model):
         PartnerEnv = self.env["res.partner"].sudo()
         return PartnerEnv.search([("is_family", "=", True)]).filtered(
             lambda app: self.id in app.member_ids.ids)
-      
-    # def recompute_status_id(self):
-    #     for partner_id in self.filtered('student_status'):
-    #         student_status = partner_id.student_status
-    #         if student_status:
-    #             for status_name, status_label in SELECT_STATUS_TYPES:
-    #                 if student_status.lower() == status_name.lower():
-    #                     partner_id.student_status_id = status_name
-    #                     break
+
+    def set_member_relationship(self, individual_id: int, relation_id: int, reltype_id: int = False):
+        self.ensure_one()
+        if not self.is_family:
+            raise UserError("You only can modify member relationship from families")
+
+        relationship = \
+            self.member_relationship_ids.filtered(
+                lambda rel:
+                    rel.partner_individual_id.id == individual_id
+                    and rel.partner_relation_id.id == relation_id)
+
+        if not relationship:
+            relationship = self.env['school_base.relationship'].create({
+                'partner_individual_id': individual_id,
+                'partner_relation_id': relation_id,
+                'family_id': self.id
+                })
+        relationship.relationship_type_id = reltype_id
+        return relationship

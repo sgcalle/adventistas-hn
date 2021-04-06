@@ -12,7 +12,7 @@ def post_parameters():
     return http.request.httprequest.form
 
 
-class Admission(http.Controller):
+class InquiryController(http.Controller):
 
     #===================================================================================================================
     # @http.route("/")
@@ -45,9 +45,6 @@ class Admission(http.Controller):
         })
         return response
 
-    def all_exist(avalue, bvalue):
-        return all(any(x in y for y in bvalue) for x in avalue)
-
     @http.route("/admission/inquiry", auth="public", methods=["POST"], website=True, csrf=False)
     def add_inquiry(self, **params):
         PartnerEnv = http.request.env['res.partner']
@@ -74,22 +71,21 @@ class Admission(http.Controller):
                 })
                 return response
             else:
-                # PARA TOMAR POR FACTS ID
-                #   family_data = PartnerEnv.sudo().search([('facts_id','=',family_id_fact),('is_family', '=', True)])[0]
-                # CASO DE TOMAR POR EL FACTS UD ID
-                family_data = PartnerEnv.sudo().search([('facts_id','=',family_id_fact),('is_family', '=', True)])[0]
+                # Para tomar por facts id
+                # Caso de tomar por el facts ud id
+                family_data = \
+                    PartnerEnv.sudo().search([
+                        ('facts_id', '=', family_id_fact),
+                        ('is_family', '=', True)])[0]
                 family_id = family_data
                 mobile_1 = family_data.mobile
                 email_1 = family_data.email
-                country_id = family_data.country_id.id
-                parents_ids_created = (family_data.member_ids.filtered(lambda item: item.function == 'parent')).ids
+                parents_ids_created = (
+                    family_data.member_ids
+                    .filtered(lambda item: item.function == 'parent')).ids
 
         else:
             # Create a new family
-            full_name = "{}, {}{}".format(params["txtLastName_1"],
-                                           params["txtFirstName_1"],
-                                           "" if not params["txtMiddleName_1"] else " {}".format(params["txtMiddleName_1"]))
-
             first_name = params["txtFirstName_1"]
             middle_name = params["txtMiddleName_1"]
             last_name = params["txtLastName_1"]
@@ -127,7 +123,11 @@ class Admission(http.Controller):
                 parent_id_1.auto_format_name()
             else:
                 family_id = PartnerEnv.sudo().search([('id', '=', family_1)])
-                parent_id_1 = PartnerEnv.sudo().search([('email','=',email_1),('function', '=', 'parent')])[0]
+                parent_id_1 = \
+                    PartnerEnv.sudo().search([
+                        ('email', '=',email_1),
+                        ('function', '=', 'parent')
+                        ])[0]
 
             parents_ids_created = []
             family_id.write({'member_ids': [(4,parent_id_1.id)]})
@@ -141,9 +141,6 @@ class Admission(http.Controller):
                 middle_name = params["txtMiddleName_2"]
                 last_name = params["txtLastName_2"]
                 country_id = int(params["selCountry_2"])
-                # full_name = "{}, {}{}".format(params["txtLastName_2"], params["txtFirstName_2"],
-                #                               "" if not params["txtMiddleName_2"] else " {}".format(
-                #                                   params["txtMiddleName_2"]))
                 mobile_2 = params["txtCellPhone_2"]
                 email_2 = params["txtEmail_2"]
 
@@ -152,7 +149,6 @@ class Admission(http.Controller):
                     parent_id_2.write({'family_ids': [(4,family_id.id)]})
                 else:
                     parent_id_2 = PartnerEnv.sudo().create({
-                        # "name": full_name,
                         "first_name": first_name,
                         "middle_name": middle_name,
                         "last_name": last_name,
@@ -167,6 +163,7 @@ class Admission(http.Controller):
 
                 parents_ids_created.append(parent_id_2.id)
                 family_id.write({'member_ids': [(4, parent_id_2.id)]})
+
         # Create students
         id_students = list()
         students_total = int(params["studentsCount"])
@@ -175,8 +172,9 @@ class Admission(http.Controller):
         last_name_list = post_parameters().getlist("txtStudentLastName")
         middle_name_list = post_parameters().getlist("txtStudentMiddleName")
         birthday_list = post_parameters().getlist("txtStudentBirthday")
-        current_grade_level_list = post_parameters().getlist("selStudentCurrentGradeLevel")
- 
+        current_grade_level_list = \
+            post_parameters().getlist("selStudentCurrentGradeLevel")
+
         InquiryEnv = http.request.env["adm.inquiry"]
 
         for index_student in range(students_total):
@@ -185,10 +183,8 @@ class Admission(http.Controller):
             last_name = last_name_list[index_student]
             birthday = birthday_list[index_student]
             current_grade_level = current_grade_level_list[index_student]
-            full_name_student = "{}, {}{}".format(last_name, first_name, "" if not middle_name else " {}".format(middle_name))
- 
+
             id_student = PartnerEnv.sudo().create({
-                # "name": full_name_student,
                 "first_name": first_name,
                 "middle_name": middle_name,
                 "last_name": last_name,
@@ -205,14 +201,15 @@ class Admission(http.Controller):
 
             # Create an inquiry for each new student
             new_inquiry = InquiryEnv.sudo().create({
-                "partner_id": id_student.id,
+                'partner_id': id_student.id,
                 'first_name': first_name,
                 'middle_name': middle_name,
                 'last_name': last_name,
-                'current_grade_level_id': current_grade_level and int(current_grade_level) or False,
-                'responsible_id': [(6,0,parents_ids_created)],
+                'current_grade_level_id':
+                    current_grade_level and int(current_grade_level) or False,
+                'responsible_id': [(6, 0, parents_ids_created)],
                 })
-            
+
             id_student.inquiry_id = new_inquiry.id
             id_students.append(id_student)
 
