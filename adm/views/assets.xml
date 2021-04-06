@@ -88,4 +88,8 @@
         <script type="text/javascript" src="/adm/static/src/js/application/family/finance.js"></script>
     </template>
 
+    <template id="assets_inquiry">
+        <script type="text/javascript" src="/adm/static/src/js/inquiry/inquiry.js"></script>
+        <link rel="stylesheet" href="/adm/static/src/css/form_application.css"/>
+    </template>
 </odoo>

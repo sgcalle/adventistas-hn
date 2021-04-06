@@ -12,7 +12,7 @@ def district_code(self):
             if user_district_code_ids:
                 if any(did not in district_code_ids for did in district_code_ids):
                     raise AccessError(_("Access to unauthorized or invalid district codes."))
-            return self['res.company'].browse(district_code_ids[0])
+            return self['school_base.district_code'].browse(district_code_ids[0])
     return self.user.district_code_id
 
 
@@ -24,7 +24,7 @@ def district_codes(self):
             if user_district_code_ids:
                 if any(did not in district_code_ids for did in district_code_ids):
                     raise AccessError(_("Access to unauthorized or invalid district codes."))
-            return self['res.company'].browse(district_code_ids)
+            return self['school_base.district_code'].browse(district_code_ids)
     return self.user.district_code_id
 
 
@@ -36,7 +36,7 @@ def school_code(self):
             if user_school_code_ids:
                 if any(did not in school_code_ids for did in school_code_ids):
                     raise AccessError(_("Access to unauthorized or invalid school codes."))
-            return self['res.company'].browse(school_code_ids[0])
+            return self['school_base.school_code'].browse(school_code_ids[0])
     return self.user.school_code_id
 
 
@@ -48,7 +48,7 @@ def school_codes(self):
             if user_school_code_ids:
                 if any(did not in school_code_ids for did in school_code_ids):
                     raise AccessError(_("Access to unauthorized or invalid school codes."))
-            return self['res.company'].browse(school_code_ids)
+            return self['school_base.school_code'].browse(school_code_ids)
     return self.user.school_code_id
 
 
