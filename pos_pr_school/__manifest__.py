@@ -16,8 +16,7 @@
 
     'data': [
         'views/assets.xml',
-        'views/pos_config_views.xml',
-        ],
+        ,
 
     'qweb': ['static/src/xml/screens.xml'],
 
