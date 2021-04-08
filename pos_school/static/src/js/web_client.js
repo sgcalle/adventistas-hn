@@ -17,7 +17,7 @@ odoo.define('pos', require => {
 
             console.log(this.config.school_code_ids);
             console.log('After this loaded');
-            
+
             session.user_context.allowed_school_code_ids = this.config.school_code_ids;
 
             return res;

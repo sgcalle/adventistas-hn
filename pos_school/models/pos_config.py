@@ -15,3 +15,10 @@ class PosConfig(models.Model):
         for session in self:
             session.available_school_code_ids = session.mapped('company_id.district_code_ids.school_code_ids')
 
+    def open_ui(self):
+        res = super(PosConfig, self).open_ui()
+
+        res['url'] += '&school_code_ids=%s' % ','.join(map(str, self.school_code_ids.ids))
+
+        return res
+
