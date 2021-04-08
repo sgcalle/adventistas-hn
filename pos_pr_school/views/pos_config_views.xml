@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
 
-    <record id="pos_pr.view_pos_session_form" model="ir.ui.view">
-        <field name="name">pos.payment.register.view.pos.session.form.inherit</field>
-        <field name="model">pos.session</field>
-        <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+    <record id="pos_config_view_form_inherit" model="ir.ui.view">
+        <field name="name">pos.config.view.form.inherit.school</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" 
+               ref="point_of_sale.pos_config_view_form"/>
         <field name="arch" type="xml">
             <sheet position="inside">
 		<h2>School</h2>

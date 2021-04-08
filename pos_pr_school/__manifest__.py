@@ -14,7 +14,10 @@
 
     'depends': ['pos_pr', 'pos_school'],
 
-    'data': ['views/assets.xml', ],
+    'data': [
+        'views/assets.xml',
+        'views/pos_config_views.xml',
+        ],
 
     'qweb': ['static/src/xml/screens.xml'],
 
