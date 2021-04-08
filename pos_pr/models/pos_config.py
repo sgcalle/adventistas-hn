@@ -8,6 +8,13 @@ class PosConfig(models.Model):
     _inherit = "pos.config"
 
     is_pos_pr_discount = fields.Boolean(default=False)
+    school_code_ids = fields.Many2many('school_base.school_code')
+    available_school_code_ids = fields.Many2many('school_base.school_code')
+
+    @api.depends('company_id')
+    def _compute_available_school_code_ids(self):
+        for session in self:
+            session.available_school_code_ids = session.mapped('company_id.district_code_ids.school_code_ids')
 
     @api.constrains('payment_method_ids')
     def check_if_there_is_discount_payment_method(self):

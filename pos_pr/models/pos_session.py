@@ -81,28 +81,12 @@ class PosSession(models.Model):
             # Crear statements lines
             statement_line_vals = self._get_pr_statement_line_vals(invoice_payment_ids)
             cash_statement_lines = {}
-            # for statement in self.statement_ids:
-                # statement.button_reopen()
-                # cash_statement_lines[statement] = self.env['account.bank.statement.line'].create(statement_line_vals[statement])
-                # if not self.config_id.cash_control:
-                #     statement.write({'balance_end_real': statement.balance_end})
-
-                # statement.button_confirm_bank()
-                # for statement_line in cash_statement_lines[statement]:
-                #     if not statement_line.journal_entry_ids:
-                #         statement_line.fast_counterpart_creation()
-                #         cash_reconcile_lines += statement_line.journal_entry_ids.filtered(lambda aml: aml.account_id.internal_type == 'receivable')
 
             # Invoices Receivable lines
             misc_move_receivable_lines = MoveLine.create(self._get_pr_receivable_line_vals_list(invoice_payment_ids))
 
             account_move.post()
             # Post and reconcile entries
-            # Cash
-            # accounts = cash_reconcile_lines.mapped('account_id')
-            # lines_by_account = [cash_reconcile_lines.filtered(lambda l: l.account_id == account) for account in accounts]
-            # for lines in lines_by_account:
-            #     lines.reconcile()
 
             # Invoices
             for invoice in invoice_payment_ids.mapped('move_id'):

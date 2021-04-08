@@ -32,6 +32,7 @@
 
         'views/assets.xml',
         'views/invoice_payment_views.xml',
+        'views/pos_config_views.xml',
 
         'views/pos_session_views.xml',
         'views/account_journal_views.xml',
