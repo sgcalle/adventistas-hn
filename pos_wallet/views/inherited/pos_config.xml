@@ -16,6 +16,7 @@
                         </div>
                         <div class="content-group mt16">
                             <field name="wallet_category_ids" colspan="4" nolabel="1" widget="many2many_tags" required="1"/>
+<!--                            <field name="module_pos_discount"/>-->
                         </div>
 <!--                        <div>-->
 <!--                            <button name="383" icon="fa-arrow-right" type="action" string="Payment Methods" class="btn-link"/>-->

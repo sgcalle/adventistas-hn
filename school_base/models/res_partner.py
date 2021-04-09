@@ -108,7 +108,7 @@ class Contact(models.Model):
     middle_name = fields.Char("Middle Name")
     last_name = fields.Char("Last Name")
 
-    date_of_birth = fields.Date('Date of birth')
+    date_of_birth = fields.Date(string='Date of birth')
     suffix = fields.Char("Suffix")
     facts_nickname = fields.Char("Facts Nickname")
     ethnicity = fields.Char("Ethnicity")
@@ -119,7 +119,8 @@ class Contact(models.Model):
     race = fields.Char("Race")
     gender = fields.Many2one("school_base.gender", string="Gender")
 
-    date_of_birth = fields.Date("date_of_birth")
+    id_documentation_file = fields.Binary(attachment=True)
+    id_documentation_file_name = fields.Char()
 
     medical_allergies_ids = fields.One2many("school_base.medical_allergy", "partner_id", string="Medical Allergies")
     medical_conditions_ids = fields.One2many("school_base.medical_condition", "partner_id", string="Medical conditions")
@@ -129,33 +130,39 @@ class Contact(models.Model):
     citizenship = fields.Many2one("res.country", string="Citizenship")
     identification = fields.Char("ID number")
     salutation = fields.Char("Salutation")
-    # marital_status = fields.Selection(
-    #     [("married", "Married"), ("single", "Single"), ("divorced", "Divorced"), ("widowed", "Widowed")],
-    #     string="Marital Status")
 
-    marital_status = fields.Many2one('school_base.marital_status', string='Marital status')
+    marital_status_id = fields.Many2one('school_base.marital_status', string='Marital status')
     occupation = fields.Char("Occupation")
     title = fields.Char("Title")
-    relationship_ids = fields.One2many("school_base.relationship", "partner_1", string="Relationships")
 
-    relationship_members_ids = fields.One2many("school_base.relationship", "family_id", string="Relationships Members",
-                                               readonly=True)
+    family_member_ids = fields.Many2many(related='family_ids.member_ids')
+    relationship_ids = fields.One2many("school_base.relationship", "partner_1", string="Relationships")
+    relationship_members_ids = fields.One2many("school_base.relationship", "family_id", string="Relationships Members", readonly=True)
 
     # Fields for current student status, grade leve, status, etc...
     school_code_id = fields.Many2one('school_base.school_code', string='Current school code')
     grade_level_id = fields.Many2one("school_base.grade_level", string="Grade Level")
+
+    school_year_id = fields.Many2one('school_base.school_year', string="School year", help="The school year where the student is enrolled")
+
     student_status = fields.Char("Student status (Deprecated)", help="(This field is deprecated)")
-    # student_status_id = fields.Many2one("school_base.enrollment.status", string="Student status")
+
+    student_status_id = fields.Many2one("school_base.enrollment.status", string="Student status")
 
     # Fields for next student status, grade leve, status, etc...
-    next_school_code_id = fields.Many2one('school_base.school_code', string='Current school code')
+    next_school_code_id = fields.Many2one('school_base.school_code', string='Next school code')
     next_grade_level_id = fields.Many2one("school_base.grade_level", string="Next grade level")
+    student_next_status_id = fields.Many2one("school_base.enrollment.status", string="Student next status")
 
-    student_next_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student next status")
-    student_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student next status")
+    # student_next_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student next status")
+    # student_status_id = fields.Selection(SELECT_STATUS_TYPES, string="Student next status")
     # student_next_status_id2 = fields.Many2one("school_base.enrollment.status", string="Student next status")
 
     # School information
+    home_address_ids = fields.One2many("school_base.home_address", 'family_id', string="Home Addresses",)
+    family_home_address_ids = fields.One2many(related='family_ids.home_address_ids', string="Family Home Addresses",)
+    home_address_id = fields.Many2one("school_base.home_address", string="Home Address")
+
     homeroom = fields.Char("Homeroom")
     class_year = fields.Char("Class year")
     student_sub_status_id = fields.Many2one(
@@ -168,19 +175,15 @@ class Contact(models.Model):
     withdraw_reason_id = fields.Many2one('school_base.withdraw_reason',
                                          string=_("Withdraw reason"))
 
-    reenrollment_status_id = fields.Selection(SELECT_REENROLLMENT_STATUS,
-                                              string="Reenrollment Status")
-    reenrollment_school_year_id = fields.Many2one('school_base.school_year',
-                                                  string=_(
-                                                      "Reenollment school "
-                                                      "year"))
+    reenrollment_record_ids = fields.One2many('school_base.reenrollment.record', 'partner_id')
+
+    reenrollment_status_id = fields.Selection(SELECT_REENROLLMENT_STATUS, string="Reenrollment Status", store=True, compute='_compute_reenrollment_status')
+    reenrollment_school_year_id = fields.Many2one('school_base.school_year', string=_("Reenollment school year"), store=True, compute='_compute_reenrollment_status')
 
     placement_id = fields.Many2one('school_base.placement', string=_("Placement"))
 
-    # Facts metadata
-    facts_id_int = fields.Integer("Facts id (Integer)",
-                                  compute="_converts_facts_id_to_int",
-                                  store=True, readonly=True)
+    facts_id_int = fields.Integer("Facts id (Integer)")
+
     facts_id = fields.Char("Facts id")
 
     # Facts UDID
@@ -194,6 +197,52 @@ class Contact(models.Model):
     condition_ids = fields.One2many("school_base.condition", "partner_id",
                                     string="Conditions")
 
+    # Enrollment history
+    enrollment_history_ids = fields.One2many('school_base.enrollment.history', 'student_id')
+
+    # This fields are mainly used for the onchange method below
+    home_address_name = fields.Char(realated='home_address_id.name')
+    home_address_country_id = fields.Many2one(realated='home_address_id.country_id')
+    home_address_state_id = fields.Many2one(realated='home_address_id.state_id')
+
+    home_address_city = fields.Char(realated='home_address_id.city')
+    home_address_zip = fields.Char(realated='home_address_id.zip')
+    home_address_street = fields.Char(realated='home_address_id.street')
+    home_address_street2 = fields.Char(realated='home_address_id.street2')
+    home_address_phone = fields.Char(realated='home_address_id.phone')
+
+    @api.onchange('parent_id', 'home_address_id',
+                  'home_address_country_id', 
+                  'home_address_state_id',
+                  'home_address_city',
+                  'home_address_street',
+                  'home_address_street2',
+                  'home_address_phone',
+                  )
+    def onchange_parent_id(self):
+        res = super(Contact, self).onchange_parent_id()
+        res = res or {}
+        if self.home_address_id:
+            address_fields = self._address_fields()
+            if any(self.home_address_id[key] for key in address_fields):
+                def convert(value):
+                    return value.id if isinstance(value, models.BaseModel) else value
+                res['value'] = {key: convert(self.home_address_id[key]) for key in address_fields}
+        return res
+
+    @api.onchange('home_address_id', 'home_address_phone')
+    def _phone_sync_from_home_address(self):
+        for partner in self:
+            if partner.home_address_id.phone:
+                partner.phone = partner.home_address_id.phone
+
+    def _fields_sync(self, values):
+        super(Contact, self)._fields_sync(values)
+        if values.get('home_address_id'):
+            self._phone_sync_from_home_address()
+            onchange_vals = self.onchange_parent_id().get('value', {})
+            self.update_address(onchange_vals)
+
     @api.depends("facts_id")
     def _converts_facts_id_to_int(self):
         for partner_id in self:
@@ -203,15 +252,12 @@ class Contact(models.Model):
     def _check_facts_id(self):
         for partner_id in self:
             if partner_id.facts_id:
-
                 if not partner_id.facts_id.isdigit():
                     raise ValidationError("Facts id needs to be an number")
 
-                should_be_unique = self.search_count(
-                    [("facts_id", "=", partner_id.facts_id)])
+                should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_id), ('is_family', '=', partner_id.is_family)])
                 if should_be_unique > 1:
-                    raise ValidationError(
-                        "Another contact has the same facts id!")
+                    raise ValidationError("Another contact has the same facts id! (%s)" % partner_id.facts_id)
                     
     @api.depends("facts_udid")
     def _converts_facts_udid_id_to_int(self):
@@ -229,7 +275,7 @@ class Contact(models.Model):
 
                 should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
                 if should_be_unique > 1:
-                    raise ValidationError("Another contact has the same facts id!")
+                    raise ValidationError("Another contact has the same facts udid! (%s)" % partner_id.facts_udid)
 
     @api.depends("facts_udid")
     def _converts_facts_udid_id_to_int(self):
@@ -237,17 +283,17 @@ class Contact(models.Model):
             partner_id.facts_udid_int = int(
                 partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
 
-    @api.constrains("facts_udid")
-    def _check_facts_udid_id(self):
-        for partner_id in self:
-            if partner_id.facts_udid:
-
-                if not partner_id.facts_udid.isdigit():
-                    raise ValidationError("Facts id needs to be an number")
-
-                should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
-                if should_be_unique > 1:
-                    raise ValidationError("Another contact has the same facts id!")
+    # @api.constrains("facts_udid")
+    # def _check_facts_udid_id(self):
+    #     for partner_id in self:
+    #         if partner_id.facts_udid:
+    #
+    #             if not partner_id.facts_udid.isdigit():
+    #                 raise ValidationError("Facts id needs to be an number")
+    #
+    #             should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
+    #             if should_be_unique > 1:
+    #                 raise ValidationError("Another contact has the same facts id!")
 
     @api.model
     def format_name(self, first_name, middle_name, last_name):
@@ -301,6 +347,13 @@ class Contact(models.Model):
     @api.depends("first_name", "middle_name", "last_name")
     def _compute_name(self):
         self.auto_format_name()
+
+    @api.depends('reenrollment_record_ids')
+    def _compute_reenrollment_status(self):
+        for partner_id in self:
+            reenrollment_record_id = partner_id.reenrollment_record_ids.sorted('create_date', reverse=True)[:1]
+            partner_id.reenrollment_school_year_id = reenrollment_record_id.school_year_id.id
+            partner_id.reenrollment_status_id = reenrollment_record_id.reenrollment_status
 
     @api.model
     def create(self, values):
@@ -385,11 +438,11 @@ class Contact(models.Model):
         return PartnerEnv.search([("is_family", "=", True)]).filtered(
             lambda app: self.id in app.member_ids.ids)
       
-    def recompute_status_id(self):
-        for partner_id in self.filtered('student_status'):
-            student_status = partner_id.student_status
-            if student_status:
-                for status_name, status_label in SELECT_STATUS_TYPES:
-                    if student_status.lower() == status_name.lower():
-                        partner_id.student_status_id = status_name
-                        break
+    # def recompute_status_id(self):
+    #     for partner_id in self.filtered('student_status'):
+    #         student_status = partner_id.student_status
+    #         if student_status:
+    #             for status_name, status_label in SELECT_STATUS_TYPES:
+    #                 if student_status.lower() == status_name.lower():
+    #                     partner_id.student_status_id = status_name
+    #                     break

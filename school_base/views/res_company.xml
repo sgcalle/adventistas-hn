@@ -12,6 +12,8 @@
                 <page string="School information">
                     <group>
                         <field name="district_code_id"/>
+                        <field name="current_school_year_id"/>
+                        <field name="enrollment_school_year_id"/>
                     </group>
                 </page>
             </notebook>

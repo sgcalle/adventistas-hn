@@ -6,8 +6,9 @@ Created on Feb 1, 2020
 from odoo import models, fields, api, _
 
 
-class Relationship(models.Model):
-    _name = "school_base.relationship"
+class SchoolBaseRelationship(models.Model):
+    _name = 'school_base.relationship'
+    _description = "Relationship"
 
     partner_1 = fields.Many2one("res.partner", string="Partner 1", required=True, ondelete="cascade")
     partner_2 = fields.Many2one("res.partner", string="Partner", required=True, ondelete="cascade")
@@ -26,12 +27,12 @@ class Relationship(models.Model):
 
     @api.model
     def create(self, values):
-        relationship = super(Relationship, self).create(values)
+        relationship = super().create(values)
         relationship.update_partner_2_family()
         return relationship
 
     def write(self, values):
-        success = super(Relationship, self).write(values)
+        success = super().write(values)
         if success:
             self.update_partner_2_family()
         return success
@@ -42,11 +43,11 @@ class Relationship(models.Model):
                 if relationship.partner_2:
                     relationship.partner_2.write({
                         'family_ids': [(4, family.id, False)]
-                        })
+                    })
 
                     family.write({
                         'member_ids': [(4, relationship.partner_2.id, False)]
-                        })
+                    })
                     if relationship.relationship_type_id.key in ['father', 'mother']:
                         relationship.partner_2.person_type = 'parent'
     # relationship_type = fields.Selection([
@@ -69,14 +70,15 @@ class RelationshipType(models.Model):
     _order = "sequence"
 
     name = fields.Char(string="Relationship type", required=True, translate=True)
-    key = fields.Selection([
-        ('sibling', _("Sibling")),
-        ('father', _("Father")),
-        ('mother', _("Mother")),
-        ('grandmother', _("Grand mother")),
-        ('grandfather', _("Grand father")),
-        ('stepmother', _("Step mother")),
-        ('stepfather', _("Step father")),
-        ('stepsibling', _("Step sibling")),
-        ], string="Key")
+    key = fields.Char(string="Key", translate=False)
+    # key = fields.Selection([
+    #     ('sibling', _("Sibling")),
+    #     ('father', _("Father")),
+    #     ('mother', _("Mother")),
+    #     ('grandmother', _("Grand mother")),
+    #     ('grandfather', _("Grand father")),
+    #     ('stepmother', _("Step mother")),
+    #     ('stepfather', _("Step father")),
+    #     ('stepsibling', _("Step sibling")),
+    #     ], string="Key")
     sequence = fields.Integer(default=1)

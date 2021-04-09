@@ -41,6 +41,9 @@ class SchoolBaseSettings(models.TransientModel):
                                             config_parameter='school_base.allow_edit_person_name',
                                             default=False)
 
+    current_school_year_id = fields.Many2one('school_base.school_year', related='company_id.current_school_year_id', readonly=False)
+    enrollment_school_year_id = fields.Many2one('school_base.school_year', related='company_id.enrollment_school_year_id', readonly=False)
+
     @api.onchange("name_sorting_setting_ids")
     def _onchange_name_sorting_setting_ids(self):
         name_order_relation = {self.env.ref("school_base.name_sorting_first_name").id: _("First"),
