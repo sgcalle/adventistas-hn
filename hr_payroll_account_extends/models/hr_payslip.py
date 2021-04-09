@@ -86,7 +86,9 @@ class HrPayslip(models.Model):
             if not employee.payroll_invoice_product_id:
                 raise MissingError("Payroll invoice product of {} is not set. Set the product in the employee form.".format(employee.name))
             if not employee.payroll_journal_id:
-                raise MissingError("Payroll journal of {} is not set. Set the journal in the employee form.".format(employee.name))
+                raise MissingError("Payroll bill journal of {} is not set. Set the journal in the employee form.".format(employee.name))
+            if not employee.payroll_invoice_journal_id:
+                raise MissingError("Payroll invoice journal of {} is not set. Set the journal in the employee form.".format(employee.name))
 
         self.compute_sheet()
         res = super(HrPayslip, self).action_payslip_done()
@@ -125,7 +127,7 @@ class HrPayslip(models.Model):
                                     "partner_id": partner_id,
                                     "family_id": family_id,
                                     "student_id": student_id,
-                                    "journal_id": payslip.employee_id.payroll_journal_id.id
+                                    "journal_id": payslip.employee_id.payroll_invoice_journal_id.id
                                 }
                                 if payslip_batch_bill_date:
                                     credit_note_vals["invoice_date"] = payslip_batch_bill_date
