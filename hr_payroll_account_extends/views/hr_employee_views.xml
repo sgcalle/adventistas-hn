@@ -10,8 +10,8 @@
                     <group>
                         <field name="payroll_bill_product_id" string="Bill Product"/>
                         <field name="payroll_invoice_product_id" string="Invoice Product"/>
-                        <field name="payroll_journal_id" string="Bill Journal"/>
-                        <field name="payroll_invoice_journal_id" string="Invoice Journal"/>
+                        <field name="payroll_journal_id" string="Bill Journal" domain="[('type','=','purchase')]"/>
+                        <field name="payroll_invoice_journal_id" string="Invoice Journal" domain="[('type','=','sale')]"/>
                     </group>
                 </page>
             </notebook>
