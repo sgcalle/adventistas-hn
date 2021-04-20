@@ -7,7 +7,10 @@
     'description': """Adventistas - Accounting""",
     'author': 'Eduwebgroup',
     'website': 'http://www.eduwebgroup.com',
-    'depends': ['base', 'account'],
+    'depends': [
+        'base',
+        'account',
+    ],
     'data': [
         'data/l10n_adventistas_chart_data.xml',
         'data/account.account.template.csv',
@@ -15,7 +18,5 @@
         'data/account_data.xml',
         'data/account_chart_template_data.xml',
     ],
-    'demo': [
-        # 'demo/demo_company.xml',
-    ],
+    'demo': [],
 }

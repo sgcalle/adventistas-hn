@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from odoo import models, api, _
+from odoo.exceptions import MissingError
 
 class AccountChartTemplate(models.Model):
     _inherit = "account.chart.template"
@@ -14,8 +15,10 @@ class AccountChartTemplate(models.Model):
     def _create_bank_journals(self, company, acc_template_ref):
         res = super(AccountChartTemplate, self)._create_bank_journals(company, acc_template_ref)
         if self == self.env.ref("l10n_adventistas.cuentas_plantilla"):
-            journals = self.env["account.journal"]
-            journals_data = [
+
+            # create journals
+            journals_obj = self.env["account.journal"]
+            journals_vals = [
                 {
                     "acc_name": "Bank",
                     "account_type": "bank",
@@ -56,15 +59,17 @@ class AccountChartTemplate(models.Model):
                     "code": "NF",
                 },
             ]
-            for acc in journals_data:
-                journals += self.env["account.journal"].create({
-                    "name": acc["acc_name"],
-                    "type": acc["account_type"],
+            journals = journals_obj
+            for journal_vals in journals_vals:
+                journals += journals_obj.create({
+                    "name": journal_vals["acc_name"],
+                    "type": journal_vals["account_type"],
                     "company_id": company.id,
-                    "currency_id": acc.get("currency_id", self.env["res.currency"]).id,
-                    "default_credit_account_id": acc.get("default_account", False),
-                    "default_debit_account_id": acc.get("default_account", False),
+                    "currency_id": journal_vals.get("currency_id", self.env["res.currency"]).id,
+                    "default_credit_account_id": journal_vals.get("default_account", False),
+                    "default_debit_account_id": journal_vals.get("default_account", False),
                     "sequence": 10,
-                    "code": acc["code"],
+                    "code": journal_vals["code"],
                 })
+
         return res
