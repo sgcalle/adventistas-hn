@@ -11,7 +11,10 @@
             <notebook position="inside">
                 <page string="School information">
                     <group>
-                        <field name="district_code_id"/>
+                        <field name="district_code_ids" widget="many2many_tags"/>
+                        <field name="district_school_code_ids" invisible="1"/>
+                        <field name="school_code_ids" widget="many2many_tags"
+                               domain="[('id', 'in', district_school_code_ids)]"/>
                         <field name="current_school_year_id"/>
                         <field name="enrollment_school_year_id"/>
                     </group>

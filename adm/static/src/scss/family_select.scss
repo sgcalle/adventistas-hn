@@ -39,11 +39,31 @@ $selection_item_width: 120px;
         flex: 0 1 10%;
         min-width: $selection_item_width;
         max-width: $selection_item_width;
+        display: flex;
+        flex-direction: column;
     }
 
     &_family_selection {
         li {
             list-style: none;
         }
+    }
+}
+
+#parent_relationship_card_list {
+    .o_adm_hide_if_parent {
+        display: none;
+    }
+}
+
+#sibling_relationship_card_list {
+    .o_adm_hide_if_sibling {
+        display: none;
+    }
+}
+
+#other_relationship_card_list {
+    .o_adm_hide_if_other {
+        display: none;
     }
 }

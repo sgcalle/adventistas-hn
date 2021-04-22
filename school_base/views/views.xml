@@ -59,8 +59,21 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="view_sub_status_tree">
-        <field name="name">Substatus</field>
+    <record id="school_base_enrollment_status_view_tree" model="ir.ui.view">
+        <field name="name">school.base.enrollment.status.view.tree</field>
+        <field name="model">school_base.enrollment.status</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="key"/>
+                <field name="type"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="school_base_enrollment_sub_status_view_tree" model="ir.ui.view">
+        <field name="name">school.base.enrollment.sub.status.view.tree</field>
         <field name="model">school_base.enrollment.sub_status</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
@@ -88,8 +101,8 @@
         <field name="arch" type="xml">
             <tree editable="bottom">
                 <field name="family_id"/>
-                <field name="partner_1"/>
-                <field name="partner_2"/>
+                <field name="partner_individual_id"/>
+                <field name="partner_relation_id"/>
                 <field name="relationship_type_id"/>
                 <field name="is_emergency_contact"/>
                 <field name="custody"/>
@@ -134,6 +147,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="key"/>
+                <field name="type"/>
             </tree>
         </field>
     </record>

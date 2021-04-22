@@ -10,10 +10,18 @@ class SchoolBaseRelationship(models.Model):
     _name = 'school_base.relationship'
     _description = "Relationship"
 
-    partner_1 = fields.Many2one("res.partner", string="Partner 1", required=True, ondelete="cascade")
-    partner_2 = fields.Many2one("res.partner", string="Partner", required=True, ondelete="cascade")
-    family_id = fields.Many2one("res.partner", string="Family", required=True, domain=[('is_family', '=', True)])
-    relationship_type_id = fields.Many2one("school_base.relationship_type", string="Relationship")
+    partner_individual_id = fields.Many2one(
+        "res.partner", string="Individual", required=True, ondelete="cascade")
+    partner_relation_id = fields.Many2one(
+        "res.partner", string="Relation", required=True, ondelete="cascade")
+
+    family_id = fields.Many2one(
+        "res.partner", string="Family", required=True,
+        domain=[('is_family', '=', True)], ondelete="cascade")
+    relationship_type_id = fields.Many2one(
+        "school_base.relationship_type", string="Relationship",
+        ondelete="set null")
+
     custody = fields.Boolean(string="Custody")
     correspondence = fields.Boolean(string="Correspondence")
     grand_parent = fields.Boolean(string="Grand Parent")
@@ -22,45 +30,10 @@ class SchoolBaseRelationship(models.Model):
     is_emergency_contact = fields.Boolean("Is an emergency contact?")
 
     financial_responsability = fields.Boolean()
-    residency_permit_id_number = fields.Many2one('ir.attachment')
-    parent_passport_upload = fields.Many2one('ir.attachment')
 
-    @api.model
-    def create(self, values):
-        relationship = super().create(values)
-        relationship.update_partner_2_family()
-        return relationship
-
-    def write(self, values):
-        success = super().write(values)
-        if success:
-            self.update_partner_2_family()
-        return success
-
-    def update_partner_2_family(self):
-        for relationship in self:
-            for family in relationship.partner_1.family_ids:
-                if relationship.partner_2:
-                    relationship.partner_2.write({
-                        'family_ids': [(4, family.id, False)]
-                    })
-
-                    family.write({
-                        'member_ids': [(4, relationship.partner_2.id, False)]
-                    })
-                    if relationship.relationship_type_id.key in ['father', 'mother']:
-                        relationship.partner_2.person_type = 'parent'
-    # relationship_type = fields.Selection([
-    #         ('sibling', "Sibling"),
-    #         ('father', "Father"),
-    #         ('mother', "Mother"),
-    #         ('uncle', "Uncle"),
-    #         ('grandmother', "Grandmother"),
-    #         ('grandfather', "Grandfather"),
-    #         ('other', "Other"),
-    #     ],
-    #     string="Type", default='other'
-    # )
+    def write(self, vals):
+        res = super(SchoolBaseRelationship, self).write(vals)
+        return res
 
 
 class RelationshipType(models.Model):
@@ -71,14 +44,32 @@ class RelationshipType(models.Model):
 
     name = fields.Char(string="Relationship type", required=True, translate=True)
     key = fields.Char(string="Key", translate=False)
-    # key = fields.Selection([
-    #     ('sibling', _("Sibling")),
-    #     ('father', _("Father")),
-    #     ('mother', _("Mother")),
-    #     ('grandmother', _("Grand mother")),
-    #     ('grandfather', _("Grand father")),
-    #     ('stepmother', _("Step mother")),
-    #     ('stepfather', _("Step father")),
-    #     ('stepsibling', _("Step sibling")),
-    #     ], string="Key")
+    type = fields.Selection([
+        ('daughter', _("Daughter")),
+        ('son', _("Son")),
+        ('child', _("Child")),
+
+        ('sibling', _("Sibling")),
+        ('brother', _("Brother")),
+        ('sister', _("Sister")),
+
+        ('parent', _("Parent")),
+        ('father', _("Father")),
+        ('mother', _("Mother")),
+
+        ('grandparent', _("Grandparent")),
+        ('grandmother', _("Grandmother")),
+        ('grandfather', _("Grandfather")),
+
+        ('stepparent', _("Stepparent")),
+        ('stepmother', _("Stepmother")),
+        ('stepfather', _("Stepfather")),
+        ('stepsibling', _("Stepsibling")),
+        ('stepsister', _("Stepsister")),
+        ('stepbrother', _("Stepbrother")),
+
+        ('uncle', _("Uncle")),
+        ('cousin', _("Cousin")),
+        ('other', _("Other")),
+        ], string="Type")
     sequence = fields.Integer(default=1)

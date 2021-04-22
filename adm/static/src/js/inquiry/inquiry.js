@@ -12,7 +12,7 @@ odoo.define('adm.inquiry', require => {
         const $currentTarget = $(event.currentTarget);
         const $selectGradeLevels = $currentTarget.parents('[role="tabpanel"]').find('[name="selStudentInterestGradeLevel"]');
         const schoolCodeId = $currentTarget.val();
-        
+
         $selectGradeLevels.children("option:gt(0)").hide();
         $selectGradeLevels.children("option[data-school-code='" + schoolCodeId + "']").show();
 
@@ -20,7 +20,7 @@ odoo.define('adm.inquiry', require => {
             $selectGradeLevels.children("option:nth(0)").prop("selected", true);
         }
     }
-    
+
     function recomputaTabStudent() {
         $('#studentsNavbar').find('li').each((i, el) => {
             const $el = $(el);
@@ -254,7 +254,7 @@ odoo.define('adm.inquiry', require => {
                     // State
                     const $selState = $('[name^=selState]');
                     $selState.each((i, selState) => {
-                        
+
                         const stateOption = _.filter(selCountry.options, option => option.dataset.country === countryOption[0].value
                                                      && option.dataset.code === result.region)
                         if (stateOption.length) {

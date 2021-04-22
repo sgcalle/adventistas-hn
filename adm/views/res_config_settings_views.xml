@@ -65,7 +65,7 @@
                                                    class="o_light_label"
                                                    options="{'no_open': 0}"
                                                    style="width: 100%"
-                                                   domain="[('id', 'not in', adm_application_optional_field_ids)]">
+                                                   domain="[('id', 'not in', adm_application_optional_field_ids), ('parent_id', '=', False)]">
                                                 <tree>
                                                     <field name="name"/>
                                                     <field name="field_id" />
@@ -94,7 +94,7 @@
                                                    class="o_light_label"
                                                    options="{'no_open': 0}"
                                                    style="width: 100%"
-                                                   domain="[('id', 'not in', adm_application_required_field_ids)]">
+                                                   domain="[('id', 'not in', adm_application_required_field_ids), ('parent_id', '=', False)]">
                                                 <tree>
                                                     <field name="name"/>
                                                     <field name="field_id" />

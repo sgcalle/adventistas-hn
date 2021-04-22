@@ -13,7 +13,7 @@
         </field>
     </record>
 
-     <record id="view_application_status_view_form" model="ir.ui.view">
+    <record id="view_application_status_view_form" model="ir.ui.view">
         <field name="name">view.application.status.view.form</field>
         <field name="model">adm.application.status</field>
         <field name="arch" type="xml">
@@ -33,9 +33,11 @@
                             />
                         </group>
                         <group>
+                            <field name="import_to_facts"/>
                             <field name="type_id" widget="radio"/>
                         </group>
                     </group>
+
                     <notebook>
                         <page string="Tasks">
                             <field name="task_ids">
@@ -54,6 +56,20 @@
                                 </group>
                                 <group>
                                     <field name="web_alternative_name"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Others" attrs="{'invisible': [('import_to_facts', '!=', True)]}">
+                            <group>
+                                <group>
+                                    <h3 colspan="2">Current year</h3>
+                                    <field name="current_year_status_to_facts"/>
+                                    <field name="current_year_next_status_to_facts"/>
+                                </group>
+                                <group>
+                                    <h3 colspan="2">Enrollment year</h3>
+                                    <field name="next_years_status_to_facts"/>
+                                    <field name="next_years_next_status_to_facts"/>
                                 </group>
                             </group>
                         </page>

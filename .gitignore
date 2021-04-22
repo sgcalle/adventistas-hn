@@ -3,5 +3,6 @@
 **/theme*
 **/.git
 **/*.pyc
+**/*.swp
 **/.idea
 **/.ipynb_checkpoints

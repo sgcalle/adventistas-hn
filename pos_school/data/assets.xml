@@ -4,6 +4,7 @@
         <xpath expr="." position="inside">
             <!--Script-->
             <script type="text/javascript" src="/pos_school/static/src/js/load_fields.js" />
+            <script type="text/javascript" src="/school_base/static/src/js/web_client.js" />
         </xpath>
     </template>
 </odoo>

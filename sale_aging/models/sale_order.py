@@ -28,8 +28,11 @@ class SaleOrder(models.Model):
             ("paid", "Paid Invoice")],
         compute="_compute_invoice_payment_state",
         store=True)
+    remaining_amount = fields.Monetary(string="Remaining Amount",
+        compute="_compute_remaining_amount",
+        store=True)
 
-    @api.depends("invoice_ids", "invoice_ids.state", "invoice_ids.invoice_payment_state")
+    @api.depends("invoice_ids", "invoice_ids.state", "invoice_ids.amount_residual", "invoice_ids.invoice_payment_state")
     def _compute_invoice_payment_state(self):
         for order in self:
             invoices = order.invoice_ids.filtered(lambda x: x.type in ["out_invoice", "out_receipt"] and x.state != "cancel")
@@ -56,6 +59,15 @@ class SaleOrder(models.Model):
                 date_due = order.date_order + relativedelta(days=diff)
             order.computed_invoice_date_due = date_due
     
+    @api.depends("invoice_ids", "invoice_ids.state", "invoice_ids.amount_total")
+    def _compute_remaining_amount(self):
+        for so in self:
+            invoices = so.invoice_ids.filtered(lambda x: x.type in ["out_invoice", "out_receipt"] and x.state != "cancel")
+            remaining_amount = so.amount_total - sum(invoices.mapped("amount_total"))
+            if remaining_amount < 0:
+                remaining_amount = 0
+            so.remaining_amount = remaining_amount
+
     def _compute_days_amount(self):
         for order in self:
             result_30_days = 0.0
@@ -66,15 +78,15 @@ class SaleOrder(models.Model):
             if order.computed_invoice_date_due:
                 diff = fields.Datetime.now() - order.computed_invoice_date_due
                 if diff.days > 120:
-                    result_above_120_days = order.amount_total
+                    result_above_120_days = order.remaining_amount
                 elif diff.days > 90:
-                    result_120_days = order.amount_total
+                    result_120_days = order.remaining_amount
                 elif diff.days > 60:
-                    result_90_days = order.amount_total
+                    result_90_days = order.remaining_amount
                 elif diff.days > 30:
-                    result_60_days = order.amount_total
+                    result_60_days = order.remaining_amount
                 elif diff.days >= 1:
-                    result_30_days = order.amount_total
+                    result_30_days = order.remaining_amount
             order.amount_30_days = result_30_days
             order.amount_60_days = result_60_days
             order.amount_90_days = result_90_days

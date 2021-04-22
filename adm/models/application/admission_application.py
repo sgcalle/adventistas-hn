@@ -2,16 +2,14 @@
 
 from odoo import models, fields, api, exceptions, _
 from odoo.addons.adm.utils import formatting
-import base64
-import datetime
 from odoo.tools.safe_eval import safe_eval
+from ast import literal_eval
 
-status_types = [("stage", "Stage"),
-                ("done", "Done"),
-                ("return", "Return To Parents"),
-                ("started", "Application Started"),
-                ("submitted", "Submitted"),
-                ("cancelled", "Cancelled")]
+import base64
+import hashlib
+import datetime
+import time
+from lxml import etree
 
 
 class Questions(models.Model):
@@ -31,11 +29,22 @@ class ApplicationStatus(models.Model):
     description = fields.Text(string="Description")
     sequence = fields.Integer(readonly=True, default=-1)
 
-    mail_template_id = fields.Many2one('mail.template', string='Email Template', domain=[('model', '=', 'adm.application')],
-                                       help="If set an email will be sent to the customer when the application reaches this status")
+    mail_template_id = fields.Many2one(
+        'mail.template', string='Email Template',
+        domain=[('model', '=', 'adm.application')],
+        help="If set an email will be sent to the customer when "
+             "the application reaches this status")
 
     fold = fields.Boolean(string="Fold")
-    type_id = fields.Selection(status_types, string="Type", default='stage')
+    type_id = fields.Selection([
+        ("stage", "Stage"),
+        ("done", "Done"),
+        ("return", "Return To Parents"),
+        ("started", "Application Started"),
+        ("submitted", "Submitted"),
+        ("import_completed", "Import Completed"),
+        ("cancelled", "Cancelled")
+        ], string="Type", default='stage')
     web_visible = fields.Boolean(string="Visible on web")
     web_alternative_name = fields.Char("Alternative name for web")
     hide_if_cancel = fields.Boolean(string="Hide if cancelled")
@@ -43,11 +52,29 @@ class ApplicationStatus(models.Model):
 
     partner_id = fields.Many2one("res.partner", string="Customer")
 
-    task_ids = fields.One2many("adm.application.task", "status_id", "Status Ids")
+    task_ids = fields.One2many(
+        "adm.application.task", "status_id", "Status Ids")
+    new_user_email_template = fields.Many2one(
+        "mail.template", string="New user Accepted Admission")
+    existed_user_email_template = fields.Many2one(
+        "mail.template", string="Existed user Accepted Admission")
+
+    current_year_status_to_facts = fields.Many2one(
+        "school_base.enrollment.status", string="Current status to FACTS")
+    current_year_next_status_to_facts = fields.Many2one(
+        "school_base.enrollment.status", string="Next status to FACTS")
+
+    next_years_status_to_facts = fields.Many2one(
+        "school_base.enrollment.status", string="Current status to FACTS")
+    next_years_next_status_to_facts = fields.Many2one(
+        "school_base.enrollment.status", string="Next status to FACTS")
+
+    import_to_facts = fields.Boolean()
 
     @api.model
     def create(self, values):
-        next_order = self.env['ir.sequence'].next_by_code('sequence.application.task')
+        next_order = self.env['ir.sequence'].next_by_code(
+            'sequence.application.task')
 
         values['sequence'] = next_order
         return super().create(values)
@@ -61,112 +88,88 @@ class Gender(models.Model):
 
 
 class Application(models.Model):
+    ######################
+    # Private attributes #
+    ######################
     _name = "adm.application"
     _description = "Admission Application"
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin']
 
-    @api.model
-    def _read_group_status_ids(self, stages, domain, order):
-        status_ids = self.env['adm.application.status'].search([])
-        return status_ids
+    ###################
+    # Default methods #
+    ###################
 
+    ######################
+    # Fields declaration #
+    ######################
     # Admission Information
-    preferred_degree_program = fields.Many2one("adm.degree_program", string="Preferred Degree Program")
+    preferred_degree_program = fields.Many2one(
+        "adm.degree_program", string="Preferred Degree Program")
 
     # Demographic
     name = fields.Char(string="Name", related="partner_id.name")
-    first_name = fields.Char(string="First Name", related="partner_id.first_name")
-    middle_name = fields.Char(string="Middle Name", related="partner_id.middle_name")
-    last_name = fields.Char(string="Last Name", related="partner_id.last_name")
-    date_of_birth = fields.Date(string="Date of birth", related="partner_id.date_of_birth")
-    identification = fields.Char(string="Identification", related="partner_id.identification")
-    birth_country = fields.Many2one("res.country", string="Birth Country", related="partner_id.country_id")
-    birth_city = fields.Char("Birth City", related="partner_id.city")
-    gender = fields.Many2one("adm.gender", string="Gender", related="partner_id.gender", inverse="_set_gender")
-    status_history_ids = fields.One2many('adm.application.history.status', 'application_id', string="Status history")
-    last_time_submitted = fields.Datetime(compute='_compute_last_time_submitted', store=True)
-    family_id = fields.Many2one('res.partner', domain="[('is_family', '=', True)]", required=True)
+    first_name = fields.Char(
+        string="First Name", related="partner_id.first_name", readonly=False)
+    middle_name = fields.Char(
+        string="Middle Name", related="partner_id.middle_name", readonly=False)
+    last_name = fields.Char(
+        string="Last Name", related="partner_id.last_name", readonly=False)
+    date_of_birth = fields.Date(
+        string="Date of birth", related="partner_id.date_of_birth", readonly=False)
+    identification = fields.Char(
+        string="Identification", related="partner_id.identification",
+        readonly=False)
+    birth_country = fields.Many2one(
+        "res.country", string="Birth Country",
+        related="partner_id.country_id", readonly=False)
+    birth_city = fields.Char(
+        "Birth City", related="partner_id.city", readonly=False)
+    gender = fields.Many2one(
+        "adm.gender", string="Gender", related="partner_id.gender", readonly=False)
+    status_history_ids = fields.One2many(
+        'adm.application.history.status', 'application_id',
+        string="Status history")
+    last_time_submitted = fields.Datetime(
+        compute='_compute_last_time_submitted', store=True)
+    family_id = fields.Many2one(
+        'res.partner', domain="[('is_family', '=', True)]", required=True)
+    implicated_family_ids = fields.Many2many(
+        'res.partner', string="Implicated families",
+        compute='_compute_implicated_family_ids')
 
-    finish_datetime = fields.Datetime(compute='_compute_finish_date', store=True)
+    finish_datetime = fields.Datetime(
+        compute='_compute_finish_date', store=True)
     finish_timeline = fields.Float(compute='_compute_finish_date', store=True)
 
     responsible_user_id = fields.Many2one('res.users', required=True)
+    responsible_user_ids = fields.Many2many('res.users', compute="_compute_responsible_users", string="Responsible User")
+    user_access_ids = fields.One2many('adm.application.user.access', 'application_id')
+    current_user_access_id = fields.Many2one(
+        'adm.application.user.access', compute='compute_current_user_access')
+    is_current_school_year = fields.Boolean(
+        string="Current school year", compute='_compute_defaults_school_year',
+        search='_search_current_school_year')
+    is_enrollment_school_year = fields.Boolean(
+        string="Enrollment school year",
+        compute='_compute_defaults_school_year',
+        search='_search_enrollment_school_year')
 
-    responsible_user_kanban_ids = fields.Many2many(
-        'res.users',
-        compute="compute_responsible_user_kanban",
-        string="Responsible User")
-
-    is_current_school_year = fields.Boolean(string="Current school year", compute='_compute_current_school_year', search='_search_current_school_year')
-
-    def compute_responsible_user_kanban(self):
-        for application_id in self:
-            application_id.responsible_user_kanban_ids = application_id.responsible_user_id
-
-    assigned_user_id = fields.Many2one('res.users')
-
-    @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
-        a = 0
-        return res
-
-    def _search_current_school_year(self, operator, value):
-        current_school_year_id = int(self.env['ir.config_parameter'].sudo().get_param('adm.adm_current_school_year', False))
-        current_school_year = self.env['school_base.school_year'].browse(current_school_year_id)
-
-        if value:
-            operator = '='
-        else:
-            operator = '!='
-
-        return [('school_year', operator, current_school_year.id)]
-
-    def _compute_current_school_year(self):
-        for application_id in self:
-            current_school_year_id = int(self.env['ir.config_parameter'].sudo().get_param('adm.adm_current_school_year', False))
-            current_school_year = self.env['school_base.school_year'].browse(current_school_year_id)
-            application_id.is_current_school_year = (application_id.school_year
-                                                     or current_school_year
-                                                     or application_id.school_year == current_school_year)
-
-
-    @api.depends('status_history_ids')
-    def _compute_last_time_submitted(self):
-        for application_id in self:
-            submitted_status = application_id.status_history_ids.filtered(lambda sh: sh.status_id.type_id == 'submitted')[:1]
-            application_id.last_time_submitted = submitted_status.timestamp
-
-    @api.depends('status_id', 'status_id.type_id')
-    def _compute_finish_date(self):
-        for application_id in self:
-            if application_id.status_id.type_id == 'done':
-
-                now = datetime.datetime.now()
-                diff = now - application_id.create_date
-
-                application_id.finish_datetime = now
-                # application_id.finish_timeline = diff
-                application_id.finish_timeline = 0
-
-    def _set_gender(self):
-        for application_id in self:
-            application_id.partner_id.gender = self.gender
-
-    def _set_family_id(self):
-        for application_id in self:
-            application_id.family_id = application_id.family_id
-
+    user_id = fields.Many2one('res.users', string='Assigned to', tracking=True)
     father_name = fields.Char("Father name")
     mother_name = fields.Char("Mother name")
 
-    attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'adm.application')], string='Attachments')
+    attachment_ids = fields.One2many(
+        'ir.attachment', 'res_id',
+        domain=[('res_model', '=', 'adm.application')], string='Attachments')
+    how_hear_about_us_id = fields.Many2one('adm.application.option.how.hear.about.us')
 
     # Contact
     email = fields.Char(string="Email", related="partner_id.email", index=True)
     phone = fields.Char(string="Phone", related="partner_id.mobile")
     home_phone = fields.Char(string="Home phone", related="partner_id.phone")
-    other_contacts_ids = fields.One2many("adm.application.other_contacts", "application_id", string="Other Contacts")
+    other_contacts_ids = fields.One2many(
+        "adm.application.other_contacts", "application_id",
+        string="Other Contacts")
     citizenship = fields.Many2one("res.country", string="Citizenship")
     language_spoken = fields.Many2one("adm.language", string="Language Spoken")
     image = fields.Binary("Applicant´s Photo", related="partner_id.image_1920")
@@ -174,10 +177,18 @@ class Application(models.Model):
     current_school = fields.Char(string="Current School")
     current_school_address = fields.Char(string="Current School Address")
 
-    grade_level = fields.Many2one("school_base.grade_level", string="Grade Level", domain=[('active_admissions', '=', True)])
-    grade_level_type = fields.Selection(related="grade_level.user_type_id.type")
-    grade_level_inquiry = fields.Many2one(string="GradeLevel", related="inquiry_id.grade_level_id")
-    school_year = fields.Many2one("school_base.school_year", string="School Year")
+    grade_level_id = fields.Many2one(
+        "school_base.grade_level", string="Grade Level",
+        domain=[('active_admissions', '=', True)])
+    grade_level_type = fields.Selection(
+        related="grade_level_id.user_type_id.type")
+    grade_level_inquiry = fields.Many2one(
+        string="GradeLevel", related="inquiry_id.grade_level_id")
+    school_year_id = fields.Many2one(
+        "school_base.school_year", string="School Year")
+    available_tuition_plan_ids = fields.Many2many(
+        'tuition.plan', compute='_compute_available_tuition_plan_ids')
+    tuition_plan_id = fields.Many2one('tuition.plan')
 
     previous_school = fields.Char(string="Previous School")
     previous_school_address = fields.Char(string="Previous School Address")
@@ -188,57 +199,85 @@ class Application(models.Model):
     bac_grade = fields.Float("BAC Grade")
 
     # Skills
-    language_ids = fields.One2many("adm.application.language",
-                                   "application_id", string="Languages",
-                                   kwargs={"website_form_blacklisted": False})
+    language_ids = fields.One2many(
+        "adm.application.language", "application_id",
+        string="Languages", kwargs={"website_form_blacklisted": False})
+
+    primary_language_at_home_id = fields.Many2one('adm.language')
 
     # Location
-    country_id = fields.Many2one("res.country",
-                                 related="partner_id.country_id",
-                                 string="Country")
-    state_id = fields.Many2one("res.country.state",
-                               related="partner_id.state_id", string="State")
+    country_id = fields.Many2one(
+        "res.country", related="partner_id.country_id", string="Country")
+    state_id = fields.Many2one(
+        "res.country.state", related="partner_id.state_id", string="State")
     city = fields.Char(string="City", related="partner_id.city")
     street = fields.Char(string="Street Address", related="partner_id.street")
     zip = fields.Char("zip", related="partner_id.zip")
 
     # Relationships
-    relationship_ids = fields.One2many(string="Relationship",
-                                       related="partner_id.relationship_ids",
-                                       readonly=False)
-    custodial_relationship_ids = fields.Many2many('school_base.relationship',
-                                                  string="Custodials",
-                                                  compute="compute_custodials",
-                                                  store=False,
-                                                  )
+    student_relationship_ids = fields.Many2many(
+        'school_base.relationship', string="Relationship",
+        related="partner_id.self_relationship_ids", readonly=False)
 
-    @api.depends('relationship_ids', 'relationship_ids.custody')
-    def compute_custodials(self):
-        for application_id in self:
-            application_id.custodial_relationship_ids = (
-                application_id.relationship_ids.filtered('custody'))
+    parent_relationship_ids = fields.One2many(
+        'school_base.relationship',
+        string="Parents/Guardian",
+        # compute="compute_relationships",
+        # inverse="_set_parent_relationships",
+        related='partner_id.parent_relationship_ids',
+        readonly=False,
+        )
 
+    sibling_relationship_ids = fields.One2many(
+        'school_base.relationship',
+        string="Siblings",
+        # compute="compute_relationships",
+        # inverse="_set_sibling_relationships",
+        related='partner_id.sibling_relationship_ids',
+        readonly=False,
+        store=False
+        )
+
+    other_relationship_ids = fields.One2many(
+        'school_base.relationship',
+        string="Others",
+        # compute="compute_relationships",
+        # inverse="_set_other_relationships",
+        related='partner_id.other_relationship_ids',
+        readonly=False,
+        store=False
+        )
+
+    custodial_relationship_ids = fields.Many2many(
+        'school_base.relationship', string="Custody contacts",
+        related='partner_id.custodial_relationship_ids', store=False)
     # Documentation
-    letter_of_motivation_id = fields.Many2one("ir.attachment",
-                                              string="Letter of motivation")
+    letter_of_motivation_id = fields.Many2one(
+        "ir.attachment", string="Letter of motivation")
     cv_id = fields.Many2one("ir.attachment", string="C.V")
-    grade_transcript_id = fields.Many2one("ir.attachment",
-                                          string="Grade transcript")
+    grade_transcript_id = fields.Many2one(
+        "ir.attachment", string="Grade transcript")
     letters_of_recommendation_id = fields.Many2one(
         "ir.attachment", string="Letter of recommendation")
 
     # Additional student info
-    resident_status = fields.Selection([('permanent', 'Permanent'),
-                                        ('transient', 'Transient'),
-                                        ],
-                                       string="Resident status")
+    resident_status = fields.Selection(
+        [('permanent', 'Permanent'), ('transient', 'Transient'), ],
+        string="Resident status")
     resident_length_of_stay = fields.Char("Length of stay")
 
     # languages level
-    languages_levels = [("beginner", "Beginner"), ("elementary", "Elementary"), ("intermediate", "Intermediate"), ("advanced", "Advanced"), ("fluent", "Fluent")]
-    first_level_language = fields.Selection(languages_levels, string="Level", default='beginner')
-    second_level_language = fields.Selection(languages_levels, string="Level", default='beginner')
-    third_level_language = fields.Selection(languages_levels, string="Level", default='beginner')
+    languages_levels = [
+        ("beginner", "Beginner"), ("elementary", "Elementary"),
+        ("intermediate", "Intermediate"),
+        ("advanced", "Advanced"), ("fluent", "Fluent")
+        ]
+    first_level_language = fields.Selection(
+        languages_levels, string="Level", default='beginner')
+    second_level_language = fields.Selection(
+        languages_levels, string="Level", default='beginner')
+    third_level_language = fields.Selection(
+        languages_levels, string="Level", default='beginner')
 
     number_years_in_english = fields.Char("Years in English")
     additional_info_other = fields.Char("Other")
@@ -254,155 +293,436 @@ class Application(models.Model):
     iep_education = fields.Boolean("IEP Education")
 
     # Previous School
-    previous_school_ids = fields.One2many("adm.previous_school_description", "application_id")
-
-    # houses
-    house_address_ids = fields.One2many(related="family_id.house_address_ids", string="House addresses")
+    previous_school_ids = fields.One2many("adm.previous.school.description", "application_id")
 
     # References
     isp_community_reference_1 = fields.Char("ISP Community Reference #1")
     isp_community_reference_2 = fields.Char("ISP Community Reference #2")
 
-    personal_reference_contact_information_1 = fields.Char("Personal Reference #1 Contact Information:")
+    personal_reference_contact_information_1 = fields.Char(
+        "Personal Reference #1 Contact Information:")
     personal_reference_name_1 = fields.Char("Personal Reference #1 Name")
 
-    personal_reference_contact_information_2 = fields.Char("Personal Reference #2 Contact Information:")
+    personal_reference_contact_information_2 = fields.Char(
+        "Personal Reference #2 Contact Information:")
     personal_reference_name_2 = fields.Char("Personal Reference #2 Name")
 
     # Medical information
-    doctor_name = fields.Char("Doctor name")
-    doctor_phone = fields.Char("Doctor phone")
-    doctor_address = fields.Char("Doctor Direction")
-    hospital = fields.Char("Hospital")
-    hospital_address = fields.Char("Hospital Address")
-    permission_to_treat = fields.Boolean("Permission To Treat")
-    blood_type = fields.Char("Blood Type")
-    medical_allergies_ids = fields.One2many(string="Allergies", related="partner_id.medical_allergies_ids", readonly=False)
-    medical_conditions_ids = fields.One2many(string="Conditions", related="partner_id.medical_conditions_ids", readonly=False)
-    medical_medications_ids = fields.One2many(string="Medications", related="partner_id.medical_medications_ids", readonly=False)
+    doctor_name = fields.Char(
+        "Doctor name", related='partner_id.doctor_name', readonly=False)
+    doctor_phone = fields.Char(
+        "Doctor phone", related='partner_id.doctor_phone', readonly=False)
+    doctor_address = fields.Char(
+        "Doctor Direction", related='partner_id.doctor_address',
+        readonly=False)
+    hospital = fields.Char(
+        "Hospital", related='partner_id.hospital', readonly=False)
+    hospital_address = fields.Char(
+        "Hospital Address", related='partner_id.hospital_address',
+        readonly=False)
+    permission_to_treat = fields.Boolean(
+        "Permission To Treat", related='partner_id.permission_to_treat',
+        readonly=False)
+    blood_type = fields.Char(
+        "Blood Type", related='partner_id.blood_type', readonly=False)
+
+    medical_allergies_ids = fields.One2many(
+        string="Allergies", related="partner_id.medical_allergies_ids",
+        readonly=False)
+    medical_conditions_ids = fields.One2many(
+        string="Conditions", related="partner_id.medical_conditions_ids",
+        readonly=False)
+    medical_medications_ids = fields.One2many(
+        string="Medications", related="partner_id.medical_medications_ids",
+        readonly=False)
 
     # Meta
-    contact_time_id = fields.Many2one("adm.contact_time", string="Preferred contact time")
+    contact_time_id = fields.Many2one(
+        "adm.contact_time", string="Preferred contact time")
 
     partner_id = fields.Many2one("res.partner", string="Contact")
-    status_id = fields.Many2one("adm.application.status", string="Status", group_expand="_read_group_status_ids")
+    partner_family_ids = fields.Many2many('res.partner', related='partner_id.family_ids')
+    partner_family_member_ids = fields.Many2many('res.partner', related='partner_id.family_member_ids')
+
+    status_id = fields.Many2one(
+        "adm.application.status", string="Status",
+        group_expand="_read_group_status_ids")
     task_ids = fields.Many2many("adm.application.task")
+
+    are_stage_task_complete = fields.Boolean(
+        "Are all task complete", compute='compute_all_task_complete',
+        store=True)
 
     inquiry_id = fields.Many2one("adm.inquiry")
 
-    state_tasks = fields.One2many(string="State task", related="status_id.task_ids")
+    state_tasks = fields.One2many(
+        string="State task", related="status_id.task_ids")
 
-    status_type = fields.Selection(string="Status Type", related="status_id.type_id")
+    status_type = fields.Selection(
+        string="Status Type", related="status_id.type_id")
     forcing = False
 
     # QUESTION CUSTOMIZED PREESCOLAR
-    applying_semester = fields.Selection([
-        ('semester_1', 'Semester 1 (August)'),
-        ('semester_2', 'Semester 2 (January)'),
-        ('immediate', 'Immediate'),
-        ],
-        string="Applying semester")
-
-    # HERMANOS INFORMATION
-    sibling_ids = fields.One2many("adm.application.sibling", "application_id", "Siblings")
+    applying_semester = fields.Selection(
+        [
+            ('semester_1', 'Semester 1 (August)'),
+            ('semester_2', 'Semester 2 (January)'),
+            ('immediate', 'Immediate'),
+            ], string="Applying semester")
 
     # Files
-    passport_file_ids = fields.Many2many('ir.attachment', 'application_passport_id')
-    residency_file_ids = fields.Many2many('ir.attachment', 'application_residency_id')
+    birth_certificate_attachment_ids = fields.Many2many(
+        'ir.attachment', relation='application_birth_certificates')
+    immunization_records_attachment_ids = fields.Many2many(
+        'ir.attachment', relation='application_immunization_records')
+    custody_documents_attachment_ids = fields.Many2many(
+        'ir.attachment', relation='application_custody_documents')
+    current_report_card_attachment_ids = fields.Many2many(
+        'ir.attachment', relation='application_current_report_cards')
+    standardized_test_attachment_ids = fields.Many2many(
+        'ir.attachment', relation='application_standardized_tests')
+
+    passport_file_ids = fields.Many2many(
+        'ir.attachment', 'application_passport_id')
+    residency_file_ids = fields.Many2many(
+        'ir.attachment', 'application_residency_id')
 
     residency_permit_id_number = fields.Many2one('ir.attachment')
     parent_passport_upload = fields.Many2one('ir.attachment')
 
-    required_fields_completed = fields.Integer(string="Required fields completed", compute="_compute_application_fields")
-    optional_fields_completed = fields.Integer(string="Optional fields completed", compute="_compute_application_fields")
-    fields_completed = fields.Float(string="Fields completed", compute="_compute_application_fields")
+    # Fields compute percentage
+    required_fields_completed = fields.Integer(
+        string="Required fields completed",
+        compute="_compute_application_fields")
+    optional_fields_completed = fields.Integer(
+        string="Optional fields completed",
+        compute="_compute_application_fields")
+    fields_completed = fields.Float(
+        string="Fields completed", compute="_compute_application_fields")
 
-    total_required_fields_completed = fields.Float(string="Total required fields completed", compute="_compute_application_fields")
-    total_optional_fields_completed = fields.Float(string="Total optional fields completed", compute="_compute_application_fields")
-    total_fields_completed = fields.Float(string="Total fields completed", compute="_compute_application_fields")
+    total_required_fields_completed = fields.Float(
+        string="Total required fields completed",
+        compute="_compute_application_fields")
+    total_optional_fields_completed = fields.Float(
+        string="Total optional fields completed",
+        compute="_compute_application_fields")
+    total_fields_completed = fields.Float(
+        string="Total fields completed", compute="_compute_application_fields")
 
     # Signature
     signature_attach_url = fields.Char("Signature Attachment URL")
     signature_person_name = fields.Char()
     signature_agreements = fields.Boolean(string="Signature agreements")
-    check_confidential_info_adm_file = fields.Boolean(string="Rights to access confidential information contained in applicant's admission file.")
+    check_confidential_info_adm_file = fields.Boolean(
+        string="Rights to access confidential information "
+               "contained in applicant's admission file.")
 
     signature_date = fields.Date()
 
+    ##############################
+    # Compute and search methods #
+    ##############################
+    @api.depends("first_name", "middle_name", "last_name")
+    def _update_contact(self):
+        for record in self:
+            record.partner_id.first_name = record.first_name
+
+    def _compute_implicated_family_ids(self):
+        for application_id in self:
+            application_id.implicated_family_ids = False
+
+    def _compute_responsible_users(self):
+        for application_id in self:
+            application_id.responsible_user_ids = application_id.mapped('user_access_ids.user_id')
+
+    def _compute_defaults_school_year(self):
+        for application_id in self:
+            current_school_year = self.env.company.current_school_year_id
+            enrollment_school_year = self.env.company.enrollment_school_year_id
+
+            application_id.is_current_school_year = (
+                    application_id.school_year_id
+                    or current_school_year
+                    or application_id.school_year_id == current_school_year)
+            application_id.is_enrollment_school_year = (
+                    application_id.school_year_id
+                    or current_school_year
+                    or application_id.school_year_id == enrollment_school_year)
+
+    def compute_current_user_access(self):
+        for application in self:
+            user_access = application.user_access_ids.filtered(
+                lambda us: us.user_id == self.env.user
+                ).sorted('create_date', reverse=True)
+            application.current_user_access_id = user_access[:1]
+
+    @api.depends('status_history_ids')
+    def _compute_last_time_submitted(self):
+        for application_id in self:
+            submitted_status = application_id.status_history_ids.filtered(
+                lambda sh: sh.status_id.type_id == 'submitted')[:1]
+            application_id.last_time_submitted = submitted_status.timestamp
+
+    @api.depends('status_id', 'status_id.type_id')
+    def _compute_finish_date(self):
+        for application_id in self:
+            if application_id.status_id.type_id == 'done':
+                now = datetime.datetime.now()
+                application_id.finish_datetime = now
+                application_id.finish_timeline = 0
+
+    @api.model
+    def _create_relation_if_not_exists(self, relationships):
+        rels = relationships.filtered(lambda r: r._origin)
+        for relation in relationships:
+            if not relation._origin:
+                rels += relation.copy()
+        return rels
+
+    def _set_parent_relationships(self):
+        for application_id in self:
+            application_id.partner_id.parent_relationship_ids = application_id.parent_relationship_ids
+
+    def _set_sibling_relationships(self):
+        for application_id in self:
+            application_id.partner_id.sibling_relationship_ids = application_id.sibling_relationship_ids
+
+    def _set_other_relationships(self):
+        for application_id in self:
+            application_id.partner_id.other_relationship_ids = application_id.other_relationship_ids
+
     def _compute_application_fields(self):
         for application_id in self:
-
-            config_parameter = self.env['ir.config_parameter'].sudo()
-            application_required_fields_str = config_parameter.get_param('adm_application_required_field_ids', '')
-            application_required_fields = [int(e) for e in application_required_fields_str.split(',') if e.isdigit()]
-
-            if application_required_fields:
-                required_field_ids = self.env['adm.fields.settings'].sudo().browse(application_required_fields)
-                filtered_required_fields_ids = self.env['adm.fields.settings'].sudo()
-                for required_field_id in required_field_ids:
-                    field_domain = safe_eval(required_field_id.domain or '[]')
-                    if application_id.filtered_domain(field_domain):
-                        filtered_required_fields_ids += required_field_id
-
-                application_id.required_fields_completed = sum(filtered_required_fields_ids.mapped(lambda f: not not application_id[f.name]))
-                if filtered_required_fields_ids:
-                    application_id.total_required_fields_completed = application_id.required_fields_completed * 100 / len(filtered_required_fields_ids)
-                else:
-                    application_id.total_required_fields_completed = 0
+            required_field_ids = self.get_required_fields()
+            application_id.required_fields_completed = sum(
+                required_field_ids.mapped(
+                    lambda f: not not application_id[f.name]))
+            if required_field_ids:
+                application_id.total_required_fields_completed = (
+                        application_id.required_fields_completed
+                        * 100
+                        / len(required_field_ids))
             else:
-                application_id.required_fields_completed = 0
                 application_id.total_required_fields_completed = 0
 
-            application_optional_fields_str = config_parameter.get_param('adm_application_optional_field_ids', '')
-            application_optional_fields = [int(e) for e in application_optional_fields_str.split(',') if e.isdigit()]
-
-            if application_optional_fields:
-                optional_field_ids = self.env['adm.fields.settings'].sudo().browse(application_optional_fields)
-                filtered_optional_field_ids = self.env['adm.fields.settings'].sudo()
-                for required_field_id in optional_field_ids:
-                    field_domain = safe_eval(required_field_id.domain or '[]')
-                    if application_id.filtered_domain(field_domain):
-                        filtered_optional_field_ids += optional_field_ids
-                application_id.optional_fields_completed = sum(filtered_optional_field_ids.mapped(lambda f: not not application_id[f.name]))
-                if filtered_optional_field_ids:
-                    application_id.total_optional_fields_completed = application_id.optional_fields_completed * 100 / len(filtered_optional_field_ids)
-                else:
-                    application_id.total_optional_fields_completed = 0
+            optional_field_ids = self.get_optional_fields()
+            application_id.optional_fields_completed = sum(
+                optional_field_ids.mapped(
+                    lambda f: not not application_id[f.name]))
+            if optional_field_ids:
+                application_id.total_optional_fields_completed = (
+                        application_id.optional_fields_completed
+                        * 100
+                        / len(optional_field_ids))
             else:
-                application_id.optional_fields_completed = 0
                 application_id.total_optional_fields_completed = 0
 
             # Required fields first
-            application_id.fields_completed = application_id.required_fields_completed + application_id.optional_fields_completed
-            if application_optional_fields and application_required_fields:
-                application_id.total_fields_completed = (application_id.fields_completed * 100) / (len(application_optional_fields) + len(application_required_fields))
+            application_id.fields_completed = (
+                    application_id.required_fields_completed
+                    + application_id.optional_fields_completed)
+            if required_field_ids and optional_field_ids:
+                application_id.total_fields_completed = (
+                        (application_id.fields_completed * 100)
+                        / (len(required_field_ids) + len(optional_field_ids)))
             else:
                 application_id.total_fields_completed = 0
 
-    def message_get_suggested_recipients(self):
-        recipients = super().message_get_suggested_recipients()
-        try:
-            for inquiry in self:
-                if inquiry.email:
-                    inquiry._message_add_suggested_recipient(recipients, partner=self.partner_id, email=inquiry.email, reason=_('Custom Email Luis'))
-        except exceptions.AccessError:  # no read access rights -> just ignore suggested recipients because this imply modifying followers
-            pass
-        return recipients
+    @api.depends('status_id', 'state_tasks', 'task_ids')
+    def compute_all_task_complete(self):
+        for application_id in self:
+            stage_task_completed = (application_id.state_tasks
+                                    & application_id.task_ids)
+            are_task_completed = \
+                stage_task_completed == application_id.state_tasks
+            application_id.are_stage_task_complete = are_task_completed
 
-    def force_back(self):
-        status_ids_ordered = self.env['adm.application.status'].search([], order="sequence")
-        index = 0
+    @api.depends("first_name", "middle_name", "last_name")
+    def _compute_name(self):
+        for record in self:
+            record.name = formatting.format_name(
+                record.first_name, record.middle_name, record.last_name)
+            record.partner_id.first_name = record.first_name
+
+    def _set_family_id(self):
+        for application_id in self:
+            application_id.family_id = application_id.family_id
+
+    def _search_current_school_year(self, operator, value):
+        current_school_year = self.env.company.current_school_year_id
+
+        if value:
+            operator = '='
+        else:
+            operator = '!='
+
+        return [('school_year_id', operator, current_school_year.id)]
+
+    def _search_enrollment_school_year(self, operator, value):
+        enrollment_school_year = self.env.company.enrollment_school_year_id
+
+        if value:
+            operator = '='
+        else:
+            operator = '!='
+
+        return [('school_year_id', operator, enrollment_school_year.id)]
+
+    def _compute_available_tuition_plan_ids(self):
+        for application_id in self:
+            school_year_id = application_id.school_year_id
+            tuition_plan_ids = \
+                self.env['tuition.plan'].search([
+                    ('period_date_from', '>=', school_year_id.date_start),
+                    ('period_date_from', '<=', school_year_id.date_end),
+                    ('grade_level_ids', '=', application_id.grade_level_id.id)
+                    ])
+            application_id.available_tuition_plan_ids = tuition_plan_ids
+
+    ############################
+    # Constrains and onchanges #
+    ############################
+    @api.onchange("country_id")
+    def _onchange_country_id(self):
+        res = {}
+        if self.country_id:
+            res['domain'] = {
+                'state_id': [('country_id', '=', self.country_id.id)]
+                }
+
+    @api.onchange("first_name", "middle_name", "last_name")
+    def _set_full_name(self):
+        self.name = formatting.format_name(
+            self.first_name, self.middle_name, self.last_name)
+
+    #########################
+    # CRUD method overrides #
+    #########################
+    @api.model
+    def _read_group_status_ids(self, stages, domain, order):
+        status_ids = self.env['adm.application.status'].search([])
+        return status_ids
+
+    @api.model
+    def create(self, values):
+        if not values.get('status_id', False):
+            status_id = self.env['adm.application.status'].search(
+                [], order="sequence")[0]
+            values['status_id'] = status_id.id
+        else:
+            status_id = self.env['adm.application.status'].browse(
+                values['status_id'])
+        # values['name'] = formatting.format_name(values['first_name'],
+        # values['middle_name'], values['last_name'])
+        application_id = super(Application, self).create(values)
+
+        member_ids = application_id.partner_id.mapped('family_ids.member_ids')
+
+        application_id.message_subscribe(
+            partner_ids=member_ids.filtered(
+                lambda m: m.person_type == 'parent').ids)
+
+        message = _("Application created in [%s] status") % status_id.name
+        timestamp = datetime.datetime.now()
+
+        self.env['adm.application.history.status'].sudo().create({
+            'note': message,
+            'timestamp': timestamp,
+            'application_id': application_id.id,
+            'status_id': status_id.id,
+            })
+
+        if status_id.mail_template_id:
+            application_id.message_post_with_template(
+                template_id=status_id.mail_template_id.id,
+                res_id=application_id.id)
+
+        return application_id
+
+    def write(self, values):
+        for application_id in self:
+            first_name = values.get('first_name', application_id.first_name)
+            middle_name = values.get('middle_name', application_id.middle_name)
+            last_name = values.get('last_name', application_id.last_name)
+
+            # "related" in application_id.fields_get()["email"]
+            # Se puede hacer totalmente dinamico, no lo hago ahora por falta de
+            # tiempo
+            # Pero sin embargo, es totalmente posible.
+            # Los no related directamente no tiene related, y los que si son
+            # tiene el campo related de la siguiente manera: (model, field)
+            # fields = application_id.fields_get()
+            partner_related_fields = {}
+            partner_fields = [
+                'email', 'phone', 'home_phone', 'country_id', 'state_id',
+                'city', 'street', 'zip', 'date_of_birth', 'identification'
+                ]
+            for partner_field in partner_fields:
+                if partner_field in values:
+                    partner_related_fields[partner_field] = \
+                        values[partner_field]
+
+            if "first_name" in values:
+                partner_related_fields["first_name"] = first_name
+            if "middle_name" in values:
+                partner_related_fields["middle_name"] = middle_name
+            if "last_name" in values:
+                partner_related_fields["last_name"] = last_name
+
+            application_id.sudo().partner_id.write(partner_related_fields)
+
+            # PARA PONER VALOR POR DEFECTO
+            # application_id._context.get('forcing', False):
+
+            if values.get('status_id', False):
+                next_status_id = \
+                    application_id.env['adm.application.status'].browse(
+                        values['status_id'])
+
+                message = _("From [%s] to [%s] status") % (
+                    application_id.status_id.name, next_status_id.name)
+                timestamp = datetime.datetime.now()
+
+                self.env['adm.application.history.status'].sudo().create({
+                    'note': message,
+                    'timestamp': timestamp,
+                    'application_id': application_id.id,
+                    'status_id': next_status_id.id,
+                    })
+
+                if next_status_id.mail_template_id:
+                    application_id.message_post_with_template(
+                        template_id=next_status_id.mail_template_id.id,
+                        res_id=application_id.id)
+
+                if not self._context.get('forcing', False):
+                    if not application_id.are_stage_task_complete:
+                        raise exceptions.ValidationError(
+                            _("All task are not completed"))
+            else:
+                application_id.forcing = False
+
+            member_ids = application_id.partner_id.mapped(
+                'family_ids.member_ids')
+
+            application_id.message_subscribe(
+                partner_ids=member_ids.filtered(
+                    lambda m: m.person_type == 'parent').ids)
+
+        return super(Application, self).write(values)
+
+    ##################
+    # Action methods #
+    ##################
+    def cancel(self):
+
+        status_ids_ordered = self.env['adm.application.status'].search(
+            [], order="sequence")
+
         for status in status_ids_ordered:
-            if status == self.status_id:
+            if status.type_id == 'cancelled':
+                self.status_id = status
                 break
-            index += 1
-
-        index -= 1
-        if index >= 0:
-            next_status = status_ids_ordered[index]
-            self.with_context({
-                'forcing': True
-                }).status_id = next_status
 
     def print_default(self):
         return {
@@ -420,8 +740,41 @@ class Application(models.Model):
             'res_id': self.id,
             }
 
-    # GENERATE THE INTERNAL REPORT AND WILL SAVE INT ATTACHMENT OF THE APPLICATION
+    def force_back(self):
+        status_ids_ordered = self.env['adm.application.status'].search(
+            [], order="sequence")
+        index = 0
+        for status in status_ids_ordered:
+            if status == self.status_id:
+                break
+            index += 1
+
+        index -= 1
+        if index >= 0:
+            next_status = status_ids_ordered[index]
+            self.with_context({
+                'forcing': True
+                }).status_id = next_status
+
+    def force_next(self):
+        status_ids_ordered = self.env['adm.application.status'].sudo().search(
+            [], order="sequence")
+        index = 0
+        for status in status_ids_ordered:
+            if status == self.status_id:
+                break
+            index += 1
+
+        index += 1
+        if index < len(status_ids_ordered):
+            next_status = status_ids_ordered[index]
+            self.with_context({
+                'forcing': True
+                }).status_id = next_status
+
     def generate_internal_report(self):
+        """  Generate the internal report and will save int
+             attachment of the application """
         AttachmentEnv = self.env["ir.attachment"]
         REPORT_ID = 'adm.report_internal_custom'
         pdf = self.env.ref(REPORT_ID).render_qweb_pdf(self.ids)
@@ -437,8 +790,6 @@ class Application(models.Model):
             'res_model': 'adm.application',
             'res_id': self.id,
             'datas': b64_pdf,
-            # 'datas': base64.b64encode(urlopen('/report/html/adm.report_internal_custom/'+str(self.id)).read()),
-            # 'datas': base64.b64encode(s.get(url).content),
             })
 
         return {
@@ -448,20 +799,64 @@ class Application(models.Model):
             'res_id': self.id,
             }
 
-    def force_next(self):
-        status_ids_ordered = self.env['adm.application.status'].sudo().search([], order="sequence")
-        index = 0
-        for status in status_ids_ordered:
-            if status == self.status_id:
-                break
-            index += 1
+    ####################
+    # Business methods #
+    ####################
+    def get_required_fields(self):
+        # First we get the all the fields
+        config_parameter = self.env['ir.config_parameter'].sudo()
+        application_required_fields_str = config_parameter.get_param(
+            'adm_application_required_field_ids', '')
+        application_required_fields = [
+            int(e)
+            for e in application_required_fields_str.split(',')
+            if e.isdigit()
+            ]
+        required_field_ids = self.env['adm.fields.settings'].sudo().browse(
+            application_required_fields)
 
-        index += 1
-        if index < len(status_ids_ordered):
-            next_status = status_ids_ordered[index]
-            self.with_context({
-                'forcing': True
-                }).status_id = next_status
+        # Then we filter by the field domain
+        filtered_required_fields_ids = self.env['adm.fields.settings'].sudo()
+        for required_field_id in required_field_ids:
+            field_domain = safe_eval(required_field_id.domain or '[]')
+            if self.filtered_domain(field_domain):
+                filtered_required_fields_ids += required_field_id
+
+        return filtered_required_fields_ids
+
+    def get_optional_fields(self):
+        application_optional_fields_str = \
+            self.env['ir.config_parameter'].sudo().get_param(
+                'adm_application_optional_field_ids', '')
+        application_optional_fields = [
+            int(e)
+            for e in application_optional_fields_str.split(',')
+            if e.isdigit()
+            ]
+        optional_field_ids = self.env['adm.fields.settings'].sudo().browse(
+            application_optional_fields)
+
+        filtered_optional_field_ids = self.env['adm.fields.settings'].sudo()
+        for required_field_id in optional_field_ids:
+            field_domain = safe_eval(required_field_id.domain or '[]')
+            if self.filtered_domain(field_domain):
+                filtered_optional_field_ids += optional_field_ids
+
+        return filtered_optional_field_ids
+
+    def message_get_suggested_recipients(self):
+        recipients = super().message_get_suggested_recipients()
+        try:
+            for inquiry in self:
+                if inquiry.email:
+                    inquiry._message_add_suggested_recipient(
+                        recipients, partner=self.partner_id,
+                        email=inquiry.email, reason=_('Custom Email Luis'))
+        except exceptions.AccessError:
+            # no read access rights -> just ignore
+            # suggested recipients because this imply modifying followers
+            pass
+        return recipients
 
     def force_status_submitted(self, next_status_id):
         self.with_context({
@@ -483,125 +878,215 @@ class Application(models.Model):
             next_status = status_ids_ordered[index]
 
             if self.status_id.type_id == 'done':
-                raise exceptions.except_orm(_('Application completed'), _('The Application is already done'))
+                raise exceptions.except_orm(
+                    _('Application completed'),
+                    _('The Application is already done'))
             elif self.status_id.type_id == 'cancelled':
-                raise exceptions.except_orm(_('Application cancelled'), _('The Application cancelled'))
+                raise exceptions.except_orm(
+                    _('Application cancelled'),
+                    _('The Application cancelled'))
             else:
                 self.status_id = next_status
 
-    def cancel(self):
-        status_ids_ordered = self.env['adm.application.status'].search([], order="sequence")
-        for status in status_ids_ordered:
-            if status.type_id == 'cancelled':
-                self.status_id = status
-                break
+    def get_partner_invitation(self, email, access=False, mail_template=False):
+        self.ensure_one()
+        if not access:
+            access = []
 
-    @api.depends("first_name", "middle_name", "last_name")
-    def _compute_name(self):
-        for record in self:
-            record.name = formatting.format_name(record.first_name, record.middle_name, record.last_name)
-            record.partner_id.first_name = record.first_name
+        if not mail_template:
+            mail_template = \
+                self.env.company.sudo().mail_inviting_partner_to_application_id
 
-    @api.depends("first_name", "middle_name", "last_name")
-    def _update_contact(self):
-        for record in self:
-            record.partner_id.first_name = record.first_name
-
-    @api.onchange("first_name", "middle_name", "last_name")
-    def _set_full_name(self):
-        self.name = formatting.format_name(self.first_name, self.middle_name, self.last_name)
-
-    @api.onchange("country_id")
-    def _onchange_country_id(self):
-        res = {}
-        if self.country_id:
-            res['domain'] = {
-                'state_id': [('country_id', '=', self.country_id.id)]
-                }
-
-    @api.model
-    def create(self, values):
-
-        if not values.get('status_id', False):
-            status_id = self.env['adm.application.status'].search([], order="sequence")[0]
-            values['status_id'] = status_id.id
-        else:
-            status_id = self.env['adm.application.status'].browse(values['status_id'])
-        # values['name'] = formatting.format_name(values['first_name'],
-        # values['middle_name'], values['last_name'])
-        application_id = super(Application, self).create(values)
-
-        message = _("Application created in [%s] status") % status_id.name
-        timestamp = datetime.datetime.now()
-
-        self.env['adm.application.history.status'].sudo().create({
-            'note': message,
-            'timestamp': timestamp,
-            'application_id': application_id.id,
-            'status_id': status_id.id,
+        invitation = self.env['adm.application.invitation'].sudo().create({
+            'application_id': self.id,
+            'by_partner_id': self.env.user.partner_id.id,
+            'to_email': email,
+            'mail_template_id': mail_template.id,
+            # 'access_ids': [(6, 0, access)]
             })
 
-        if status_id.mail_template_id:
-            application_id.message_post_with_template(template_id=status_id.mail_template_id.id, res_id=application_id.id)
+        return invitation
 
-        return application_id
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        res = super().fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
 
-    def write(self, values):
+        View = self.env['ir.ui.view']
 
-        for application_id in self:
-            first_name = values.get('first_name', application_id.first_name)
-            middle_name = values.get('middle_name', application_id.middle_name)
-            last_name = values.get('last_name', application_id.last_name)
+        if view_type == 'form':
+            doc = etree.XML(res['arch'])
+            res_fields = res.get('fields', {})
+            for node in doc.xpath('//page[@name="custom_page"]/notebook'):
+                pages = self.env['adm.application.fields.configuration'].search([])
+                for page in pages:
+                    xml_page = etree.Element('page', string=page.name)
+                    xml_group = etree.SubElement(xml_page, 'group')
+                    for field_config in page.field_ids:
+                        field_id = field_config.field_id
+                        context = field_config.custom_context
+                        attrs = field_config.custom_attrs
+                        field_el = etree.SubElement(xml_group, 'field',
+                                                    name=field_id.name,
+                                                    attrs=attrs,
+                                                    context=context,)
+                        self.fields_get()
+                        if field_config.custom_xml_to_render:
+                            xml_to_render_el = etree.fromstring(field_config.custom_xml_to_render)
+                            field_el.append(xml_to_render_el)
 
-            # "related" in application_id.fields_get()["email"]
-            # Se puede hacer totalmente dinamico, no lo hago ahora por falta de
-            # tiempo
-            # Pero sin embargo, es totalmente posible.
-            # Los no related directamente no tiene related, y los que si son
-            # tiene el campo related de la siguiente manera: (model, field)
-            # fields = application_id.fields_get()
-            partner_related_fields = {}
-            partner_fields = ['email', 'phone', 'home_phone', 'country_id', 'state_id', 'city', 'street', 'zip', 'date_of_birth', 'identification']
-            for partner_field in partner_fields:
-                if partner_field in values:
-                    partner_related_fields[partner_field] = values[partner_field]
+                    xarch, xfields = View.postprocess_and_fields(self._name, xml_page, view_id)
+                    node.append(etree.XML(xarch))
+                    res_fields.update(xfields)
+            res['arch'] = etree.tostring(doc, encoding='unicode', method='xml')
+            res['fields'] = res_fields
 
-            if "first_name" in values:
-                partner_related_fields["first_name"] = first_name
-            if "middle_name" in values:
-                partner_related_fields["middle_name"] = middle_name
-            if "last_name" in values:
-                partner_related_fields["last_name"] = last_name
+        return res
 
-            application_id.sudo().partner_id.write(partner_related_fields)
+    ####################
+    # Private methods #
+    ####################
+    def _message_get_default_recipients(self):
+        res = {}
+        for application in self:
+            recipient_ids, email_to, email_cc = [], False, False
+            partner_follower_ids = application.mapped('message_follower_ids.partner_id')
+            recipient_ids.extend(partner_follower_ids.ids)
+            # email_to =
+            # if 'partner_id' in record and record.partner_id:
+            #     recipient_ids.append(record.partner_id.id)
+            # elif 'email_normalized' in record and record.email_normalized:
+            #     email_to = record.email_normalized
+            # elif 'email_from' in record and record.email_from:
+            #     email_to = record.email_from
+            # elif 'partner_email' in record and record.partner_email:
+            #     email_to = record.partner_email
+            # elif 'email' in record and record.email:
+            #     email_to = record.email
+            res[application.id] = {
+                'partner_ids': recipient_ids,
+                'email_to': email_to,
+                'email_cc': email_cc
+                }
+        return res
 
-            # PARA PONER VALOR POR DEFECTO
-            # application_id._context.get('forcing', False):
 
-            if values.get('status_id', False):
+class AdmApplicationInvitation(models.Model):
+    ######################
+    # Private attributes #
+    ######################
+    _name = 'adm.application.invitation'
+    _description = "Application invitation"
 
-                next_status_id = application_id.env['adm.application.status'].browse(values['status_id'])
+    ###################
+    # Default methods #
+    ###################
 
-                message = _("From [%s] to [%s] status") % (application_id.status_id.name, next_status_id.name)
-                timestamp = datetime.datetime.now()
+    ######################
+    # Fields declaration #
+    ######################
+    salt = fields.Char('Salt', readonly=True, required=True)
+    secure_hash = fields.Char(readonly=True, required=True)
+    by_partner_id = fields.Many2one(
+        'res.partner', string='Invited by', required=True)
+    to_email = fields.Char('To email', required=True)
 
-                self.env['adm.application.history.status'].sudo().create({
-                    'note': message,
-                    'timestamp': timestamp,
-                    'application_id': application_id.id,
-                    'status_id': next_status_id.id,
+    mail_template_id = fields.Many2one('mail.template')
+
+    mail_id = fields.Many2one('mail.message')
+    mail_body = fields.Html(related='mail_id.body')
+    application_id = fields.Many2one('adm.application', required=True)
+    invited_user_id = fields.Many2one('res.users')
+    access_family_id = fields.Many2one('res.partner', domain="[('is_family', '=', True)]")
+
+    state = fields.Selection([
+        ('accepted', _("Accepted")),
+        ('rejected', _("Rejected")),
+        ])
+    page_access_ids = fields.Many2many('adm.application.page')
+
+    url = fields.Char(compute='compute_url')
+
+    def compute_url(self):
+        for invitation_id in self:
+            invitation_id.url = (
+                "/admission/application/%i/invite/%i/%s"
+                % (invitation_id.application_id.id, invitation_id.id, invitation_id.secure_hash))
+
+    @api.model
+    def create(self, vals):
+
+        salt = hashlib.sha256(str(time.time()).encode('utf-8')).hexdigest()
+        to_email = vals['to_email']
+        application_id = vals.get('application_id', 0)
+
+        text_to_hash = '%s%i-%s' % (salt, application_id, to_email)
+        secure_hash = hashlib.sha256(text_to_hash.encode('utf-8')).hexdigest()
+
+        vals['salt'] = salt
+        vals['secure_hash'] = secure_hash
+
+        invited_user = self.env['res.users'].search([('partner_id.email', '=', to_email)])
+        vals['invited_user_id'] = invited_user.id
+
+        return super(AdmApplicationInvitation, self).create(vals)
+
+    def write(self, vals):
+        super(AdmApplicationInvitation, self).write(vals)
+        for invitation in self:
+            if (invitation.state == 'accepted'
+                    and invitation.access_family_id):
+
+                invitation.application_id.partner_id.write({
+                    'family_ids': [(4, invitation.access_family_id.id, False)]
+                    })
+                invitation.access_family_id.write({
+                    'member_ids': [
+                        (4, invitation.application_id.partner_id.id, False)
+                        ]
                     })
 
-                if next_status_id.mail_template_id:
-                    application_id.message_post_with_template(template_id=next_status_id.mail_template_id.id, res_id=application_id.id)
 
-                if not self._context.get('forcing', False):
-                    if not application_id.state_tasks & application_id.task_ids == application_id.state_tasks and application_id:
-                        raise exceptions.ValidationError("All task are not completed")
-            else:
-                self.forcing = False
+class AdmApplicationUserAccess(models.Model):
+    ######################
+    # Private attributes #
+    ######################
+    _name = 'adm.application.user.access'
+    _description = "Application user access"
 
-        return super().write(values)
+    ######################
+    # Fields declaration #
+    ######################
+    page_access_ids = fields.Many2many('adm.application.page')
+    application_id = fields.Many2one('adm.application', required=True)
+    user_id = fields.Many2one('res.users', required=True)
+    family_id = fields.Many2one('res.partner', required=True)
+
+
+class AdmApplicationPage(models.Model):
+    _name = 'adm.application.page'
+    _description = "Application page"
+    _order = "sequence"
+
+    active = fields.Boolean(default=True)
+    sequence = fields.Integer(default='-1')
+    name = fields.Char(translate=True)
+    url = fields.Char()
+    internal_reference = fields.Char()
+    website_id = fields.Many2one('website')
+    previous_page_id = fields.Many2one('adm.application.page')
+    next_page_id = fields.Many2one('adm.application.page')
+    view_template_id = fields.Many2one('ir.ui.view')
+    parent_id = fields.Many2one('adm.application.page')
+    child_ids = fields.One2many('adm.application.page', 'parent_id')
+
+    _sql_constraints = [
+        ('adm_page_internal_reference',
+         'unique (internal_reference, website_id)',
+         "The internal reference should be unique by website"),
+        ]
+
+    @api.model
+    def find_by_reference(self, reference):
+        return self.search([('internal_reference', '=', reference)])[:1]
 
 
 class ApplicationOtherContacts(models.Model):
@@ -623,29 +1108,53 @@ class ApplicationTasks(models.Model):
     status_id = fields.Many2one("adm.application.status", string="Status")
 
 
-class ApplicationSiblings(models.Model):
-    _name = 'adm.application.sibling'
-    _description = "Application sibling"
-
-    partner_id = fields.Many2one('res.partner')
-
-    name = fields.Char(related="partner_id.name")
-    age = fields.Integer("Edad")
-
-    school = fields.Char("School name")
-    application_id = fields.Many2one("adm.application", "Application")
-    grade_level_id = fields.Many2one('school_base.grade_level')
-    alumni_state = fields.Selection([('alumni', 'Alumni'), ('currently_enrolled', 'Currently Enrolled')], 'Alumni or currently Enrolled Students')
-    alumnus_enrolled_1 = fields.Char("Alumnus/Enrolled 1")
-    alumnus_enrolled_name = fields.Char()
-    relationship_to_application = fields.Char()
-    years_attended = fields.Char()
-
-
 class AdmissionApplicationLanguages(models.Model):
     _name = 'adm.application.language'
     _description = "Application language"
 
     language_id = fields.Many2one("adm.language", string="Language")
-    language_level_id = fields.Many2one("adm.language.level", string="Language Level")
+    language_level_id = fields.Many2one(
+        "adm.language.level", string="Language Level")
     application_id = fields.Many2one("adm.application", string="Application")
+
+
+class AdmApplicationFieldsConfiguration(models.Model):
+    _name = 'adm.application.fields.configuration'
+    _description = "Application fields configuration"
+    _order = 'sequence'
+
+    name = fields.Char(translate=True, required=True)
+    sequence = fields.Integer()
+
+    field_ids = fields.One2many(
+        'adm.application.fields.configuration.field',
+        'configuration_id',
+        string="Fields")
+
+
+class AdmApplicationFieldsConfigurationField(models.Model):
+    _name = 'adm.application.fields.configuration.field'
+    _description = "Application fields configuration.field"
+    _order = 'sequence'
+
+    def _get_application_model(self):
+        return self.env['ir.model'].search([('model', '=', 'adm.application')])
+
+    configuration_id = fields.Many2one('adm.application.fields.configuration')
+    sequence = fields.Integer()
+    field_id = fields.Many2one('ir.model.fields',
+                                 string="Field",
+                                 domain="[('model', '=', 'adm.application'), ('state', '=', 'manual')]")
+    adm_application_model_id = fields.Many2one('ir.model',
+                                               default=_get_application_model,
+                                               compute='_compute_application_model')
+
+    custom_xml_to_render = fields.Text("Custom xml to render", help="""
+        Used to XML render a custom xml.
+        """)
+    custom_context = fields.Char(required=True, default='{}')
+    custom_attrs = fields.Char(required=True, default='{}')
+
+    def _compute_application_model(self):
+        for record in self:
+            record.adm_application_model_id = self._get_application_model()

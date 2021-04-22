@@ -27,7 +27,7 @@ odoo.define('adm.family.parents', require => {
                 toggleParentForm(elCheckbox, false);
             }
 
-            $target.find('[data-adm-field="partner_2"]').find('input:hidden').remove();
+            $target.find('[data-adm-field="partner_relation_id"]').find('input:hidden').remove();
             $target.find('img').attr('src', '/adm/static/img/contact_photo_placeholder.png');
         });
 

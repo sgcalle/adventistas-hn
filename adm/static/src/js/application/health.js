@@ -18,6 +18,35 @@ odoo.define('adm.application.condition', require => {
 			$inputHealth.prop('disabled', !isChecked);
 	}
 
+    function toggleAllergySelect(event) {
+			const $otherToggleCheckbox = $(event.currentTarget);
+			const $selectHealth = $otherToggleCheckbox.closest('div.row').find('select.js_allergy_select');
+			const $inputHealth = $otherToggleCheckbox.closest('div.row').find('input.js_allergy_text');
+
+			const isChecked = $otherToggleCheckbox.is(':checked');
+
+			$selectHealth.toggle(!isChecked);
+			$selectHealth.prop('disabled', isChecked);
+
+			$inputHealth.toggle(isChecked);
+			$inputHealth.prop('disabled', !isChecked);
+        console.log("DSSADSADSDSAd")
+	}
+
+    function toggleMedicationSelect(event) {
+			const $otherToggleCheckbox = $(event.currentTarget);
+			const $selectHealth = $otherToggleCheckbox.closest('div.row').find('select.js_medication_select');
+			const $inputHealth = $otherToggleCheckbox.closest('div.row').find('input.js_medication_text');
+
+			const isChecked = $otherToggleCheckbox.is(':checked');
+
+			$selectHealth.toggle(!isChecked);
+			$selectHealth.prop('disabled', isChecked);
+
+			$inputHealth.toggle(isChecked);
+			$inputHealth.prop('disabled', !isChecked);
+	}
+
 
 
     function removeNewCondition(event) {
@@ -30,6 +59,8 @@ odoo.define('adm.application.condition', require => {
         const $clonedNewConditionTemplate = $(document.getElementById('template_allergy')).clone();
         // We remove the style display none
         $clonedNewConditionTemplate.removeAttr( 'style');
+        $clonedNewConditionTemplate.find('.js_allergy_toggle').on('change', toggleAllergySelect);
+        $clonedNewConditionTemplate.find('input.js_allergy_text').hide().prop('disabled', true);
 
         const conditionList = document.getElementById('allergy_list');
         const newMany2manyRev = document.createElement('DIV');
@@ -45,6 +76,9 @@ odoo.define('adm.application.condition', require => {
         const $clonedNewConditionTemplate = $(document.getElementById('template_medication')).clone();
         // We remove the style display none
         $clonedNewConditionTemplate.removeAttr('style');
+
+        $clonedNewConditionTemplate.find('.js_medication_toggle').on('change', toggleMedicationSelect);
+        $clonedNewConditionTemplate.find('input.js_medication_text').hide().prop('disabled', true);
 
         const conditionList = document.getElementById('medication_list');
         const newMany2manyRev = document.createElement('DIV');
@@ -72,10 +106,13 @@ odoo.define('adm.application.condition', require => {
         conditionList.appendChild(newMany2manyRev);
     }
 
-    $(document).ready(() => {
+    $(document).ready(event => {
         $('.add-condition').on('click', appendNewCondition);
         $('.remove-rel-medical').on('click', removeNewCondition);
+
         $('.js_condition_select').on('change', toggleCoditionSelect);
+        $('.js_allergy_toggle').on('change', toggleAllergySelect);
+        $('.js_medication_toggle').on('change', toggleMedicationSelect);
 
         $('button.add-medical_condition').on('click', appendNewCondition);
         $('button.add-medical_allergy').on('click', appendNewAllergy);

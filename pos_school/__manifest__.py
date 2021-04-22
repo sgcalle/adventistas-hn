@@ -14,7 +14,10 @@
 
     'depends': ['point_of_sale', 'school_finance'],
 
-    'data': ['data/assets.xml', ],
+    'data': [
+        'data/assets.xml',
+        'views/pos_config_views.xml',
+    ],
 
     'installable': True,
     'auto_install': True,
