@@ -25,13 +25,11 @@ class TuitionPlan(models.Model):
         help="Used to identify the period based on the selected period type")
     period_date_from = fields.Date(string="Period Start",
         compute="_compute_period_dates",
-        required=True,
         readonly=False,
         store=True,
         help="Autocomputed based on the selected reference date and period type")
     period_date_to = fields.Date(string="Period End",
         compute="_compute_period_dates",
-        required=True,
         readonly=False,
         store=True,
         help="Autocomputed based on the selected reference date and period type")
