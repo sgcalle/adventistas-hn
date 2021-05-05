@@ -273,9 +273,9 @@ class ResPartner(models.Model):
     facts_id = fields.Char("Facts id")
 
     # Facts UDID
-    facts_udid_int = fields.Integer(
-        "Facts UDID (Integer)", compute="_converts_facts_udid_id_to_int",
-        store=True, readonly=True)
+#     facts_udid_int = fields.Integer(
+#         "Facts UDID (Integer)", compute="_converts_facts_udid_id_to_int",
+#         store=True, readonly=True)
     facts_udid = fields.Char("Facts UDID")
 
     # Enrollment history
@@ -307,17 +307,17 @@ class ResPartner(models.Model):
         for partner_id in self:
             partner_id.facts_id_int = int(partner_id.facts_id) if partner_id.facts_id and partner_id.facts_id.isdigit() else 0
 
-    @api.depends("facts_udid")
-    def _converts_facts_udid_id_to_int(self):
-        for partner_id in self:
-            partner_id.facts_udid_int = int(
-                partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
+#     @api.depends("facts_udid")
+#     def _converts_facts_udid_id_to_int(self):
+#         for partner_id in self:
+#             partner_id.facts_udid_int = int(
+#                 partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
 
-    @api.depends("facts_udid")
-    def _converts_facts_udid_id_to_int(self):
-        for partner_id in self:
-            partner_id.facts_udid_int = int(
-                partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
+#     @api.depends("facts_udid")
+#     def _converts_facts_udid_id_to_int(self):
+#         for partner_id in self:
+#             partner_id.facts_udid_int = int(
+#                 partner_id.facts_udid) if partner_id.facts_udid and partner_id.facts_udid.isdigit() else 0
 
     @api.depends("first_name", "middle_name", "last_name")
     def _compute_name(self):
@@ -423,17 +423,17 @@ class ResPartner(models.Model):
             if partner.home_address_id.phone:
                 partner.phone = partner.home_address_id.phone
 
-    @api.constrains("facts_udid")
-    def _check_facts_udid_id(self):
-        for partner_id in self:
-            if partner_id.facts_udid:
+#     @api.constrains("facts_udid")
+#     def _check_facts_udid_id(self):
+#         for partner_id in self:
+#             if partner_id.facts_udid:
 
-                if not partner_id.facts_udid.isdigit():
-                    raise ValidationError("Facts id needs to be an number")
+#                 if not partner_id.facts_udid.isdigit():
+#                     raise ValidationError("Facts id needs to be an number")
 
-                should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
-                if should_be_unique > 1:
-                    raise ValidationError("Another contact has the same facts udid! (%s)" % partner_id.facts_udid)
+#                 should_be_unique = self.search_count([("facts_id", "=", partner_id.facts_udid)])
+#                 if should_be_unique > 1:
+#                     raise ValidationError("Another contact has the same facts udid! (%s)" % partner_id.facts_udid)
 
     @api.constrains("facts_id")
     def _check_facts_id(self):
