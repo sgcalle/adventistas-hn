@@ -133,7 +133,6 @@
                                                        attrs="{'invisible': ['|', ('is_company', '=', False), '&amp;', ('is_family', '=', True), ('is_company', '=', True)]}"/>
                                             </div>
                                             <field name="facts_udid" nolabel="1" class="oe_inline"/>
-                                            <field name="facts_udid_int" groups="base.group_no_one"/>
 
 
                                         </group>
