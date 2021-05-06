@@ -20,7 +20,7 @@ class TuitionPlanInstallment(models.Model):
         comodel_name="tuition.plan.product",
         relation="plan_product_plan_installment_rel",
         help="Products to include in order and/or invoice")
-    
+   
     def _get_end_date(self):
         self.ensure_one()
         installments = self.plan_id.installment_ids.filtered(lambda i: i.product_ids)
