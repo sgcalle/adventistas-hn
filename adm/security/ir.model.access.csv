@@ -1,4 +1,3 @@
-
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 adm_inquiry_access,adm.adm_inquiry_access,adm.model_adm_inquiry,,1,1,1,0
 adm_inquiry_status_access,adm.adm_inquiry_status_access,adm.model_adm_inquiry_status,,1,1,1,1
