@@ -38,7 +38,7 @@ class TuitionPlanInstallment(models.Model):
             students = self._context.get("students") or (plan.partner_ids | plan.default_partner_ids)
             students = students.filtered(lambda s: s.grade_level_id in plan.grade_level_ids)
             if plan.apply_for_status:
-                students = students.filtered(lambda s: s.student_status_id == plan.apply_for_status)
+                students = students.filtered(lambda s: s.student_status_id.type == plan.apply_for_status)
             if not students:
                 continue
             invoice_due_date = False
@@ -65,7 +65,7 @@ class TuitionPlanInstallment(models.Model):
             for sale in make_sale.sales_ids:
                 if plan.discount_ids:
                     children = sale.family_id.member_ids\
-                        .filtered(lambda m: m.person_type == "student" and m.student_status == "Enrolled")\
+                        .filtered(lambda m: m.person_type == "student" and m.student_status_id.type == "enrolled")\
                         .sorted(lambda m: m.name)\
                         .sorted(lambda m: (m.grade_level_id.sequence or 0, m.grade_level_id.id or 0,
                             m.date_of_birth or fields.Date.context_today(self)), reverse=True).ids
